@@ -21,7 +21,6 @@ public class MainActivity extends AppCompatActivity {
         webSettings.setJavaScriptEnabled(true);
         webSettings.setDomStorageEnabled(true);
         webSettings.setDatabaseEnabled(true);
-        webSettings.setAppCacheEnabled(true);
         
         // Mobile-optimized settings
         webSettings.setUseWideViewPort(true);
