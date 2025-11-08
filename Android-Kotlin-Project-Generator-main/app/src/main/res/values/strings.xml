@@ -1,5 +1,0 @@
-<resources>
-    <string name="app_name">MyApplication</string>
-    <string name="app_logo">App Logo</string>
-    <string name="app_tagline">Powered by Kotlin</string>
-</resources>
