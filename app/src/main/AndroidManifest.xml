@@ -1,4 +1,6 @@
-<manifest xmlns:android="http://schemas.android.com/apk/res/android">
+<?xml version="1.0" encoding="utf-8"?>
+<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+    package="com.goodboycat.ttrpg_advance_toolkit">
 
     <application
         android:allowBackup="true"
@@ -6,22 +8,15 @@
         android:supportsRtl="true"
         android:theme="@style/Theme.MyApplication">
         
-        <!-- Splash Screen as launcher activity -->
-        <activity 
-            android:name=".SplashActivity"
-            android:exported="true"
-            android:theme="@style/SplashTheme">
+        <!-- Main Activity as launcher -->
+        <activity
+            android:name=".MainActivity"
+            android:exported="true">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
         
-        <!-- Main Activity -->
-        <activity 
-            android:name=".MainActivity"
-            android:exported="false" />
-            
     </application>
-
 </manifest>
