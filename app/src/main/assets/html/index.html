@@ -1,29 +1,189 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-    <meta charset="utf-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+    <meta name="theme-color" content="#6200EE">
     <title>TTRPG Advance Toolkit</title>
+<link rel="stylesheet" href="file:///android_asset/css/app.css">
     <style>
-        body { 
-            font-family: Arial, sans-serif; 
-            margin: 20px;
-            background: #f0f0f0;
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
         }
-        .container {
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+            color: #333;
+        }
+        
+        .app-container {
             max-width: 800px;
             margin: 0 auto;
             background: white;
+            border-radius: 16px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+            overflow: hidden;
+        }
+        
+        .header {
+            background: #6200EE;
+            color: white;
             padding: 20px;
+            text-align: center;
+        }
+        
+        .header h1 {
+            font-size: 1.5rem;
+            margin-bottom: 5px;
+        }
+        
+        .header p {
+            opacity: 0.9;
+            font-size: 0.9rem;
+        }
+        
+        .content {
+            padding: 30px 20px;
+        }
+        
+        .feature-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 20px;
+            margin-top: 20px;
+        }
+        
+        .feature-card {
+            background: #f8f9fa;
+            padding: 20px;
+            border-radius: 12px;
+            border-left: 4px solid #6200EE;
+            transition: transform 0.2s ease;
+        }
+        
+        .feature-card:hover {
+            transform: translateY(-2px);
+        }
+        
+        .feature-card h3 {
+            color: #6200EE;
+            margin-bottom: 10px;
+        }
+        
+        .feature-card p {
+            color: #666;
+            font-size: 0.9rem;
+            line-height: 1.4;
+        }
+        
+        .footer {
+            text-align: center;
+            padding: 20px;
+            background: #f8f9fa;
+            color: #666;
+            font-size: 0.8rem;
+        }
+        
+        /* Mobile responsiveness */
+        @media (max-width: 768px) {
+            body {
+                padding: 10px;
+            }
+            
+            .header h1 {
+                font-size: 1.3rem;
+            }
+            
+            .content {
+                padding: 20px 15px;
+            }
+            
+            .feature-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+        
+        /* Touch-friendly buttons */
+        .btn {
+            background: #6200EE;
+            color: white;
+            border: none;
+            padding: 12px 24px;
             border-radius: 8px;
+            font-size: 1rem;
+            cursor: pointer;
+            transition: background 0.2s ease;
+            min-height: 44px; /* Minimum touch target size */
+        }
+        
+        .btn:hover {
+            background: #5000d6;
         }
     </style>
 </head>
 <body>
-    <div class="container">
-        <h1>Welcome to TTRPG Advance Toolkit</h1>
-        <p>Your TTRPG companion app is ready!</p>
-        <p>Add your HTML, CSS, and JS files to the assets folder.</p>
+    <div class="app-container">
+        <div class="header">
+            <h1>🎲 TTRPG Advance Toolkit</h1>
+            <p>Your mobile companion for tabletop adventures</p>
+        </div>
+        
+        <div class="content">
+            <h2>Welcome to Your Toolkit</h2>
+            <p>This is a mobile-optimized web app running in Android WebView.</p>
+            
+            <div class="feature-grid">
+                <div class="feature-card">
+                    <h3>Character Manager</h3>
+                    <p>Create and manage your RPG characters with ease.</p>
+                </div>
+                <div class="feature-card">
+                    <h3>Dice Roller</h3>
+                    <p>Virtual dice for all your gaming needs.</p>
+                </div>
+                <div class="feature-card">
+                    <h3>Rule Reference</h3>
+                    <p>Quick access to game rules and mechanics.</p>
+                </div>
+                <div class="feature-card">
+                    <h3>Campaign Tracker</h3>
+                    <p>Keep track of your adventure progress.</p>
+                </div>
+            </div>
+            
+            <button class="btn" onclick="showWelcome()">Get Started</button>
+        </div>
+        
+        <div class="footer">
+            <p>TTRPG Advance Toolkit v1.0 • Optimized for Mobile</p>
+        </div>
     </div>
+
+    <script>
+        function showWelcome() {
+            alert('Welcome to TTRPG Advance Toolkit! Add your HTML/CSS/JS files to build your app.');
+        }
+        
+        // Detect if running in WebView (Android)
+        function isAndroidWebView() {
+            return navigator.userAgent.toLowerCase().indexOf('wv') > -1;
+        }
+        
+        // Mobile-specific enhancements
+        if (isAndroidWebView()) {
+            document.body.classList.add('android-webview');
+            console.log('Running in Android WebView');
+        }
+        
+        // Prevent zoom on double-tap (optional)
+        document.addEventListener('dblclick', function(e) {
+            e.preventDefault();
+        }, { passive: false });
+    </script>
 </body>
 </html>
