@@ -1,0 +1,255 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Random Generators - TTRPG Toolkit</title>
+    <link rel="stylesheet" href="file:///android_asset/css/style.css">
+</head>
+<body>
+    <nav class="navbar">
+        <h1>TTRPG Toolkit</h1>
+        <div class="nav-tabs">
+            <a href="index.html">Dashboard</a>
+            <a href="dice-roller.html">Dice</a>
+            <a href="character-sheet.html">Characters</a>
+            <a href="random-generator.html" class="active">Generators</a>
+            <a href="settings.html">Settings</a>
+        </div>
+    </nav>
+
+    <main class="container">
+        <section class="card">
+            <h2 contenteditable="true">Random Tables</h2>
+            <div id="tableList" class="table-list"></div>
+            <button onclick="createNewTable()" class="btn-primary" contenteditable="true">New Table</button>
+        </section>
+
+        <section class="card" id="tableEditor" style="display: none;">
+            <h2 contenteditable="true">Table Editor</h2>
+            <div class="form-group">
+                <label contenteditable="true">Table Name:</label>
+                <input type="text" id="tableName" placeholder="Table Name">
+            </div>
+            <div class="form-group">
+                <label contenteditable="true">Roll Type:</label>
+                <select id="rollType">
+                    <option value="d6">d6</option>
+                    <option value="d10">d10</option>
+                    <option value="d20">d20</option>
+                    <option value="d100">d100</option>
+                    <option value="custom">Custom</option>
+                </select>
+            </div>
+            <div id="tableEntries" class="table-entries"></div>
+            <button onclick="addTableEntry()" class="btn-secondary" contenteditable="true">Add Entry</button>
+            <div class="button-group">
+                <button onclick="saveTable()" class="btn-primary" contenteditable="true">Save Table</button>
+                <button onclick="deleteTable()" class="btn-danger" contenteditable="true">Delete</button>
+                <button onclick="closeEditor()" class="btn-secondary" contenteditable="true">Close</button>
+            </div>
+        </section>
+
+        <section class="card">
+            <h2 contenteditable="true">Quick Oracle</h2>
+            <div class="oracle-controls">
+                <button onclick="oracleRoll('yesno')" class="btn-oracle" contenteditable="true">Yes/No</button>
+                <button onclick="oracleRoll('event')" class="btn-oracle" contenteditable="true">Event</button>
+                <button onclick="oracleRoll('npc')" class="btn-oracle" contenteditable="true">NPC</button>
+                <button onclick="oracleRoll('location')" class="btn-oracle" contenteditable="true">Location</button>
+            </div>
+            <div id="oracleResult" class="oracle-result">
+                <p contenteditable="true">Oracle result will appear here...</p>
+            </div>
+        </section>
+    </main>
+
+    <script src="file:///android_asset/js/main.js"></script>
+    <script>
+        let tables = JSON.parse(localStorage.getItem('randomTables') || '[]');
+        let currentTableId = null;
+
+        if (tables.length === 0) {
+            tables = [
+                {
+                    id: '1',
+                    name: 'Dungeon Rooms',
+                    rollType: 'd6',
+                    entries: [
+                        {id: 1, text: 'Empty room with debris'},
+                        {id: 2, text: 'Monster lair'},
+                        {id: 3, text: 'Treasure chest (trapped)'},
+                        {id: 4, text: 'Strange magical effect'},
+                        {id: 5, text: 'NPC prisoner'},
+                        {id: 6, text: 'Secret door'}
+                    ]
+                },
+                {
+                    id: '2',
+                    name: 'Random Encounters',
+                    rollType: 'd10',
+                    entries: []
+                }
+            ];
+            localStorage.setItem('randomTables', JSON.stringify(tables));
+        }
+
+        document.addEventListener('DOMContentLoaded', function() {
+            loadTableList();
+        });
+
+        function loadTableList() {
+            const container = document.getElementById('tableList');
+            if (tables.length === 0) {
+                container.innerHTML = '<p contenteditable="true">No tables yet. Create your first!</p>';
+                return;
+            }
+            container.innerHTML = tables.map(table => `
+                <div class="table-item" onclick="editTable('${table.id}')">
+                    <span class="table-name" contenteditable="true">${table.name}</span>
+                    <span class="table-type" contenteditable="true">${table.rollType}</span>
+                    <button onclick="rollTable(event, '${table.id}')">Roll</button>
+                </div>
+            `).join('');
+        }
+
+        function createNewTable() {
+            const newTable = {
+                id: Date.now().toString(),
+                name: 'New Table',
+                rollType: 'd6',
+                entries: []
+            };
+            tables.push(newTable);
+            editTable(newTable.id);
+        }
+
+        function editTable(id) {
+            currentTableId = id;
+            const table = tables.find(t => t.id === id);
+            if (!table) return;
+            
+            document.getElementById('tableName').value = table.name;
+            document.getElementById('rollType').value = table.rollType;
+            
+            const entriesContainer = document.getElementById('tableEntries');
+            if (table.entries.length > 0) {
+                entriesContainer.innerHTML = table.entries.map(entry => `
+                    <div class="table-entry">
+                        <span class="entry-range">${entry.id}</span>
+                        <span contenteditable="true" class="entry-text">${entry.text}</span>
+                        <button onclick="removeEntry(this)">X</button>
+                    </div>
+                `).join('');
+            } else {
+                const slots = getRollMax(table.rollType);
+                entriesContainer.innerHTML = '';
+                for (let i = 1; i <= slots; i++) {
+                    const div = document.createElement('div');
+                    div.className = 'table-entry';
+                    div.innerHTML = `
+                        <span class="entry-range">${i}</span>
+                        <span contenteditable="true" class="entry-text">Entry ${i}</span>
+                        <button onclick="removeEntry(this)">X</button>
+                    `;
+                    entriesContainer.appendChild(div);
+                }
+            }
+            
+            document.getElementById('tableEditor').style.display = 'block';
+        }
+
+        function getRollMax(rollType) {
+            const maxMap = {d6: 6, d10: 10, d20: 20, d100: 100};
+            return maxMap[rollType] || 6;
+        }
+
+        function addTableEntry() {
+            const entriesContainer = document.getElementById('tableEntries');
+            const count = entriesContainer.children.length + 1;
+            const div = document.createElement('div');
+            div.className = 'table-entry';
+            div.innerHTML = `
+                <span class="entry-range">${count}</span>
+                <span contenteditable="true" class="entry-text">New Entry</span>
+                <button onclick="removeEntry(this)">X</button>
+            `;
+            entriesContainer.appendChild(div);
+        }
+
+        function removeEntry(button) {
+            button.parentElement.remove();
+            const entries = document.querySelectorAll('.table-entry .entry-range');
+            entries.forEach((span, index) => span.textContent = index + 1);
+        }
+
+        function saveTable() {
+            const table = tables.find(t => t.id === currentTableId);
+            if (!table) return;
+            
+            table.name = document.getElementById('tableName').value;
+            table.rollType = document.getElementById('rollType').value;
+            
+            const entryElements = document.querySelectorAll('.table-entry');
+            table.entries = Array.from(entryElements).map((el, index) => ({
+                id: index + 1,
+                text: el.querySelector('.entry-text').textContent
+            }));
+            
+            localStorage.setItem('randomTables', JSON.stringify(tables));
+            loadTableList();
+            alert('Table saved!');
+        }
+
+        function deleteTable() {
+            if (!currentTableId) return;
+            if (!confirm('Delete this table?')) return;
+            
+            tables = tables.filter(t => t.id !== currentTableId);
+            localStorage.setItem('randomTables', JSON.stringify(tables));
+            currentTableId = null;
+            document.getElementById('tableEditor').style.display = 'none';
+            loadTableList();
+        }
+
+        function closeEditor() {
+            document.getElementById('tableEditor').style.display = 'none';
+            currentTableId = null;
+        }
+
+        function rollTable(event, id) {
+            event.stopPropagation();
+            const table = tables.find(t => t.id === id);
+            if (!table || table.entries.length === 0) return;
+            
+            const roll = Math.floor(Math.random() * table.entries.length) + 1;
+            const entry = table.entries.find(e => e.id === roll);
+            
+            if (entry) {
+                document.getElementById('oracleResult').innerHTML = `
+                    <h3 contenteditable="true">${table.name}</h3>
+                    <p class="roll-detail" contenteditable="true">Rolled ${roll}: ${entry.text}</p>
+                `;
+            }
+        }
+
+        function oracleRoll(type) {
+            const oracles = {
+                yesno: ['Yes', 'No', 'Yes, but...', 'No, and...', 'Maybe', 'Ask again later'],
+                event: ['Combat encounter', 'Environmental hazard', 'NPC interaction', 'Discovery', 'Nothing happens', 'Plot twist'],
+                npc: ['Friendly merchant', 'Hostile guard', 'Mysterious stranger', 'Injured traveler', 'Lost child', 'Villain in disguise'],
+                location: ['Dense forest', 'Abandoned temple', 'Bustling tavern', 'Dark cave', 'Peaceful village', 'Castle courtyard']
+            };
+
+            
+            const results = oracles[type] || ['Unknown'];
+            const roll = Math.floor(Math.random() * results.length);
+            
+            document.getElementById('oracleResult').innerHTML = `
+                <h3 contenteditable="true">Oracle: ${type}</h3>
+                <p class="roll-detail" contenteditable="true">${results[roll]}</p>
+            `;
+        }
+    </script>
+</body>
+</html>

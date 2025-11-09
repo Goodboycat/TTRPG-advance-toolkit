@@ -1,0 +1,227 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Character Sheets - TTRPG Toolkit</title>
+    <link rel="stylesheet" href="file:///android_asset/css/style.css">
+</head>
+<body>
+    <nav class="navbar">
+        <h1>TTRPG Toolkit</h1>
+        <div class="nav-tabs">
+            <a href="index.html">Dashboard</a>
+            <a href="dice-roller.html">Dice</a>
+            <a href="character-sheet.html" class="active">Characters</a>
+            <a href="random-generator.html">Generators</a>
+            <a href="settings.html">Settings</a>
+        </div>
+    </nav>
+
+    <main class="container">
+        <section class="card">
+            <h2 contenteditable="true">Character List</h2>
+            <div id="characterList" class="character-list"></div>
+            <button onclick="createCharacter()" class="btn-primary" contenteditable="true">New Character</button>
+        </section>
+
+        <section class="card" id="characterEditor" style="display: none;">
+            <h2 contenteditable="true">Character Editor</h2>
+            <div class="char-header">
+                <div class="form-group">
+                    <label contenteditable="true">Name:</label>
+                    <input type="text" id="charName" placeholder="Character Name">
+                </div>
+                <div class="form-group">
+                    <label contenteditable="true">Level:</label>
+                    <span contenteditable="true" class="editable-field" id="charLevel">1</span>
+                </div>
+            </div>
+
+            <div class="stats-grid" id="statsGrid">
+            </div>
+
+            <div class="skills-section">
+                <h3 contenteditable="true">Skills & Abilities</h3>
+                <div id="skillsList" class="skills-list">
+                    <div class="skill-item">
+                        <span contenteditable="true" class="skill-name">Athletics</span>
+                        <span contenteditable="true" class="skill-value">+2</span>
+                        <button onclick="removeSkill(this)">X</button>
+                    </div>
+                </div>
+                <button onclick="addSkill()" class="btn-secondary" contenteditable="true">Add Skill</button>
+            </div>
+
+            <div class="notes-section">
+                <h3 contenteditable="true">Notes</h3>
+                <textarea id="charNotes" placeholder="Character notes..."></textarea>
+            </div>
+
+            <div class="button-group">
+                <button onclick="saveCharacter()" class="btn-primary" contenteditable="true">Save Character</button>
+                <button onclick="deleteCharacter()" class="btn-danger" contenteditable="true">Delete</button>
+                <button onclick="closeEditor()" class="btn-secondary" contenteditable="true">Close</button>
+            </div>
+        </section>
+    </main>
+
+    <script src="file:///android_asset/js/main.js"></script>
+    <script>
+        let characters = JSON.parse(localStorage.getItem('characters') || '[]');
+        let currentCharacterId = null;
+        let characterStats = JSON.parse(localStorage.getItem('characterStats') || '["STR","DEX","CON","INT","WIS","CHA"]');
+
+        document.addEventListener('DOMContentLoaded', function() {
+            loadCharacterList();
+            generateStatInputs();
+        });
+
+        function loadCharacterList() {
+            const container = document.getElementById('characterList');
+            if (characters.length === 0) {
+                container.innerHTML = '<p contenteditable="true">No characters yet. Create your first!</p>';
+                return;
+            }
+            container.innerHTML = characters.map(char => `
+                <div class="character-item" onclick="editCharacter('${char.id}')">
+                    <span class="char-name" contenteditable="true">${char.name || 'Unnamed'}</span>
+                    <span class="char-level" contenteditable="true">Lvl ${char.level || 1}</span>
+                </div>
+            `).join('');
+        }
+
+        function createCharacter() {
+            const newChar = {
+                id: Date.now().toString(),
+                name: 'New Character',
+                level: 1,
+                stats: {},
+                skills: [],
+                notes: ''
+            };
+            
+            characterStats.forEach(stat => {
+                newChar.stats[stat] = 10;
+            });
+            
+            characters.push(newChar);
+            localStorage.setItem('characters', JSON.stringify(characters));
+            editCharacter(newChar.id);
+            loadCharacterList();
+        }
+
+        function editCharacter(id) {
+            currentCharacterId = id;
+            const char = characters.find(c => c.id === id);
+            if (!char) return;
+            
+            document.getElementById('charName').value = char.name || '';
+            document.getElementById('charLevel').textContent = char.level || 1;
+            document.getElementById('charNotes').value = char.notes || '';
+            
+            characterStats.forEach(stat => {
+                const input = document.getElementById(`stat-${stat}`);
+                if (input) input.value = char.stats[stat] || 10;
+            });
+            
+            const skillsContainer = document.getElementById('skillsList');
+            if (char.skills && char.skills.length > 0) {
+                skillsContainer.innerHTML = char.skills.map(skill => `
+                    <div class="skill-item">
+                        <span contenteditable="true" class="skill-name">${skill.name}</span>
+                        <span contenteditable="true" class="skill-value">${skill.value}</span>
+                        <button onclick="removeSkill(this)">X</button>
+                    </div>
+                `).join('');
+            } else {
+                skillsContainer.innerHTML = `
+                    <div class="skill-item">
+                        <span contenteditable="true" class="skill-name">Athletics</span>
+                        <span contenteditable="true" class="skill-value">+2</span>
+                        <button onclick="removeSkill(this)">X</button>
+                    </div>
+                `;
+            }
+            
+            document.getElementById('characterEditor').style.display = 'block';
+        }
+
+        function saveCharacter() {
+            const char = characters.find(c => c.id === currentCharacterId);
+            if (!char) return;
+            
+            char.name = document.getElementById('charName').value;
+            char.level = parseInt(document.getElementById('charLevel').textContent) || 1;
+            char.notes = document.getElementById('charNotes').value;
+            
+            characterStats.forEach(stat => {
+                const input = document.getElementById(`stat-${stat}`);
+                if (input) char.stats[stat] = parseInt(input.value) || 10;
+            });
+            
+            const skillItems = document.querySelectorAll('.skill-item');
+            char.skills = Array.from(skillItems).map(item => ({
+                name: item.querySelector('.skill-name').textContent,
+                value: item.querySelector('.skill-value').textContent
+            }));
+            
+            localStorage.setItem('characters', JSON.stringify(characters));
+            loadCharacterList();
+            alert('Character saved!');
+        }
+
+        function deleteCharacter() {
+            if (!currentCharacterId) return;
+            if (!confirm('Delete this character?')) return;
+            
+            characters = characters.filter(c => c.id !== currentCharacterId);
+            localStorage.setItem('characters', JSON.stringify(characters));
+            currentCharacterId = null;
+            document.getElementById('characterEditor').style.display = 'none';
+            loadCharacterList();
+        }
+
+        function closeEditor() {
+            document.getElementById('characterEditor').style.display = 'none';
+            currentCharacterId = null;
+        }
+
+        function addSkill() {
+            const skillsContainer = document.getElementById('skillsList');
+            const newSkill = document.createElement('div');
+            newSkill.className = 'skill-item';
+            newSkill.innerHTML = `
+                <span contenteditable="true" class="skill-name">New Skill</span>
+                <span contenteditable="true" class="skill-value">+0</span>
+                <button onclick="removeSkill(this)">X</button>
+            `;
+            skillsContainer.appendChild(newSkill);
+        }
+
+        function removeSkill(button) {
+            button.parentElement.remove();
+        }
+
+        function generateStatInputs() {
+            const container = document.getElementById('statsGrid');
+            container.innerHTML = characterStats.map(stat => `
+                <div class="stat-item">
+                    <label contenteditable="true">${stat}:</label>
+                    <input type="number" id="stat-${stat}" value="10" min="1" max="30">
+                    <span class="stat-mod" contenteditable="true">Mod: ${Math.floor((10 - 10) / 2)}</span>
+                </div>
+            `).join('');
+            
+            container.addEventListener('input', function(e) {
+                if (e.target.type === 'number') {
+                    const value = parseInt(e.target.value) || 10;
+                    const mod = Math.floor((value - 10) / 2);
+                    const modSpan = e.target.nextElementSibling;
+                    if (modSpan) modSpan.textContent = `Mod: ${mod >= 0 ? '+' : ''}${mod}`;
+                }
+            });
+        }
+    </script>
+</body>
+</html>

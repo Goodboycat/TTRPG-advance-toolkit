@@ -1,0 +1,204 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dice Roller - TTRPG Toolkit</title>
+    <link rel="stylesheet" href="file:///android_asset/css/style.css">
+</head>
+<body>
+    <nav class="navbar">
+        <h1>TTRPG Toolkit</h1>
+        <div class="nav-tabs">
+            <a href="index.html">Dashboard</a>
+            <a href="dice-roller.html" class="active">Dice</a>
+            <a href="character-sheet.html">Characters</a>
+            <a href="random-generator.html">Generators</a>
+            <a href="settings.html">Settings</a>
+        </div>
+    </nav>
+
+    <main class="container">
+        <section class="card">
+            <h2 contenteditable="true">Quick Roll</h2>
+            <div class="dice-controls">
+                <div class="dice-input">
+                    <input type="number" id="diceCount" value="1" min="1" max="100">
+                    <span contenteditable="true" id="diceTypeLabel">d</span>
+                    <input type="number" id="diceSides" value="20" min="2" max="1000">
+                    <span contenteditable="true">+</span>
+                    <input type="number" id="diceMod" value="0" min="-100" max="100">
+                </div>
+                <button onclick="rollDice()" class="btn-primary" contenteditable="true">Roll</button>
+                <div id="rollResult" class="roll-result">
+                    <span contenteditable="true">Result: </span><span id="resultValue">-</span>
+                </div>
+            </div>
+        </section>
+
+        <section class="card">
+            <h2 contenteditable="true">Saved Dice Sets</h2>
+            <div id="savedDiceSets" class="dice-sets">
+                <div class="dice-set" contenteditable="true">
+                    <span class="set-name">Attack Roll</span>
+                    <span class="set-formula">1d20+5</span>
+                    <button onclick="rollSet(this)">Roll</button>
+                    <button onclick="removeSet(this)">X</button>
+                </div>
+            </div>
+            <button onclick="addDiceSet()" class="btn-secondary" contenteditable="true">Add New Set</button>
+        </section>
+
+        <section class="card">
+            <h2 contenteditable="true">Roll History</h2>
+            <div id="rollHistory" class="roll-history"></div>
+            <button onclick="clearRollHistory()" class="btn-danger" contenteditable="true">Clear History</button>
+        </section>
+    </main>
+
+    <script src="file:///android_asset/js/main.js"></script>
+    <script>
+        let rollHistory = JSON.parse(localStorage.getItem('rollHistory') || '[]');
+
+        document.addEventListener('DOMContentLoaded', function() {
+            loadDiceSets();
+            displayRollHistory();
+        });
+
+        function rollDice() {
+            const count = parseInt(document.getElementById('diceCount').value) || 1;
+            const sides = parseInt(document.getElementById('diceSides').value) || 20;
+            const mod = parseInt(document.getElementById('diceMod').value) || 0;
+            
+            let total = 0;
+            let rolls = [];
+            
+            for (let i = 0; i < count; i++) {
+                const roll = Math.floor(Math.random() * sides) + 1;
+                rolls.push(roll);
+                total += roll;
+            }
+            
+            const finalResult = total + mod;
+            const formula = `${count}d${sides}${mod >= 0 ? '+' : ''}${mod}`;
+            const resultText = `${formula} = [${rolls.join(' + ')}]${mod >= 0 ? '+' : ''}${mod} = ${finalResult}`;
+            
+            document.getElementById('resultValue').textContent = finalResult;
+            
+            const timestamp = new Date().toLocaleTimeString();
+            rollHistory.unshift({formula, result: finalResult, details: resultText, time: timestamp});
+            rollHistory = rollHistory.slice(0, 50);
+            localStorage.setItem('rollHistory', JSON.stringify(rollHistory));
+            displayRollHistory();
+            
+            const recentRolls = JSON.parse(localStorage.getItem('recentRolls') || '[]');
+            recentRolls.unshift(`${formula}: ${finalResult}`);
+            recentRolls.splice(5);
+            localStorage.setItem('recentRolls', JSON.stringify(recentRolls));
+        }
+
+        function addDiceSet() {
+            const name = prompt('Enter set name:') || 'New Set';
+            const formula = prompt('Enter formula (e.g., 2d6+3):') || '1d20';
+            
+            const sets = JSON.parse(localStorage.getItem('diceSets') || '[]');
+            sets.push({name, formula});
+            localStorage.setItem('diceSets', JSON.stringify(sets));
+            loadDiceSets();
+        }
+
+        function loadDiceSets() {
+            const sets = JSON.parse(localStorage.getItem('diceSets') || '[]');
+            const container = document.getElementById('savedDiceSets');
+            
+            if (sets.length === 0) {
+                container.innerHTML = '<p contenteditable="true">No saved sets yet. Add one!</p>';
+                return;
+            }
+            
+            container.innerHTML = sets.map((set, index) => `
+                <div class="dice-set" data-index="${index}">
+                    <span class="set-name" contenteditable="true">${set.name}</span>
+                    <span class="set-formula" contenteditable="true">${set.formula}</span>
+                    <button onclick="rollSet(this)">Roll</button>
+                    <button onclick="removeSet(this)">X</button>
+                </div>
+            `).join('');
+        }
+
+        function rollSet(button) {
+            const setDiv = button.parentElement;
+            const formula = setDiv.querySelector('.set-formula').textContent;
+            
+            const match = formula.match(/(\d*)d(\d+)([+-]\d+)?/i);
+            if (!match) return;
+            
+            const count = parseInt(match[1]) || 1;
+            const sides = parseInt(match[2]);
+            const mod = parseInt(match[3]) || 0;
+            
+            let total = 0;
+            let rolls = [];
+            
+            for (let i = 0; i < count; i++) {
+                const roll = Math.floor(Math.random() * sides) + 1;
+                rolls.push(roll);
+                total += roll;
+            }
+            
+            const finalResult = total + mod;
+            const resultText = `${formula} = [${rolls.join(' + ')}]${mod >= 0 ? '+' : ''}${mod} = ${finalResult}`;
+            
+            document.getElementById('resultValue').textContent = finalResult;
+            
+            const timestamp = new Date().toLocaleTimeString();
+            rollHistory.unshift({formula, result: finalResult, details: resultText, time: timestamp});
+            rollHistory = rollHistory.slice(0, 50);
+            localStorage.setItem('rollHistory', JSON.stringify(rollHistory));
+            displayRollHistory();
+        }
+
+        function removeSet(button) {
+            const setDiv = button.parentElement;
+            const index = parseInt(setDiv.dataset.index);
+            
+            const sets = JSON.parse(localStorage.getItem('diceSets') || '[]');
+            sets.splice(index, 1);
+            localStorage.setItem('diceSets', JSON.stringify(sets));
+            loadDiceSets();
+        }
+
+        function displayRollHistory() {
+            const container = document.getElementById('rollHistory');
+            if (rollHistory.length === 0) {
+                container.innerHTML = '<p contenteditable="true">No rolls yet...</p>';
+                return;
+            }
+            container.innerHTML = rollHistory.slice(0, 10).map(entry => `
+                <div class="history-item" contenteditable="true">
+                    <strong>${entry.formula}</strong> = ${entry.result} 
+                    <small>(${entry.time})</small>
+                </div>
+            `).join('');
+        }
+
+        function clearRollHistory() {
+            if (confirm('Clear all roll history?')) {
+                rollHistory = [];
+                localStorage.removeItem('rollHistory');
+                displayRollHistory();
+            }
+        }
+
+        document.getElementById('savedDiceSets').addEventListener('blur', function(e) {
+            if (e.target.classList.contains('set-name') || e.target.classList.contains('set-formula')) {
+                const sets = Array.from(document.querySelectorAll('.dice-set')).map(setDiv => ({
+                    name: setDiv.querySelector('.set-name').textContent,
+                    formula: setDiv.querySelector('.set-formula').textContent
+                }));
+                localStorage.setItem('diceSets', JSON.stringify(sets));
+            }
+        }, true);
+    </script>
+</body>
+</html>

@@ -1,189 +1,109 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" data-theme="dark">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
-    <meta name="theme-color" content="#6200EE">
-    <title>TTRPG Advance Toolkit</title>
-<link rel="stylesheet" href="file:///android_asset/css/app.css">
-    <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
-        
-        body {
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            min-height: 100vh;
-            padding: 20px;
-            color: #333;
-        }
-        
-        .app-container {
-            max-width: 800px;
-            margin: 0 auto;
-            background: white;
-            border-radius: 16px;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
-            overflow: hidden;
-        }
-        
-        .header {
-            background: #6200EE;
-            color: white;
-            padding: 20px;
-            text-align: center;
-        }
-        
-        .header h1 {
-            font-size: 1.5rem;
-            margin-bottom: 5px;
-        }
-        
-        .header p {
-            opacity: 0.9;
-            font-size: 0.9rem;
-        }
-        
-        .content {
-            padding: 30px 20px;
-        }
-        
-        .feature-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-            gap: 20px;
-            margin-top: 20px;
-        }
-        
-        .feature-card {
-            background: #f8f9fa;
-            padding: 20px;
-            border-radius: 12px;
-            border-left: 4px solid #6200EE;
-            transition: transform 0.2s ease;
-        }
-        
-        .feature-card:hover {
-            transform: translateY(-2px);
-        }
-        
-        .feature-card h3 {
-            color: #6200EE;
-            margin-bottom: 10px;
-        }
-        
-        .feature-card p {
-            color: #666;
-            font-size: 0.9rem;
-            line-height: 1.4;
-        }
-        
-        .footer {
-            text-align: center;
-            padding: 20px;
-            background: #f8f9fa;
-            color: #666;
-            font-size: 0.8rem;
-        }
-        
-        /* Mobile responsiveness */
-        @media (max-width: 768px) {
-            body {
-                padding: 10px;
-            }
-            
-            .header h1 {
-                font-size: 1.3rem;
-            }
-            
-            .content {
-                padding: 20px 15px;
-            }
-            
-            .feature-grid {
-                grid-template-columns: 1fr;
-            }
-        }
-        
-        /* Touch-friendly buttons */
-        .btn {
-            background: #6200EE;
-            color: white;
-            border: none;
-            padding: 12px 24px;
-            border-radius: 8px;
-            font-size: 1rem;
-            cursor: pointer;
-            transition: background 0.2s ease;
-            min-height: 44px; /* Minimum touch target size */
-        }
-        
-        .btn:hover {
-            background: #5000d6;
-        }
-    </style>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>TTRPG Toolkit - Dashboard</title>
+    <link rel="stylesheet" href="file:///android_asset/css/style.css">
 </head>
 <body>
-    <div class="app-container">
-        <div class="header">
-            <h1>🎲 TTRPG Advance Toolkit</h1>
-            <p>Your mobile companion for tabletop adventures</p>
+    <nav class="navbar">
+        <h1 contenteditable="true" id="gameTitle">My TTRPG System</h1>
+        <div class="nav-tabs">
+            <a href="index.html" class="active">Dashboard</a>
+            <a href="dice-roller.html">Dice</a>
+            <a href="character-sheet.html">Characters</a>
+            <a href="random-generator.html">Generators</a>
+            <a href="settings.html">Settings</a>
         </div>
-        
-        <div class="content">
-            <h2>Welcome to Your Toolkit</h2>
-            <p>This is a mobile-optimized web app running in Android WebView.</p>
-            
-            <div class="feature-grid">
-                <div class="feature-card">
-                    <h3>Character Manager</h3>
-                    <p>Create and manage your RPG characters with ease.</p>
+    </nav>
+
+    <main class="container">
+        <section class="card">
+            <h2 contenteditable="true">Quick Stats</h2>
+            <div class="stat-grid">
+                <div class="stat-item">
+                    <label contenteditable="true">System Name:</label>
+                    <span contenteditable="true" id="systemName" class="editable-field">Flexible RPG</span>
                 </div>
-                <div class="feature-card">
-                    <h3>Dice Roller</h3>
-                    <p>Virtual dice for all your gaming needs.</p>
+                <div class="stat-item">
+                    <label contenteditable="true">Dice Type:</label>
+                    <span contenteditable="true" id="diceType" class="editable-field">d20</span>
                 </div>
-                <div class="feature-card">
-                    <h3>Rule Reference</h3>
-                    <p>Quick access to game rules and mechanics.</p>
-                </div>
-                <div class="feature-card">
-                    <h3>Campaign Tracker</h3>
-                    <p>Keep track of your adventure progress.</p>
+                <div class="stat-item">
+                    <label contenteditable="true">Max Level:</label>
+                    <span contenteditable="true" id="maxLevel" class="editable-field">10</span>
                 </div>
             </div>
-            
-            <button class="btn" onclick="showWelcome()">Get Started</button>
-        </div>
-        
-        <div class="footer">
-            <p>TTRPG Advance Toolkit v1.0 • Optimized for Mobile</p>
-        </div>
-    </div>
+        </section>
 
+        <section class="card">
+            <h2 contenteditable="true">Active Characters</h2>
+            <div id="activeCharacters" class="character-list">
+                <p contenteditable="true">No characters yet. Create one in the Character tab!</p>
+            </div>
+        </section>
+
+        <section class="card">
+            <h2 contenteditable="true">Recent Rolls</h2>
+            <div id="recentRolls" class="roll-history">
+                <p contenteditable="true">Roll history will appear here...</p>
+            </div>
+        </section>
+    </main>
+
+    <script src="file:///android_asset/js/main.js"></script>
     <script>
-        function showWelcome() {
-            alert('Welcome to TTRPG Advance Toolkit! Add your HTML/CSS/JS files to build your app.');
+        document.addEventListener('DOMContentLoaded', function() {
+            loadDashboardData();
+            loadActiveCharacters();
+            loadRecentRolls();
+        });
+
+        document.querySelectorAll('[contenteditable="true"]').forEach(el => {
+            el.addEventListener('blur', saveDashboardData);
+        });
+
+        function saveDashboardData() {
+            const data = {
+                gameTitle: document.getElementById('gameTitle').textContent,
+                systemName: document.getElementById('systemName').textContent,
+                diceType: document.getElementById('diceType').textContent,
+                maxLevel: document.getElementById('maxLevel').textContent
+            };
+            localStorage.setItem('dashboardData', JSON.stringify(data));
         }
-        
-        // Detect if running in WebView (Android)
-        function isAndroidWebView() {
-            return navigator.userAgent.toLowerCase().indexOf('wv') > -1;
+
+        function loadDashboardData() {
+            const saved = localStorage.getItem('dashboardData');
+            if (saved) {
+                const data = JSON.parse(saved);
+                document.getElementById('gameTitle').textContent = data.gameTitle || 'My TTRPG System';
+                document.getElementById('systemName').textContent = data.systemName || 'Flexible RPG';
+                document.getElementById('diceType').textContent = data.diceType || 'd20';
+                document.getElementById('maxLevel').textContent = data.maxLevel || '10';
+            }
         }
-        
-        // Mobile-specific enhancements
-        if (isAndroidWebView()) {
-            document.body.classList.add('android-webview');
-            console.log('Running in Android WebView');
+
+        function loadActiveCharacters() {
+            const characters = JSON.parse(localStorage.getItem('characters') || '[]');
+            const container = document.getElementById('activeCharacters');
+            if (characters.length > 0) {
+                container.innerHTML = characters.map(char => 
+                    `<div class="character-mini" contenteditable="true">${char.name || 'Unnamed'}</div>`
+                ).join('');
+            }
         }
-        
-        // Prevent zoom on double-tap (optional)
-        document.addEventListener('dblclick', function(e) {
-            e.preventDefault();
-        }, { passive: false });
+
+        function loadRecentRolls() {
+            const rolls = JSON.parse(localStorage.getItem('recentRolls') || '[]');
+            const container = document.getElementById('recentRolls');
+            if (rolls.length > 0) {
+                container.innerHTML = rolls.slice(0, 5).map(roll => 
+                    `<div class="roll-item" contenteditable="true">${roll}</div>`
+                ).join('');
+            }
+        }
     </script>
 </body>
 </html>

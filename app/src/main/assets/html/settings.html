@@ -1,0 +1,219 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Settings - TTRPG Toolkit</title>
+    <link rel="stylesheet" href="file:///android_asset/css/style.css">
+</head>
+<body>
+    <nav class="navbar">
+        <h1>TTRPG Toolkit</h1>
+        <div class="nav-tabs">
+            <a href="index.html">Dashboard</a>
+            <a href="dice-roller.html">Dice</a>
+            <a href="character-sheet.html">Characters</a>
+            <a href="random-generator.html">Generators</a>
+            <a href="settings.html" class="active">Settings</a>
+        </div>
+    </nav>
+
+    <main class="container">
+        <section class="card">
+            <h2 contenteditable="true">System Configuration</h2>
+            <div class="settings-group">
+                <div class="setting-item">
+                    <label contenteditable="true">Game System Name:</label>
+                    <input type="text" id="systemName" placeholder="My TTRPG System">
+                </div>
+                <div class="setting-item">
+                    <label contenteditable="true">Default Dice:</label>
+                    <input type="text" id="defaultDice" placeholder="d20">
+                </div>
+                <div class="setting-item">
+                    <label contenteditable="true">Max Character Level:</label>
+                    <input type="number" id="maxLevel" value="20" min="1" max="100">
+                </div>
+            </div>
+        </section>
+
+        <section class="card">
+            <h2 contenteditable="true">Character Stats</h2>
+            <p contenteditable="true">Define the stats used in your game:</p>
+            <div id="statList" class="stat-list"></div>
+            <button onclick="addStat()" class="btn-secondary" contenteditable="true">Add Stat</button>
+        </section>
+
+        <section class="card">
+            <h2 contenteditable="true">Data Management</h2>
+            <div class="button-group">
+                <button onclick="exportData()" class="btn-primary" contenteditable="true">Export All Data</button>
+                <button onclick="importData()" class="btn-secondary" contenteditable="true">Import Data</button>
+                <button onclick="clearAllData()" class="btn-danger" contenteditable="true">Clear All Data</button>
+            </div>
+            <textarea id="importExportArea" style="display: none;" placeholder="Paste data here..."></textarea>
+        </section>
+
+        <section class="card">
+            <h2 contenteditable="true">Appearance</h2>
+            <div class="settings-group">
+                <div class="setting-item">
+                    <label contenteditable="true">Theme:</label>
+                    <select id="themeSelect">
+                        <option value="dark">Dark (Default)</option>
+                        <option value="light">Light</option>
+                        <option value="cyber">Cyberpunk</option>
+                        <option value="forest">Forest</option>
+                    </select>
+                </div>
+                <div class="setting-item">
+                    <label contenteditable="true">Font Size:</label>
+                    <input type="range" id="fontSize" min="12" max="24" value="16">
+                    <span id="fontSizeValue">16px</span>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <script src="file:///android_asset/js/main.js"></script>
+    <script>
+        let characterStats = JSON.parse(localStorage.getItem('characterStats') || '["STR","DEX","CON","INT","WIS","CHA"]');
+
+        document.addEventListener('DOMContentLoaded', function() {
+            loadSettings();
+            loadStatList();
+            
+            const fontSlider = document.getElementById('fontSize');
+            fontSlider.addEventListener('input', function() {
+                document.getElementById('fontSizeValue').textContent = this.value + 'px';
+                document.documentElement.style.fontSize = this.value + 'px';
+                localStorage.setItem('fontSize', this.value);
+            });
+            
+            document.getElementById('themeSelect').addEventListener('change', function() {
+                document.documentElement.setAttribute('data-theme', this.value);
+                localStorage.setItem('theme', this.value);
+            });
+        });
+
+        function loadSettings() {
+            const systemName = localStorage.getItem('systemName') || 'Flexible TTRPG';
+            const defaultDice = localStorage.getItem('defaultDice') || 'd20';
+            const maxLevel = localStorage.getItem('maxLevel') || '20';
+            const fontSize = localStorage.getItem('fontSize') || '16';
+            const theme = localStorage.getItem('theme') || 'dark';
+            
+            document.getElementById('systemName').value = systemName;
+            document.getElementById('defaultDice').value = defaultDice;
+            document.getElementById('maxLevel').value = maxLevel;
+            document.getElementById('fontSize').value = fontSize;
+            document.getElementById('fontSizeValue').textContent = fontSize + 'px';
+            document.getElementById('themeSelect').value = theme;
+            
+            document.documentElement.style.fontSize = fontSize + 'px';
+            document.documentElement.setAttribute('data-theme', theme);
+        }
+
+        function loadStatList() {
+            const container = document.getElementById('statList');
+            container.innerHTML = characterStats.map((stat, index) => `
+                <div class="stat-item" data-index="${index}">
+                    <input type="text" value="${stat}" onblur="updateStat(${index}, this.value)">
+                    <button onclick="removeStat(${index})">X</button>
+                </div>
+            `).join('');
+        }
+
+        function addStat() {
+            const newStat = prompt('Enter stat name:') || 'NEW';
+            characterStats.push(newStat);
+            localStorage.setItem('characterStats', JSON.stringify(characterStats));
+            loadStatList();
+        }
+
+        function updateStat(index, value) {
+            characterStats[index] = value;
+            localStorage.setItem('characterStats', JSON.stringify(characterStats));
+        }
+
+        function removeStat(index) {
+            if (confirm('Remove this stat? This will affect all characters.')) {
+                characterStats.splice(index, 1);
+                localStorage.setItem('characterStats', JSON.stringify(characterStats));
+                loadStatList();
+            }
+        }
+
+        function exportData() {
+            const data = {
+                dashboardData: JSON.parse(localStorage.getItem('dashboardData') || '{}'),
+                characters: JSON.parse(localStorage.getItem('characters') || '[]'),
+                diceSets: JSON.parse(localStorage.getItem('diceSets') || '[]'),
+                rollHistory: JSON.parse(localStorage.getItem('rollHistory') || '[]'),
+                randomTables: JSON.parse(localStorage.getItem('randomTables') || '[]'),
+                characterStats: JSON.parse(localStorage.getItem('characterStats') || '[]'),
+                systemName: localStorage.getItem('systemName') || '',
+                defaultDice: localStorage.getItem('defaultDice') || '',
+                maxLevel: localStorage.getItem('maxLevel') || '',
+                theme: localStorage.getItem('theme') || 'dark',
+                fontSize: localStorage.getItem('fontSize') || '16'
+            };
+            
+            const exportArea = document.getElementById('importExportArea');
+            exportArea.style.display = 'block';
+            exportArea.value = JSON.stringify(data, null, 2);
+            exportArea.select();
+        }
+
+        function importData() {
+            const exportArea = document.getElementById('importExportArea');
+            if (exportArea.style.display === 'none') {
+                exportArea.style.display = 'block';
+                exportArea.value = '';
+                exportArea.placeholder = 'Paste your exported data here...';
+                return;
+            }
+            
+            try {
+                const data = JSON.parse(exportArea.value);
+                
+                if (data.dashboardData) localStorage.setItem('dashboardData', JSON.stringify(data.dashboardData));
+                if (data.characters) localStorage.setItem('characters', JSON.stringify(data.characters));
+                if (data.diceSets) localStorage.setItem('diceSets', JSON.stringify(data.diceSets));
+                if (data.rollHistory) localStorage.setItem('rollHistory', JSON.stringify(data.rollHistory));
+                if (data.randomTables) localStorage.setItem('randomTables', JSON.stringify(data.randomTables));
+                if (data.characterStats) localStorage.setItem('characterStats', JSON.stringify(data.characterStats));
+                if (data.systemName) localStorage.setItem('systemName', data.systemName);
+                if (data.defaultDice) localStorage.setItem('defaultDice', data.defaultDice);
+                if (data.maxLevel) localStorage.setItem('maxLevel', data.maxLevel);
+                if (data.theme) localStorage.setItem('theme', data.theme);
+                if (data.fontSize) localStorage.setItem('fontSize', data.fontSize);
+                
+                alert('Data imported successfully! Refresh the page to see changes.');
+                exportArea.style.display = 'none';
+            } catch (e) {
+                alert('Error importing data: ' + e.message);
+            }
+        }
+
+        function clearAllData() {
+            if (confirm('Are you sure you want to delete ALL data? This cannot be undone!')) {
+                if (confirm('Last chance! This will delete everything!')) {
+                    localStorage.clear();
+                    alert('All data cleared. Please refresh the page.');
+                }
+            }
+        }
+
+        document.getElementById('systemName').addEventListener('blur', function() {
+            localStorage.setItem('systemName', this.value);
+        });
+        document.getElementById('defaultDice').addEventListener('blur', function() {
+            localStorage.setItem('defaultDice', this.value);
+        });
+        document.getElementById('maxLevel').addEventListener('blur', function() {
+            localStorage.setItem('maxLevel', this.value);
+        });
+    </script>
+</body>
+</html>
