@@ -1,0 +1,1159 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Battle Simulator - TTRPG Toolkit</title>
+    <link rel="stylesheet" href="file:///android_asset/css/style.css">
+</head>
+<body>
+    <nav class="navbar">
+        <h1>TTRPG Toolkit</h1>
+        <div class="nav-tabs">
+            <a href="index.html">Dashboard</a>
+            <a href="dice-roller.html">Dice</a>
+            <a href="character-sheet.html">Characters</a>
+            <a href="random-generator.html">Generators</a>
+            <a href="notes.html">Notes</a>
+            <a href="map.html">Map</a>
+            <a href="battle.html" class="active">Battle</a>
+            <a href="database.html">Database</a>
+            <a href="multiplayer.html">Multiplayer</a>
+            <a href="settings.html">Settings</a>
+        </div>
+    </nav>
+
+    <main class="container">
+        <!-- Battle Setup -->
+        <section class="card">
+            <h2 contenteditable="true">Battle Setup</h2>
+            <div class="battle-controls">
+                <div class="form-group">
+                    <label contenteditable="true">Battle Name:</label>
+                    <input type="text" id="battleName" placeholder="Epic Encounter">
+                </div>
+                <div class="battle-actions">
+                    <button onclick="startNewBattle()" class="btn-primary" contenteditable="true">New Battle</button>
+                    <button onclick="loadBattle()" class="btn-secondary" contenteditable="true">Load Battle</button>
+                    <button onclick="saveBattle()" class="btn-secondary" contenteditable="true">Save Battle</button>
+                </div>
+            </div>
+        </section>
+
+        <!-- Combatants Section -->
+        <section class="card">
+            <h2 contenteditable="true">Combatants</h2>
+            <div class="combatant-management">
+                <div class="add-combatant">
+                    <select id="combatantSource">
+                        <option value="characters">From Characters</option>
+                        <option value="database">From Database</option>
+                        <option value="custom">Custom Entry</option>
+                    </select>
+                    <button onclick="addCombatant()" class="btn-primary" contenteditable="true">Add Combatant</button>
+                </div>
+                <div class="combatant-filters">
+                    <label contenteditable="true">Filter:</label>
+                    <select id="teamFilter" onchange="filterCombatants()">
+                        <option value="all">All Teams</option>
+                        <option value="party">Party</option>
+                        <option value="enemies">Enemies</option>
+                        <option value="neutral">Neutral</option>
+                    </select>
+                    <select id="statusFilter" onchange="filterCombatants()">
+                        <option value="all">All Status</option>
+                        <option value="alive">Alive</option>
+                        <option value="unconscious">Unconscious</option>
+                        <option value="dead">Dead</option>
+                    </select>
+                </div>
+            </div>
+            <div id="combatantsList" class="combatants-list">
+                <!-- Combatants will be listed here -->
+            </div>
+        </section>
+
+        <!-- Initiative Tracker -->
+        <section class="card">
+            <h2 contenteditable="true">Initiative Order</h2>
+            <div class="initiative-controls">
+                <button onclick="rollAllInitiative()" class="btn-primary" contenteditable="true">Roll All Initiative</button>
+                <button onclick="sortInitiative()" class="btn-secondary" contenteditable="true">Sort Initiative</button>
+                <button onclick="nextTurn()" class="btn-secondary" contenteditable="true">Next Turn</button>
+                <button onclick="previousTurn()" class="btn-secondary" contenteditable="true">Previous Turn</button>
+            </div>
+            <div id="initiativeOrder" class="initiative-order">
+                <!-- Initiative order will be displayed here -->
+            </div>
+        </section>
+
+        <!-- Battle Map -->
+        <section class="card">
+            <h2 contenteditable="true">Battle Map <small id="roundCounter">Round: 1</small></h2>
+            <div class="battle-map-controls">
+                <div class="form-group">
+                    <label contenteditable="true">Grid Size:</label>
+                    <input type="number" id="gridSize" value="5" min="3" max="20" onchange="generateBattleMap()">
+                </div>
+                <button onclick="generateBattleMap()" class="btn-secondary" contenteditable="true">Regenerate Map</button>
+                <button onclick="clearBattleMap()" class="btn-danger" contenteditable="true">Clear Map</button>
+            </div>
+            <div id="battleMap" class="battle-map">
+                <!-- Battle map grid will be generated here -->
+            </div>
+        </section>
+
+        <!-- Combat Log -->
+        <section class="card">
+            <h2 contenteditable="true">Combat Log</h2>
+            <div id="combatLog" class="combat-log">
+                <div class="log-entry system" contenteditable="true">Battle started. Ready for combat!</div>
+            </div>
+            <button onclick="clearCombatLog()" class="btn-danger" contenteditable="true">Clear Log</button>
+        </section>
+
+        <!-- Advanced Options -->
+        <section class="card">
+            <h2 contenteditable="true">Advanced Battle Options 
+                <button onclick="toggleAdvancedOptions()" class="btn-secondary" id="toggleAdvancedBtn">Show Advanced</button>
+            </h2>
+            <div id="advancedOptions" class="advanced-options" style="display: none;">
+                <div class="advanced-grid">
+                    <!-- Environment -->
+                    <div class="option-group">
+                        <h3 contenteditable="true">Environment</h3>
+                        <div class="form-group">
+                            <label contenteditable="true">Terrain:</label>
+                            <select id="battleTerrain">
+                                <option value="plains">Plains</option>
+                                <option value="forest">Forest</option>
+                                <option value="mountains">Mountains</option>
+                                <option value="urban">Urban</option>
+                                <option value="dungeon">Dungeon</option>
+                                <option value="water">Water</option>
+                                <option value="desert">Desert</option>
+                                <option value="arctic">Arctic</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label contenteditable="true">Weather:</label>
+                            <select id="battleWeather">
+                                <option value="clear">Clear</option>
+                                <option value="rain">Rain</option>
+                                <option value="snow">Snow</option>
+                                <option value="fog">Fog</option>
+                                <option value="wind">Wind</option>
+                                <option value="storm">Storm</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label contenteditable="true">Lighting:</label>
+                            <select id="battleLighting">
+                                <option value="daylight">Daylight</option>
+                                <option value="dim">Dim Light</option>
+                                <option value="darkness">Darkness</option>
+                                <option value="magical">Magical Light</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <!-- Battle Conditions -->
+                    <div class="option-group">
+                        <h3 contenteditable="true">Special Rules</h3>
+                        <div class="form-group">
+                            <label contenteditable="true">Morale System:</label>
+                            <input type="checkbox" id="moraleSystem">
+                        </div>
+                        <div class="form-group">
+                            <label contenteditable="true">Friendly Fire:</label>
+                            <input type="checkbox" id="friendlyFire">
+                        </div>
+                        <div class="form-group">
+                            <label contenteditable="true">AoE Templates:</label>
+                            <input type="checkbox" id="aoeTemplates" checked>
+                        </div>
+                        <div class="form-group">
+                            <label contenteditable="true">Flanking Rules:</label>
+                            <input type="checkbox" id="flankingRules" checked>
+                        </div>
+                        <div class="form-group">
+                            <label contenteditable="true">Cover System:</label>
+                            <input type="checkbox" id="coverSystem" checked>
+                        </div>
+                    </div>
+
+                    <!-- Status Effects -->
+                    <div class="option-group">
+                        <h3 contenteditable="true">Active Effects</h3>
+                        <div id="activeEffects" class="active-effects">
+                            <!-- Active effects will be listed here -->
+                        </div>
+                        <button onclick="addGlobalEffect()" class="btn-secondary" contenteditable="true">Add Global Effect</button>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Action Panel -->
+        <section class="card" id="actionPanel" style="display: none;">
+            <h2 contenteditable="true">Current Turn: <span id="currentCombatant">-</span></h2>
+            <div class="action-buttons">
+                <button onclick="performAttack()" class="btn-primary" contenteditable="true">Attack</button>
+                <button onclick="performSkill()" class="btn-secondary" contenteditable="true">Use Skill</button>
+                <button onclick="moveCombatant()" class="btn-secondary" contenteditable="true">Move</button>
+                <button onclick="dashAction()" class="btn-secondary" contenteditable="true">Dash</button>
+                <button onclick="dodgeAction()" class="btn-secondary" contenteditable="true">Dodge</button>
+                <button onclick="helpAction()" class="btn-secondary" contenteditable="true">Help</button>
+                <button onclick="endTurn()" class="btn-danger" contenteditable="true">End Turn</button>
+            </div>
+            <div class="action-details" id="actionDetails">
+                <!-- Action details will be shown here -->
+            </div>
+        </section>
+    </main>
+
+    <!-- Modals -->
+    <div id="combatantModal" class="modal" style="display: none;">
+        <div class="modal-content">
+            <h2 contenteditable="true">Add Combatant</h2>
+            <div id="combatantModalContent">
+                <!-- Dynamic content based on source -->
+            </div>
+        </div>
+    </div>
+
+    <div id="attackModal" class="modal" style="display: none;">
+        <div class="modal-content">
+            <h2 contenteditable="true">Perform Attack</h2>
+            <div class="attack-form">
+                <div class="form-group">
+                    <label contenteditable="true">Attacker:</label>
+                    <span id="attackAttacker">-</span>
+                </div>
+                <div class="form-group">
+                    <label contenteditable="true">Target:</label>
+                    <select id="attackTarget">
+                        <!-- Targets will be populated -->
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label contenteditable="true">Attack Type:</label>
+                    <select id="attackType">
+                        <option value="melee">Melee</option>
+                        <option value="ranged">Ranged</option>
+                        <option value="spell">Spell</option>
+                        <option value="aoe">Area of Effect</option>
+                    </select>
+                </div>
+                <div class="form-group" id="aoeOptions" style="display: none;">
+                    <label contenteditable="true">AoE Shape:</label>
+                    <select id="aoeShape">
+                        <option value="circle">Circle</option>
+                        <option value="cone">Cone</option>
+                        <option value="line">Line</option>
+                        <option value="square">Square</option>
+                    </select>
+                    <input type="number" id="aoeSize" value="5" min="1" max="10" placeholder="Size">
+                </div>
+                <div class="form-group">
+                    <label contenteditable="true">Bonus/Penalty:</label>
+                    <input type="number" id="attackBonus" value="0">
+                </div>
+                <div class="modal-actions">
+                    <button onclick="executeAttack()" class="btn-primary" contenteditable="true">Roll Attack</button>
+                    <button onclick="closeAttackModal()" class="btn-secondary" contenteditable="true">Cancel</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="file:///android_asset/js/main.js"></script>
+    <script>
+        // Battle state
+        let currentBattle = {
+            id: null,
+            name: 'New Battle',
+            combatants: [],
+            initiative: [],
+            currentTurn: 0,
+            round: 1,
+            environment: {
+                terrain: 'plains',
+                weather: 'clear',
+                lighting: 'daylight'
+            },
+            rules: {
+                morale: false,
+                friendlyFire: false,
+                aoeTemplates: true,
+                flanking: true,
+                cover: true
+            },
+            activeEffects: [],
+            map: [],
+            log: []
+        };
+
+        let battles = JSON.parse(localStorage.getItem('battles') || '[]');
+
+        document.addEventListener('DOMContentLoaded', function() {
+            generateBattleMap();
+            loadSavedBattles();
+        });
+
+        function startNewBattle() {
+            if (confirm('Start new battle? Current battle will be lost.')) {
+                currentBattle = {
+                    id: Date.now().toString(),
+                    name: document.getElementById('battleName').value || 'New Battle',
+                    combatants: [],
+                    initiative: [],
+                    currentTurn: 0,
+                    round: 1,
+                    environment: {
+                        terrain: document.getElementById('battleTerrain').value,
+                        weather: document.getElementById('battleWeather').value,
+                        lighting: document.getElementById('battleLighting').value
+                    },
+                    rules: {
+                        morale: document.getElementById('moraleSystem').checked,
+                        friendlyFire: document.getElementById('friendlyFire').checked,
+                        aoeTemplates: document.getElementById('aoeTemplates').checked,
+                        flanking: document.getElementById('flankingRules').checked,
+                        cover: document.getElementById('coverSystem').checked
+                    },
+                    activeEffects: [],
+                    map: [],
+                    log: [`Battle "${currentBattle.name}" started!`]
+                };
+                
+                updateCombatLog('system', `Battle "${currentBattle.name}" started!`);
+                updateRoundCounter();
+                generateBattleMap();
+                updateCombatantsList();
+            }
+        }
+
+        function generateBattleMap() {
+            const gridSize = parseInt(document.getElementById('gridSize').value) || 5;
+            const mapContainer = document.getElementById('battleMap');
+            
+            mapContainer.innerHTML = '';
+            mapContainer.style.gridTemplateColumns = `repeat(${gridSize}, 60px)`;
+            mapContainer.style.gridTemplateRows = `repeat(${gridSize}, 60px)`;
+            
+            currentBattle.map = [];
+            
+            for (let y = 0; y < gridSize; y++) {
+                const row = [];
+                for (let x = 0; x < gridSize; x++) {
+                    const cell = document.createElement('div');
+                    cell.className = 'map-cell';
+                    cell.dataset.x = x;
+                    cell.dataset.y = y;
+                    cell.innerHTML = `
+                        <div class="cell-coords">${x},${y}</div>
+                        <div class="cell-content"></div>
+                    `;
+                    cell.addEventListener('click', () => selectMapCell(x, y));
+                    mapContainer.appendChild(cell);
+                    row.push({ x, y, occupants: [], terrain: 'clear' });
+                }
+                currentBattle.map.push(row);
+            }
+        }
+
+        function clearBattleMap() {
+            currentBattle.map.forEach(row => {
+                row.forEach(cell => {
+                    cell.occupants = [];
+                    cell.terrain = 'clear';
+                });
+            });
+            generateBattleMap();
+            updateCombatantsList();
+        }
+
+        function addCombatant() {
+            const source = document.getElementById('combatantSource').value;
+            const modal = document.getElementById('combatantModal');
+            const content = document.getElementById('combatantModalContent');
+            
+            switch(source) {
+                case 'characters':
+                    showCharacterSelection(content);
+                    break;
+                case 'database':
+                    showDatabaseSelection(content);
+                    break;
+                case 'custom':
+                    showCustomCombatantForm(content);
+                    break;
+            }
+            
+            modal.style.display = 'flex';
+        }
+
+        function showCharacterSelection(container) {
+            const characters = JSON.parse(localStorage.getItem('characters') || '[]');
+            
+            if (characters.length === 0) {
+                container.innerHTML = '<p contenteditable="true">No characters available. Create some in the Characters section first.</p>';
+                return;
+            }
+            
+            container.innerHTML = `
+                <h3 contenteditable="true">Select Character</h3>
+                <div class="character-selection">
+                    ${characters.map(char => `
+                        <div class="selectable-item" onclick="addCharacterAsCombatant('${char.id}')">
+                            <strong contenteditable="true">${char.name}</strong>
+                            <span contenteditable="true">${char.race} ${char.class} Lvl ${char.level}</span>
+                        </div>
+                    `).join('')}
+                </div>
+                <button onclick="closeCombatantModal()" class="btn-secondary" contenteditable="true">Cancel</button>
+            `;
+        }
+
+        function addCharacterAsCombatant(characterId) {
+            const characters = JSON.parse(localStorage.getItem('characters') || '[]');
+            const character = characters.find(c => c.id === characterId);
+            
+            if (!character) return;
+            
+            const combatant = {
+                id: Date.now().toString(),
+                name: character.name,
+                type: 'character',
+                team: 'party',
+                stats: character.stats,
+                combat: character.combat,
+                skills: character.skills,
+                position: { x: 0, y: 0 },
+                conditions: [],
+                initiative: 0,
+                actions: {
+                    movement: 0,
+                    action: true,
+                    bonusAction: true,
+                    reaction: true
+                }
+            };
+            
+            currentBattle.combatants.push(combatant);
+            placeCombatantOnMap(combatant);
+            updateCombatantsList();
+            closeCombatantModal();
+            updateCombatLog('join', `${combatant.name} joined the battle!`);
+        }
+
+        function placeCombatantOnMap(combatant) {
+            // Find empty cell for placement
+            for (let y = 0; y < currentBattle.map.length; y++) {
+                for (let x = 0; x < currentBattle.map[y].length; x++) {
+                    if (currentBattle.map[y][x].occupants.length === 0) {
+                        combatant.position = { x, y };
+                        currentBattle.map[y][x].occupants.push(combatant.id);
+                        updateMapDisplay();
+                        return;
+                    }
+                }
+            }
+        }
+
+        function updateMapDisplay() {
+            document.querySelectorAll('.map-cell').forEach(cell => {
+                const content = cell.querySelector('.cell-content');
+                content.innerHTML = '';
+            });
+            
+            currentBattle.combatants.forEach(combatant => {
+                const cell = document.querySelector(`.map-cell[data-x="${combatant.position.x}"][data-y="${combatant.position.y}"]`);
+                if (cell) {
+                    const content = cell.querySelector('.cell-content');
+                    const token = document.createElement('div');
+                    token.className = `combatant-token ${combatant.team}`;
+                    token.textContent = combatant.name.charAt(0);
+                    token.title = combatant.name;
+                    content.appendChild(token);
+                }
+            });
+        }
+
+        function updateCombatantsList() {
+            const container = document.getElementById('combatantsList');
+            const filteredCombatants = filterCombatants();
+            
+            if (filteredCombatants.length === 0) {
+                container.innerHTML = '<p contenteditable="true">No combatants added yet.</p>';
+                return;
+            }
+            
+            container.innerHTML = filteredCombatants.map(combatant => `
+                <div class="combatant-item ${combatant.team} ${getCombatantStatus(combatant)}" data-id="${combatant.id}">
+                    <div class="combatant-header">
+                        <span class="combatant-name" contenteditable="true">${combatant.name}</span>
+                        <span class="combatant-initiative" contenteditable="true">Init: ${combatant.initiative}</span>
+                    </div>
+                    <div class="combatant-stats">
+                        <span class="hp" contenteditable="true">HP: ${combatant.combat.hp}/${combatant.combat.maxHP}</span>
+                        <span class="ac" contenteditable="true">AC: ${combatant.combat.ac}</span>
+                        <span class="position" contenteditable="true">Pos: ${combatant.position.x},${combatant.position.y}</span>
+                    </div>
+                    <div class="combatant-actions">
+                        <button onclick="editCombatant('${combatant.id}')" contenteditable="true">Edit</button>
+                        <button onclick="removeCombatant('${combatant.id}')" class="btn-danger" contenteditable="true">Remove</button>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        function filterCombatants() {
+            const teamFilter = document.getElementById('teamFilter').value;
+            const statusFilter = document.getElementById('statusFilter').value;
+            
+            return currentBattle.combatants.filter(combatant => {
+                const teamMatch = teamFilter === 'all' || combatant.team === teamFilter;
+                const statusMatch = statusFilter === 'all' || getCombatantStatus(combatant) === statusFilter;
+                return teamMatch && statusMatch;
+            });
+        }
+
+        function getCombatantStatus(combatant) {
+            if (combatant.combat.hp <= 0) return 'dead';
+            if (combatant.combat.hp <= combatant.combat.maxHP * 0.25) return 'unconscious';
+            return 'alive';
+        }
+
+        function rollAllInitiative() {
+            currentBattle.combatants.forEach(combatant => {
+                const dexMod = Math.floor(((combatant.stats.DEX || 10) - 10) / 2);
+                combatant.initiative = Math.floor(Math.random() * 20) + 1 + dexMod;
+            });
+            
+            sortInitiative();
+            updateCombatantsList();
+            updateInitiativeOrder();
+            updateCombatLog('system', 'Initiative rolled for all combatants!');
+        }
+
+        function sortInitiative() {
+            currentBattle.initiative = [...currentBattle.combatants]
+                .sort((a, b) => b.initiative - a.initiative)
+                .map(c => c.id);
+            
+            updateInitiativeOrder();
+        }
+
+        function updateInitiativeOrder() {
+            const container = document.getElementById('initiativeOrder');
+            container.innerHTML = '';
+            
+            currentBattle.initiative.forEach((combatantId, index) => {
+                const combatant = currentBattle.combatants.find(c => c.id === combatantId);
+                if (!combatant) return;
+                
+                const initiativeItem = document.createElement('div');
+                initiativeItem.className = `initiative-item ${index === currentBattle.currentTurn ? 'current-turn' : ''} ${combatant.team}`;
+                initiativeItem.innerHTML = `
+                    <span class="initiative-order" contenteditable="true">${index + 1}.</span>
+                    <span class="initiative-name" contenteditable="true">${combatant.name}</span>
+                    <span class="initiative-score" contenteditable="true">${combatant.initiative}</span>
+                    <span class="initiative-hp" contenteditable="true">${combatant.combat.hp}/${combatant.combat.maxHP}</span>
+                `;
+                initiativeItem.addEventListener('click', () => setCurrentTurn(index));
+                container.appendChild(initiativeItem);
+            });
+            
+            updateActionPanel();
+        }
+
+        function setCurrentTurn(turnIndex) {
+            currentBattle.currentTurn = turnIndex;
+            updateInitiativeOrder();
+            updateActionPanel();
+        }
+
+        function nextTurn() {
+            currentBattle.currentTurn = (currentBattle.currentTurn + 1) % currentBattle.initiative.length;
+            if (currentBattle.currentTurn === 0) {
+                currentBattle.round++;
+                updateRoundCounter();
+                updateCombatLog('system', `Round ${currentBattle.round} begins!`);
+            }
+            updateInitiativeOrder();
+            updateActionPanel();
+            
+            const currentCombatant = getCurrentCombatant();
+            if (currentCombatant) {
+                // Reset actions for new turn
+                currentCombatant.actions = {
+                    movement: currentCombatant.combat.speed || 30,
+                    action: true,
+                    bonusAction: true,
+                    reaction: true
+                };
+            }
+        }
+
+        function previousTurn() {
+            currentBattle.currentTurn = (currentBattle.currentTurn - 1 + currentBattle.initiative.length) % currentBattle.initiative.length;
+            updateInitiativeOrder();
+            updateActionPanel();
+        }
+
+        function updateActionPanel() {
+            const currentCombatant = getCurrentCombatant();
+            if (!currentCombatant) {
+                document.getElementById('actionPanel').style.display = 'none';
+                return;
+            }
+            
+            document.getElementById('actionPanel').style.display = 'block';
+            document.getElementById('currentCombatant').textContent = currentCombatant.name;
+            
+            // Update attack target options
+            const targetSelect = document.getElementById('attackTarget');
+            targetSelect.innerHTML = '<option value="">Select Target</option>';
+            
+            currentBattle.combatants
+                .filter(c => c.id !== currentCombatant.id && c.combat.hp > 0)
+                .forEach(combatant => {
+                    const option = document.createElement('option');
+                    option.value = combatant.id;
+                    option.textContent = `${combatant.name} (${combatant.team})`;
+                    targetSelect.appendChild(option);
+                });
+        }
+
+        function getCurrentCombatant() {
+            if (currentBattle.initiative.length === 0) return null;
+            return currentBattle.combatants.find(c => c.id === currentBattle.initiative[currentBattle.currentTurn]);
+        }
+
+        function performAttack() {
+            const currentCombatant = getCurrentCombatant();
+            if (!currentCombatant) return;
+            
+            document.getElementById('attackAttacker').textContent = currentCombatant.name;
+            document.getElementById('attackModal').style.display = 'flex';
+        }
+
+        function executeAttack() {
+            const attacker = getCurrentCombatant();
+            const targetId = document.getElementById('attackTarget').value;
+            const attackType = document.getElementById('attackType').value;
+            const bonus = parseInt(document.getElementById('attackBonus').value) || 0;
+            
+            if (!targetId) {
+                alert('Please select a target!');
+                return;
+            }
+            
+            const target = currentBattle.combatants.find(c => c.id === targetId);
+            if (!target) return;
+            
+            // Calculate attack roll
+            const attackRoll = Math.floor(Math.random() * 20) + 1;
+            const attackMod = Math.floor(((attacker.stats.STR || 10) - 10) / 2) + bonus;
+            const totalAttack = attackRoll + attackMod;
+            
+            // Calculate damage
+            const damageRoll = Math.floor(Math.random() * 8) + 1; // 1d8
+            const damageMod = Math.floor(((attacker.stats.STR || 10) - 10) / 2);
+            const totalDamage = Math.max(1, damageRoll + damageMod);
+            
+            let resultText = '';
+            
+            if (attackRoll === 20) {
+                // Critical hit
+                const critDamage = totalDamage * 2;
+                target.combat.hp = Math.max(0, target.combat.hp - critDamage);
+                resultText = `CRITICAL HIT! ${attacker.name} hits ${target.name} for ${critDamage} damage!`;
+            } else if (attackRoll === 1) {
+                // Critical miss
+                resultText = `CRITICAL MISS! ${attacker.name} fails to hit ${target.name}!`;
+            } else if (totalAttack >= target.combat.ac) {
+                // Normal hit
+                target.combat.hp = Math.max(0, target.combat.hp - totalDamage);
+                resultText = `${attacker.name} hits ${target.name} for ${totalDamage} damage!`;
+            } else {
+                // Miss
+                resultText = `${attacker.name} misses ${target.name}!`;
+            }
+            
+            updateCombatLog('attack', resultText);
+            updateCombatantsList();
+            updateInitiativeOrder();
+            closeAttackModal();
+            
+            // Check if target is defeated
+            if (target.combat.hp <= 0) {
+                updateCombatLog('system', `${target.name} has been defeated!`);
+            }
+            
+            // Use action
+            attacker.actions.action = false;
+        }
+
+        function updateCombatLog(type, message) {
+            const log = document.getElementById('combatLog');
+            const entry = document.createElement('div');
+            entry.className = `log-entry ${type}`;
+            entry.textContent = `[Round ${currentBattle.round}] ${message}`;
+            entry.contentEditable = true;
+            log.appendChild(entry);
+            log.scrollTop = log.scrollHeight;
+            
+            // Add to battle log
+            currentBattle.log.push(message);
+        }
+
+        function updateRoundCounter() {
+            document.getElementById('roundCounter').textContent = `Round: ${currentBattle.round}`;
+        }
+
+        function toggleAdvancedOptions() {
+            const advanced = document.getElementById('advancedOptions');
+            const button = document.getElementById('toggleAdvancedBtn');
+            
+            if (advanced.style.display === 'none') {
+                advanced.style.display = 'block';
+                button.textContent = 'Hide Advanced';
+            } else {
+                advanced.style.display = 'none';
+                button.textContent = 'Show Advanced';
+            }
+        }
+
+        function saveBattle() {
+            if (!currentBattle.id) {
+                currentBattle.id = Date.now().toString();
+            }
+            
+            // Update battle index
+            const existingIndex = battles.findIndex(b => b.id === currentBattle.id);
+            if (existingIndex !== -1) {
+                battles[existingIndex] = currentBattle;
+            } else {
+                battles.unshift(currentBattle);
+            }
+            
+            localStorage.setItem('battles', JSON.stringify(battles));
+            showNotification('Battle saved!', 'success');
+        }
+
+        function loadBattle() {
+            // Implementation for loading saved battles
+            // This would show a modal with saved battles to choose from
+            alert('Load battle functionality would show a list of saved battles here.');
+        }
+
+        // Modal management functions
+        function closeCombatantModal() {
+            document.getElementById('combatantModal').style.display = 'none';
+        }
+
+        function closeAttackModal() {
+            document.getElementById('attackModal').style.display = 'none';
+        }
+
+        // Additional battle functions would be implemented here
+        function moveCombatant() {
+            // Implementation for movement
+            alert('Movement system would allow moving the current combatant on the map.');
+        }
+
+        function performSkill() {
+            // Implementation for skill usage
+            alert('Skill system would allow using skills from the combatant\'s skill list.');
+        }
+
+        function dashAction() {
+            const combatant = getCurrentCombatant();
+            if (combatant) {
+                combatant.actions.movement += combatant.combat.speed;
+                updateCombatLog('action', `${combatant.name} takes the Dash action!`);
+                combatant.actions.action = false;
+            }
+        }
+
+        function dodgeAction() {
+            const combatant = getCurrentCombatant();
+            if (combatant) {
+                // Implement dodge mechanics
+                updateCombatLog('action', `${combatant.name} takes the Dodge action!`);
+                combatant.actions.action = false;
+            }
+        }
+
+        function helpAction() {
+            const combatant = getCurrentCombatant();
+            if (combatant) {
+                // Implement help action
+                updateCombatLog('action', `${combatant.name} takes the Help action!`);
+                combatant.actions.action = false;
+            }
+        }
+
+        function endTurn() {
+            nextTurn();
+        }
+
+        // Placeholder functions for unimplemented features
+        function showDatabaseSelection(container) {
+            container.innerHTML = '<p contenteditable="true">Database selection would show monsters and NPCs from the database.</p>';
+        }
+
+        function showCustomCombatantForm(container) {
+            container.innerHTML = '<p contenteditable="true">Custom combatant form would allow creating new combatants manually.</p>';
+        }
+
+        function editCombatant(id) {
+            // Implementation for editing combatant details
+            alert('Edit combatant functionality would open a form to modify combatant stats.');
+        }
+
+        function removeCombatant(id) {
+            if (confirm('Remove this combatant from battle?')) {
+                currentBattle.combatants = currentBattle.combatants.filter(c => c.id !== id);
+                currentBattle.initiative = currentBattle.initiative.filter(combatantId => combatantId !== id);
+                updateCombatantsList();
+                updateInitiativeOrder();
+            }
+        }
+
+        function clearCombatLog() {
+            if (confirm('Clear combat log?')) {
+                document.getElementById('combatLog').innerHTML = '';
+                currentBattle.log = [];
+            }
+        }
+
+        function selectMapCell(x, y) {
+            // Implementation for map cell selection
+            console.log(`Selected cell: ${x}, ${y}`);
+        }
+
+        function addGlobalEffect() {
+            // Implementation for adding global effects
+            alert('Global effect system would allow adding environmental effects to the battle.');
+        }
+    </script>
+
+    <style>
+        .battle-controls {
+            display: grid;
+            gap: 1rem;
+        }
+
+        .battle-actions {
+            display: flex;
+            gap: 0.5rem;
+            flex-wrap: wrap;
+        }
+
+        .combatant-management {
+            display: flex;
+            justify-content: space-between;
+            align-items: end;
+            flex-wrap: wrap;
+            gap: 1rem;
+            margin-bottom: 1rem;
+        }
+
+        .add-combatant {
+            display: flex;
+            gap: 0.5rem;
+            align-items: end;
+        }
+
+        .combatant-filters {
+            display: flex;
+            gap: 0.5rem;
+            align-items: end;
+        }
+
+        .combatants-list {
+            display: grid;
+            gap: 0.5rem;
+        }
+
+        .combatant-item {
+            background: var(--bg-secondary);
+            padding: 1rem;
+            border-radius: 8px;
+            border-left: 4px solid var(--accent);
+        }
+
+        .combatant-item.party {
+            border-left-color: var(--success);
+        }
+
+        .combatant-item.enemies {
+            border-left-color: var(--danger);
+        }
+
+        .combatant-item.neutral {
+            border-left-color: var(--text-secondary);
+        }
+
+        .combatant-item.dead {
+            opacity: 0.6;
+            background: var(--bg-primary);
+        }
+
+        .combatant-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 0.5rem;
+        }
+
+        .combatant-stats {
+            display: flex;
+            gap: 1rem;
+            margin-bottom: 0.5rem;
+            flex-wrap: wrap;
+        }
+
+        .combatant-actions {
+            display: flex;
+            gap: 0.5rem;
+        }
+
+        .initiative-controls {
+            display: flex;
+            gap: 0.5rem;
+            margin-bottom: 1rem;
+            flex-wrap: wrap;
+        }
+
+        .initiative-order {
+            display: grid;
+            gap: 0.25rem;
+        }
+
+        .initiative-item {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            padding: 0.75rem;
+            background: var(--bg-secondary);
+            border-radius: 4px;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .initiative-item.current-turn {
+            background: var(--accent);
+            color: var(--bg-primary);
+            font-weight: bold;
+        }
+
+        .initiative-item.party {
+            border-left: 3px solid var(--success);
+        }
+
+        .initiative-item.enemies {
+            border-left: 3px solid var(--danger);
+        }
+
+        .initiative-order {
+            font-weight: bold;
+            min-width: 30px;
+        }
+
+        .initiative-name {
+            flex: 1;
+        }
+
+        .battle-map-controls {
+            display: flex;
+            gap: 1rem;
+            align-items: end;
+            flex-wrap: wrap;
+            margin-bottom: 1rem;
+        }
+
+        .battle-map {
+            display: grid;
+            gap: 2px;
+            background: var(--border);
+            border: 2px solid var(--border);
+            padding: 2px;
+            max-width: 100%;
+            overflow: auto;
+        }
+
+        .map-cell {
+            width: 60px;
+            height: 60px;
+            background: var(--bg-card);
+            position: relative;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .map-cell:hover {
+            background: var(--accent);
+            color: var(--bg-primary);
+        }
+
+        .cell-coords {
+            position: absolute;
+            top: 2px;
+            left: 2px;
+            font-size: 0.7rem;
+            opacity: 0.7;
+        }
+
+        .cell-content {
+            width: 100%;
+            height: 100%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .combatant-token {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            color: white;
+        }
+
+        .combatant-token.party {
+            background: var(--success);
+        }
+
+        .combatant-token.enemies {
+            background: var(--danger);
+        }
+
+        .combatant-token.neutral {
+            background: var(--text-secondary);
+        }
+
+        .combat-log {
+            max-height: 300px;
+            overflow-y: auto;
+            background: var(--bg-secondary);
+            padding: 1rem;
+            border-radius: 8px;
+            margin-bottom: 1rem;
+            font-family: monospace;
+        }
+
+        .log-entry {
+            padding: 0.5rem;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .log-entry:last-child {
+            border-bottom: none;
+        }
+
+        .log-entry.attack {
+            color: var(--danger);
+        }
+
+        .log-entry.system {
+            color: var(--accent);
+        }
+
+        .log-entry.join {
+            color: var(--success);
+        }
+
+        .advanced-options {
+            margin-top: 1rem;
+        }
+
+        .advanced-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 2rem;
+        }
+
+        .option-group {
+            background: var(--bg-secondary);
+            padding: 1rem;
+            border-radius: 8px;
+        }
+
+        .option-group h3 {
+            margin-bottom: 1rem;
+            color: var(--accent);
+        }
+
+        .action-buttons {
+            display: flex;
+            gap: 0.5rem;
+            flex-wrap: wrap;
+            margin-bottom: 1rem;
+        }
+
+        .selectable-item {
+            padding: 1rem;
+            background: var(--bg-secondary);
+            border-radius: 4px;
+            cursor: pointer;
+            transition: all 0.3s;
+            margin-bottom: 0.5rem;
+        }
+
+        .selectable-item:hover {
+            background: var(--accent);
+            color: var(--bg-primary);
+        }
+
+        @media (max-width: 768px) {
+            .combatant-management {
+                flex-direction: column;
+                align-items: stretch;
+            }
+            
+            .add-combatant {
+                flex-direction: column;
+                align-items: stretch;
+            }
+            
+            .combatant-filters {
+                flex-direction: column;
+            }
+            
+            .initiative-controls {
+                flex-direction: column;
+            }
+            
+            .battle-map-controls {
+                flex-direction: column;
+            }
+            
+            .map-cell {
+                width: 50px;
+                height: 50px;
+            }
+            
+            .advanced-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .action-buttons {
+                flex-direction: column;
+            }
+            
+            .combatant-stats {
+                flex-direction: column;
+                gap: 0.25rem;
+            }
+        }
+    </style>
+</body>
+</html>

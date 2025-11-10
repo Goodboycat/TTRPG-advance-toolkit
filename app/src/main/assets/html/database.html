@@ -1,0 +1,900 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Game Database - TTRPG Toolkit</title>
+    <link rel="stylesheet" href="file:///android_asset/css/style.css">
+</head>
+<body>
+    <nav class="navbar">
+        <h1>TTRPG Toolkit</h1>
+        <div class="nav-tabs">
+            <a href="index.html">Dashboard</a>
+            <a href="dice-roller.html">Dice</a>
+            <a href="character-sheet.html">Characters</a>
+            <a href="random-generator.html">Generators</a>
+            <a href="notes.html">Notes</a>
+            <a href="map.html">Map</a>
+            <a href="battle.html">Battle</a>
+            <a href="database.html" class="active">Database</a>
+            <a href="multiplayer.html">Multiplayer</a>
+            <a href="settings.html">Settings</a>
+        </div>
+    </nav>
+
+    <main class="container">
+        <section class="card">
+            <h2 contenteditable="true">Game Database</h2>
+            <div class="database-controls">
+                <div class="search-box">
+                    <input type="text" id="dbSearch" placeholder="Search across all categories..." onkeyup="searchDatabase()">
+                    <button onclick="clearSearch()" class="btn-secondary">Clear</button>
+                </div>
+                <div class="category-filters">
+                    <label contenteditable="true">Filter by Category:</label>
+                    <select id="categoryFilter" onchange="filterByCategory()">
+                        <option value="all">All Categories</option>
+                        <option value="races">Races</option>
+                        <option value="classes">Classes</option>
+                        <option value="skills">Skills</option>
+                        <option value="items">Items</option>
+                        <option value="spells">Spells</option>
+                        <option value="monsters">Monsters</option>
+                        <option value="locations">Locations</option>
+                        <option value="encounters">Encounters</option>
+                        <option value="traits">Traits</option>
+                        <option value="conditions">Conditions</option>
+                    </select>
+                </div>
+            </div>
+        </section>
+
+        <section class="card">
+            <h2 contenteditable="true">Quick Import Parser</h2>
+            <div class="parser-controls">
+                <div class="form-group">
+                    <label contenteditable="true">Paste data (one entry per line):</label>
+                    <textarea id="importData" placeholder="Human: A versatile race...
+Elf: Agile and magical...
+Dwarf: Strong and resilient..." style="min-height: 150px;"></textarea>
+                </div>
+                <div class="parser-settings">
+                    <div class="form-group">
+                        <label contenteditable="true">Category:</label>
+                        <select id="importCategory">
+                            <option value="races">Races</option>
+                            <option value="classes">Classes</option>
+                            <option value="skills">Skills</option>
+                            <option value="items">Items</option>
+                            <option value="spells">Spells</option>
+                            <option value="monsters">Monsters</option>
+                            <option value="locations">Locations</option>
+                            <option value="traits">Traits</option>
+                            <option value="conditions">Conditions</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label contenteditable="true">Separator:</label>
+                        <input type="text" id="importSeparator" value=":" placeholder=":">
+                    </div>
+                    <button onclick="parseImportData()" class="btn-primary" contenteditable="true">Parse & Import</button>
+                </div>
+            </div>
+        </section>
+
+        <section class="card">
+            <h2 contenteditable="true">Database Categories</h2>
+            <div class="category-tabs">
+                <button class="category-tab active" onclick="showCategory('races')" contenteditable="true">Races</button>
+                <button class="category-tab" onclick="showCategory('classes')" contenteditable="true">Classes</button>
+                <button class="category-tab" onclick="showCategory('skills')" contenteditable="true">Skills</button>
+                <button class="category-tab" onclick="showCategory('items')" contenteditable="true">Items</button>
+                <button class="category-tab" onclick="showCategory('spells')" contenteditable="true">Spells</button>
+                <button class="category-tab" onclick="showCategory('monsters')" contenteditable="true">Monsters</button>
+                <button class="category-tab" onclick="showCategory('locations')" contenteditable="true">Locations</button>
+                <button class="category-tab" onclick="showCategory('encounters')" contenteditable="true">Encounters</button>
+                <button class="category-tab" onclick="showCategory('traits')" contenteditable="true">Traits</button>
+                <button class="category-tab" onclick="showCategory('conditions')" contenteditable="true">Conditions</button>
+            </div>
+
+            <!-- Races Category -->
+            <div id="category-races" class="category-content active">
+                <div class="category-header">
+                    <h3 contenteditable="true">Races</h3>
+                    <button onclick="addEntry('races')" class="btn-primary" contenteditable="true">Add Race</button>
+                </div>
+                <div id="races-list" class="entries-list"></div>
+            </div>
+
+            <!-- Classes Category -->
+            <div id="category-classes" class="category-content">
+                <div class="category-header">
+                    <h3 contenteditable="true">Classes</h3>
+                    <button onclick="addEntry('classes')" class="btn-primary" contenteditable="true">Add Class</button>
+                </div>
+                <div id="classes-list" class="entries-list"></div>
+            </div>
+
+            <!-- Skills Category -->
+            <div id="category-skills" class="category-content">
+                <div class="category-header">
+                    <h3 contenteditable="true">Skills</h3>
+                    <button onclick="addEntry('skills')" class="btn-primary" contenteditable="true">Add Skill</button>
+                </div>
+                <div id="skills-list" class="entries-list"></div>
+            </div>
+
+            <!-- Items Category -->
+            <div id="category-items" class="category-content">
+                <div class="category-header">
+                    <h3 contenteditable="true">Items</h3>
+                    <button onclick="addEntry('items')" class="btn-primary" contenteditable="true">Add Item</button>
+                </div>
+                <div id="items-list" class="entries-list"></div>
+            </div>
+
+            <!-- Spells Category -->
+            <div id="category-spells" class="category-content">
+                <div class="category-header">
+                    <h3 contenteditable="true">Spells</h3>
+                    <button onclick="addEntry('spells')" class="btn-primary" contenteditable="true">Add Spell</button>
+                </div>
+                <div id="spells-list" class="entries-list"></div>
+            </div>
+
+            <!-- Monsters Category -->
+            <div id="category-monsters" class="category-content">
+                <div class="category-header">
+                    <h3 contenteditable="true">Monsters</h3>
+                    <button onclick="addEntry('monsters')" class="btn-primary" contenteditable="true">Add Monster</button>
+                </div>
+                <div id="monsters-list" class="entries-list"></div>
+            </div>
+
+            <!-- Locations Category -->
+            <div id="category-locations" class="category-content">
+                <div class="category-header">
+                    <h3 contenteditable="true">Locations</h3>
+                    <button onclick="addEntry('locations')" class="btn-primary" contenteditable="true">Add Location</button>
+                </div>
+                <div id="locations-list" class="entries-list"></div>
+            </div>
+
+            <!-- Encounters Category -->
+            <div id="category-encounters" class="category-content">
+                <div class="category-header">
+                    <h3 contenteditable="true">Encounters</h3>
+                    <button onclick="addEntry('encounters')" class="btn-primary" contenteditable="true">Add Encounter</button>
+                </div>
+                <div id="encounters-list" class="entries-list"></div>
+            </div>
+
+            <!-- Traits Category -->
+            <div id="category-traits" class="category-content">
+                <div class="category-header">
+                    <h3 contenteditable="true">Traits</h3>
+                    <button onclick="addEntry('traits')" class="btn-primary" contenteditable="true">Add Trait</button>
+                </div>
+                <div id="traits-list" class="entries-list"></div>
+            </div>
+
+            <!-- Conditions Category -->
+            <div id="category-conditions" class="category-content">
+                <div class="category-header">
+                    <h3 contenteditable="true">Conditions</h3>
+                    <button onclick="addEntry('conditions')" class="btn-primary" contenteditable="true">Add Condition</button>
+                </div>
+                <div id="conditions-list" class="entries-list"></div>
+            </div>
+        </section>
+
+        <!-- Entry Editor Modal -->
+        <div id="entryEditor" class="modal" style="display: none;">
+            <div class="modal-content">
+                <h2 id="editorTitle" contenteditable="true">Edit Entry</h2>
+                <div id="editorForm" class="editor-form">
+                    <!-- Dynamic form will be generated here -->
+                </div>
+                <div class="modal-actions">
+                    <button onclick="saveEntry()" class="btn-primary" contenteditable="true">Save</button>
+                    <button onclick="closeEditor()" class="btn-secondary" contenteditable="true">Cancel</button>
+                    <button onclick="deleteCurrentEntry()" class="btn-danger" contenteditable="true">Delete</button>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <script src="file:///android_asset/js/main.js"></script>
+    <script>
+        // Database structure
+        const database = JSON.parse(localStorage.getItem('gameDatabase') || '{}');
+        const categories = [
+            'races', 'classes', 'skills', 'items', 'spells', 
+            'monsters', 'locations', 'encounters', 'traits', 'conditions'
+        ];
+
+        // Initialize default data if empty
+        if (Object.keys(database).length === 0) {
+            initializeDefaultData();
+        }
+
+        let currentCategory = 'races';
+        let editingEntry = null;
+
+        // Default templates for each category
+        const defaultTemplates = {
+            races: {
+                name: '',
+                description: '',
+                traits: [],
+                stat_bonuses: {},
+                skills: []
+            },
+            classes: {
+                name: '',
+                description: '',
+                hit_die: 'd8',
+                primary_ability: '',
+                saving_throws: [],
+                skills: []
+            },
+            skills: {
+                name: '',
+                description: '',
+                ability: 'STR',
+                type: 'active',
+                uses: 'per rest',
+                effect: ''
+            },
+            items: {
+                name: '',
+                description: '',
+                type: 'weapon',
+                rarity: 'common',
+                value: 0,
+                weight: 0,
+                properties: []
+            },
+            spells: {
+                name: '',
+                description: '',
+                level: 0,
+                school: 'evocation',
+                casting_time: '1 action',
+                range: '30 feet',
+                components: [],
+                duration: 'instantaneous',
+                effect: ''
+            },
+            monsters: {
+                name: '',
+                description: '',
+                type: 'humanoid',
+                challenge_rating: '1',
+                size: 'medium',
+                alignment: 'neutral',
+                stats: {},
+                abilities: [],
+                actions: []
+            },
+            locations: {
+                name: '',
+                description: '',
+                type: 'dungeon',
+                terrain: 'forest',
+                features: [],
+                encounters: []
+            },
+            encounters: {
+                name: '',
+                description: '',
+                difficulty: 'easy',
+                enemies: [],
+                terrain: '',
+                special_rules: ''
+            },
+            traits: {
+                name: '',
+                description: '',
+                type: 'racial',
+                effect: ''
+            },
+            conditions: {
+                name: '',
+                description: '',
+                effect: '',
+                duration: '',
+                removal: ''
+            }
+        };
+
+        document.addEventListener('DOMContentLoaded', function() {
+            loadAllCategories();
+        });
+
+        function initializeDefaultData() {
+            // Add some default data for each category
+            database.races = [
+                {
+                                     id: '1',
+                    name: 'Human',
+                    description: 'Versatile and ambitious, humans are the most common race.',
+                    traits: ['Extra feat', 'Skill versatility'],
+                    stat_bonuses: { STR: 1, DEX: 1, CON: 1, INT: 1, WIS: 1, CHA: 1 },
+                    skills: []
+                },
+                {
+                    id: '2',
+                    name: 'Elf',
+                    description: 'Graceful and magical beings with long lifespans.',
+                    traits: ['Darkvision', 'Keen Senses', 'Fey Ancestry'],
+                    stat_bonuses: { DEX: 2, INT: 1 },
+                    skills: ['Perception']
+                }
+            ];
+
+            database.classes = [
+                {
+                    id: '1',
+                    name: 'Fighter',
+                    description: 'Masters of combat, skilled with a variety of weapons and armor.',
+                    hit_die: 'd10',
+                    primary_ability: 'STR',
+                    saving_throws: ['STR', 'CON'],
+                    skills: ['Athletics', 'Intimidation']
+                }
+            ];
+
+            database.skills = [
+                {
+                    id: '1',
+                    name: 'Fireball',
+                    description: 'A bright streak flashes from your pointing finger to explode in flames.',
+                    ability: 'INT',
+                    type: 'spell',
+                    uses: 'spell slot',
+                    effect: '8d6 fire damage in 20ft radius'
+                }
+            ];
+
+            // Initialize empty arrays for other categories
+            categories.forEach(cat => {
+                if (!database[cat]) {
+                    database[cat] = [];
+                }
+            });
+
+            saveDatabase();
+        }
+
+        function saveDatabase() {
+            localStorage.setItem('gameDatabase', JSON.stringify(database));
+        }
+
+        function loadAllCategories() {
+            categories.forEach(category => {
+                loadCategory(category);
+            });
+        }
+
+        function loadCategory(category) {
+            const container = document.getElementById(`${category}-list`);
+            const entries = database[category] || [];
+            
+            if (entries.length === 0) {
+                container.innerHTML = `<p contenteditable="true">No ${category} yet. Add the first one!</p>`;
+                return;
+            }
+
+            container.innerHTML = entries.map(entry => `
+                <div class="database-entry" onclick="editEntry('${category}', '${entry.id}')">
+                    <div class="entry-header">
+                        <h4 contenteditable="true">${entry.name}</h4>
+                        <span class="entry-type" contenteditable="true">${getEntryTypeLabel(category, entry)}</span>
+                    </div>
+                    <p class="entry-description" contenteditable="true">${entry.description || 'No description'}</p>
+                    <div class="entry-tags">
+                        ${getEntryTags(category, entry).map(tag => 
+                            `<span class="tag" contenteditable="true">${tag}</span>`
+                        ).join('')}
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        function getEntryTypeLabel(category, entry) {
+            const typeLabels = {
+                races: 'Race',
+                classes: `Class (${entry.hit_die})`,
+                skills: `${entry.ability} ${entry.type}`,
+                items: `${entry.rarity} ${entry.type}`,
+                spells: `Level ${entry.level} ${entry.school}`,
+                monsters: `CR ${entry.challenge_rating} ${entry.type}`,
+                locations: `${entry.terrain} ${entry.type}`,
+                encounters: `${entry.difficulty} encounter`,
+                traits: entry.type,
+                conditions: 'Condition'
+            };
+            return typeLabels[category] || category;
+        }
+
+        function getEntryTags(category, entry) {
+            const tags = [];
+            
+            switch(category) {
+                case 'races':
+                    if (entry.traits) tags.push(...entry.traits.slice(0, 2));
+                    break;
+                case 'classes':
+                    if (entry.primary_ability) tags.push(entry.primary_ability);
+                    break;
+                case 'skills':
+                    if (entry.uses) tags.push(entry.uses);
+                    break;
+                case 'items':
+                    if (entry.rarity) tags.push(entry.rarity);
+                    if (entry.type) tags.push(entry.type);
+                    break;
+                case 'spells':
+                    if (entry.school) tags.push(entry.school);
+                    break;
+                case 'monsters':
+                    if (entry.size) tags.push(entry.size);
+                    if (entry.alignment) tags.push(entry.alignment);
+                    break;
+            }
+            
+            return tags.slice(0, 3);
+        }
+
+        function showCategory(category) {
+            // Hide all category contents
+            document.querySelectorAll('.category-content').forEach(el => {
+                el.classList.remove('active');
+            });
+            
+            // Remove active class from all tabs
+            document.querySelectorAll('.category-tab').forEach(el => {
+                el.classList.remove('active');
+            });
+            
+            // Show selected category
+            document.getElementById(`category-${category}`).classList.add('active');
+            document.querySelector(`.category-tab[onclick="showCategory('${category}')"]`).classList.add('active');
+            
+            currentCategory = category;
+        }
+
+        function addEntry(category) {
+            const newEntry = {
+                id: Date.now().toString(),
+                ...defaultTemplates[category]
+            };
+            
+            editingEntry = { category, entry: newEntry };
+            openEditor(category, newEntry);
+        }
+
+        function editEntry(category, entryId) {
+            const entry = database[category].find(e => e.id === entryId);
+            if (!entry) return;
+            
+            editingEntry = { category, entry };
+            openEditor(category, entry);
+        }
+
+        function openEditor(category, entry) {
+            document.getElementById('editorTitle').textContent = `Edit ${category.slice(0, -1)}`;
+            const form = document.getElementById('editorForm');
+            
+            // Generate form based on category template
+            form.innerHTML = generateEditorForm(category, entry);
+            
+            document.getElementById('entryEditor').style.display = 'flex';
+        }
+
+        function generateEditorForm(category, entry) {
+            const template = defaultTemplates[category];
+            let formHTML = '';
+            
+            for (const [key, value] of Object.entries(template)) {
+                if (key === 'id') continue;
+                
+                const currentValue = entry[key] !== undefined ? entry[key] : value;
+                
+                if (Array.isArray(value)) {
+                    formHTML += `
+                        <div class="form-group">
+                            <label contenteditable="true">${key.replace(/_/g, ' ').toUpperCase()}:</label>
+                            <textarea id="edit-${key}" placeholder="Enter values, one per line">${Array.isArray(currentValue) ? currentValue.join('\n') : ''}</textarea>
+                        </div>
+                    `;
+                } else if (typeof value === 'object' && value !== null) {
+                    formHTML += `
+                        <div class="form-group">
+                            <label contenteditable="true">${key.replace(/_/g, ' ').toUpperCase()}:</label>
+                            <textarea id="edit-${key}" placeholder="Format: STAT: VALUE (one per line)">${
+                                Object.entries(currentValue).map(([k, v]) => `${k}: ${v}`).join('\n')
+                            }</textarea>
+                        </div>
+                    `;
+                } else {
+                    formHTML += `
+                        <div class="form-group">
+                            <label contenteditable="true">${key.replace(/_/g, ' ').toUpperCase()}:</label>
+                            <input type="text" id="edit-${key}" value="${currentValue || ''}">
+                        </div>
+                    `;
+                }
+            }
+            
+            return formHTML;
+        }
+
+        function saveEntry() {
+            if (!editingEntry) return;
+            
+            const { category, entry } = editingEntry;
+            const formData = {};
+            const template = defaultTemplates[category];
+            
+            // Collect form data
+            for (const key of Object.keys(template)) {
+                if (key === 'id') continue;
+                
+                const input = document.getElementById(`edit-${key}`);
+                if (!input) continue;
+                
+                if (Array.isArray(template[key])) {
+                    formData[key] = input.value.split('\n').filter(line => line.trim());
+                } else if (typeof template[key] === 'object' && template[key] !== null) {
+                    const obj = {};
+                    input.value.split('\n').forEach(line => {
+                        const [k, v] = line.split(':').map(part => part.trim());
+                        if (k && v) obj[k] = v;
+                    });
+                    formData[key] = obj;
+                } else {
+                    formData[key] = input.value;
+                }
+            }
+            
+            // Update entry
+            const updatedEntry = { ...entry, ...formData };
+            
+            // Save to database
+            const index = database[category].findIndex(e => e.id === entry.id);
+            if (index !== -1) {
+                database[category][index] = updatedEntry;
+            } else {
+                database[category].push(updatedEntry);
+            }
+            
+            saveDatabase();
+            loadCategory(category);
+            closeEditor();
+            showNotification(`${category.slice(0, -1)} saved!`, 'success');
+        }
+
+        function deleteCurrentEntry() {
+            if (!editingEntry || !confirm('Delete this entry?')) return;
+            
+            const { category, entry } = editingEntry;
+            database[category] = database[category].filter(e => e.id !== entry.id);
+            
+            saveDatabase();
+            loadCategory(category);
+            closeEditor();
+            showNotification(`${category.slice(0, -1)} deleted!`, 'success');
+        }
+
+        function closeEditor() {
+            document.getElementById('entryEditor').style.display = 'none';
+            editingEntry = null;
+        }
+
+        function parseImportData() {
+            const data = document.getElementById('importData').value;
+            const category = document.getElementById('importCategory').value;
+            const separator = document.getElementById('importSeparator').value || ':';
+            
+            if (!data.trim()) {
+                alert('Please paste some data to import!');
+                return;
+            }
+            
+            const lines = data.split('\n').filter(line => line.trim());
+            let importedCount = 0;
+            
+            lines.forEach(line => {
+                const [name, ...descriptionParts] = line.split(separator);
+                if (name && descriptionParts.length > 0) {
+                    const description = descriptionParts.join(separator).trim();
+                    const newEntry = {
+                        id: Date.now().toString() + importedCount,
+                        name: name.trim(),
+                        description: description,
+                        ...defaultTemplates[category]
+                    };
+                    
+                    database[category].push(newEntry);
+                    importedCount++;
+                }
+            });
+            
+            saveDatabase();
+            loadCategory(category);
+            document.getElementById('importData').value = '';
+            showNotification(`Imported ${importedCount} ${category}`, 'success');
+        }
+
+        function searchDatabase() {
+            const searchTerm = document.getElementById('dbSearch').value.toLowerCase();
+            const categoryFilter = document.getElementById('categoryFilter').value;
+            
+            if (!searchTerm) {
+                loadAllCategories();
+                return;
+            }
+            
+            categories.forEach(category => {
+                if (categoryFilter !== 'all' && categoryFilter !== category) {
+                    document.getElementById(`${category}-list`).innerHTML = '';
+                    return;
+                }
+                
+                const entries = database[category] || [];
+                const filteredEntries = entries.filter(entry => 
+                    entry.name.toLowerCase().includes(searchTerm) ||
+                    (entry.description && entry.description.toLowerCase().includes(searchTerm))
+                );
+                
+                const container = document.getElementById(`${category}-list`);
+                if (filteredEntries.length === 0) {
+                    container.innerHTML = `<p contenteditable="true">No ${category} match your search.</p>`;
+                } else {
+                    container.innerHTML = filteredEntries.map(entry => `
+                        <div class="database-entry" onclick="editEntry('${category}', '${entry.id}')">
+                            <div class="entry-header">
+                                <h4 contenteditable="true">${entry.name}</h4>
+                                <span class="entry-type" contenteditable="true">${getEntryTypeLabel(category, entry)}</span>
+                            </div>
+                            <p class="entry-description" contenteditable="true">${entry.description || 'No description'}</p>
+                        </div>
+                    `).join('');
+                }
+            });
+        }
+
+        function filterByCategory() {
+            const categoryFilter = document.getElementById('categoryFilter').value;
+            const searchTerm = document.getElementById('dbSearch').value;
+            
+            if (categoryFilter === 'all') {
+                loadAllCategories();
+            } else {
+                showCategory(categoryFilter);
+            }
+            
+            if (searchTerm) {
+                searchDatabase();
+            }
+        }
+
+        function clearSearch() {
+            document.getElementById('dbSearch').value = '';
+            document.getElementById('categoryFilter').value = 'all';
+            loadAllCategories();
+        }
+    </script>
+
+    <style>
+        .database-controls {
+            display: grid;
+            gap: 1rem;
+        }
+
+        .search-box {
+            display: flex;
+            gap: 0.5rem;
+        }
+
+        .search-box input {
+            flex: 1;
+        }
+
+        .category-filters {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            flex-wrap: wrap;
+        }
+
+        .parser-controls {
+            display: grid;
+            gap: 1rem;
+        }
+
+        .parser-settings {
+            display: flex;
+            gap: 1rem;
+            align-items: end;
+            flex-wrap: wrap;
+        }
+
+        .parser-settings .form-group {
+            flex: 1;
+            min-width: 150px;
+        }
+
+        .category-tabs {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.5rem;
+            margin-bottom: 1rem;
+            border-bottom: 2px solid var(--border);
+            padding-bottom: 0.5rem;
+        }
+
+        .category-tab {
+            padding: 0.5rem 1rem;
+            background: var(--bg-secondary);
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .category-tab.active {
+            background: var(--accent);
+            color: var(--bg-primary);
+        }
+
+        .category-content {
+            display: none;
+        }
+
+        .category-content.active {
+            display: block;
+        }
+
+        .category-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1rem;
+        }
+
+        .entries-list {
+            display: grid;
+            gap: 0.5rem;
+        }
+
+        .database-entry {
+            background: var(--bg-secondary);
+            padding: 1rem;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.3s;
+            border-left: 4px solid var(--accent);
+        }
+
+        .database-entry:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px var(--shadow);
+        }
+
+        .entry-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 0.5rem;
+        }
+
+        .entry-header h4 {
+            margin: 0;
+            color: var(--accent);
+        }
+
+        .entry-type {
+            background: var(--accent);
+            color: var(--bg-primary);
+            padding: 0.25rem 0.5rem;
+            border-radius: 12px;
+            font-size: 0.8rem;
+        }
+
+        .entry-description {
+            color: var(--text-secondary);
+            margin-bottom: 0.5rem;
+        }
+
+        .entry-tags {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.25rem;
+        }
+
+        .tag {
+            background: var(--bg-primary);
+            color: var(--text-primary);
+            padding: 0.2rem 0.5rem;
+            border-radius: 10px;
+            font-size: 0.8rem;
+        }
+
+        .modal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.8);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+            padding: 1rem;
+        }
+
+        .modal-content {
+            background: var(--bg-card);
+            padding: 2rem;
+            border-radius: 8px;
+            max-width: 90%;
+            max-height: 90%;
+            overflow-y: auto;
+            width: 600px;
+        }
+
+        .editor-form {
+            display: grid;
+            gap: 1rem;
+            margin: 1rem 0;
+        }
+
+        .modal-actions {
+            display: flex;
+            gap: 0.5rem;
+            justify-content: flex-end;
+        }
+
+        @media (max-width: 768px) {
+            .category-tabs {
+                overflow-x: auto;
+                flex-wrap: nowrap;
+            }
+            
+            .category-tab {
+                white-space: nowrap;
+            }
+            
+            .category-header {
+                flex-direction: column;
+                align-items: stretch;
+                gap: 1rem;
+            }
+            
+            .parser-settings {
+                flex-direction: column;
+            }
+            
+            .modal-content {
+                width: 95%;
+                padding: 1rem;
+            }
+            
+            .modal-actions {
+                flex-direction: column;
+            }
+            
+            .entry-header {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 0.5rem;
+            }
+        }
+    </style>
+</body>
+</html>
