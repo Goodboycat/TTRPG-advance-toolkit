@@ -1,0 +1,317 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Notes - TTRPG Toolkit</title>
+    <link rel="stylesheet" href="file:///android_asset/css/style.css">
+</head>
+<body>
+    <nav class="navbar">
+        <h1>TTRPG Toolkit</h1>
+        <div class="nav-tabs">
+            <a href="index.html">Dashboard</a>
+            <a href="dice-roller.html">Dice</a>
+            <a href="character-sheet.html">Characters</a>
+            <a href="random-generator.html">Generators</a>
+            <a href="notes.html" class="active">Notes</a>
+            <a href="map.html">Map</a>
+            <a href="settings.html">Settings</a>
+        </div>
+    </nav>
+
+    <main class="container">
+        <section class="card">
+            <h2 contenteditable="true">New Note</h2>
+            <div class="form-group">
+                <label contenteditable="true">Title:</label>
+                <input type="text" id="noteTitle" placeholder="Note Title">
+            </div>
+            <div class="form-group">
+                <label contenteditable="true">Tags (comma separated):</label>
+                <input type="text" id="noteTags" placeholder="NPC, Location, Quest">
+            </div>
+            <div class="form-group">
+                <label contenteditable="true">Content:</label>
+                <textarea id="noteContent" placeholder="Write your notes here..." style="min-height: 200px; resize: vertical;"></textarea>
+            </div>
+            <button onclick="saveNote()" class="btn-primary" contenteditable="true">Save Note</button>
+            <button onclick="clearNote()" class="btn-secondary" contenteditable="true">Clear</button>
+        </section>
+
+        <section class="card">
+            <h2 contenteditable="true">Saved Notes</h2>
+            <div class="form-group">
+                <input type="text" id="searchNotes" placeholder="Search notes..." onkeyup="filterNotes()">
+            </div>
+            <div id="notesList" class="notes-list">
+                <!-- Notes will be loaded here -->
+            </div>
+        </section>
+    </main>
+
+    <script src="file:///android_asset/js/main.js"></script>
+    <script src="file:///android_asset/js/emojis.js"></script>
+    <script>
+        let notes = JSON.parse(localStorage.getItem('notes') || '[]');
+        let editingNoteId = null;
+
+        document.addEventListener('DOMContentLoaded', function() {
+            loadNotes();
+        });
+
+        function saveNote() {
+            const title = document.getElementById('noteTitle').value.trim();
+            const content = document.getElementById('noteContent').value.trim();
+            const tags = document.getElementById('noteTags').value.split(',').map(tag => tag.trim()).filter(tag => tag);
+            
+            if (!title || !content) {
+                alert('Please enter both title and content!');
+                return;
+            }
+
+            const note = {
+                id: editingNoteId || Date.now().toString(),
+                title,
+                content,
+                tags,
+                created: editingNoteId ? notes.find(n => n.id === editingNoteId).created : new Date().toISOString(),
+                updated: new Date().toISOString()
+            };
+
+            if (editingNoteId) {
+                const index = notes.findIndex(n => n.id === editingNoteId);
+                notes[index] = note;
+            } else {
+                notes.unshift(note);
+            }
+
+            localStorage.setItem('notes', JSON.stringify(notes));
+            loadNotes();
+            clearNote();
+            showNotification('Note saved!', 'success');
+        }
+
+        function loadNotes() {
+            const container = document.getElementById('notesList');
+            if (notes.length === 0) {
+                container.innerHTML = '<p contenteditable="true">No notes yet. Create your first note!</p>';
+                return;
+            }
+
+            container.innerHTML = notes.map(note => `
+                <div class="note-item" onclick="openNote('${note.id}')">
+                    <div class="note-header">
+                        <h3 contenteditable="true">${note.title}</h3>
+                        <small contenteditable="true">${new Date(note.updated).toLocaleDateString()}</small>
+                    </div>
+                    <div class="note-preview" contenteditable="true">
+                        ${note.content.substring(0, 100)}${note.content.length > 100 ? '...' : ''}
+                    </div>
+                    <div class="note-tags">
+                        ${note.tags.map(tag => `<span class="tag" contenteditable="true">${tag}</span>`).join('')}
+                    </div>
+                    <div class="note-actions">
+                        <button onclick="editNote(event, '${note.id}')" contenteditable="true">Edit</button>
+                        <button onclick="deleteNote(event, '${note.id}')" class="btn-danger" contenteditable="true">Delete</button>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        function openNote(id) {
+            const note = notes.find(n => n.id === id);
+            if (!note) return;
+
+            // Create modal view
+            const modal = document.createElement('div');
+            modal.className = 'note-modal';
+            modal.style.cssText = `
+                position: fixed;
+                top: 0;
+                left: 0;
+                width: 100%;
+                height: 100%;
+                background: rgba(0,0,0,0.8);
+                display: flex;
+                justify-content: center;
+                align-items: center;
+                z-index: 1000;
+            `;
+            
+            modal.innerHTML = `
+                <div class="note-modal-content" style="
+                    background: var(--bg-card);
+                    padding: 2rem;
+                    border-radius: 8px;
+                    max-width: 90%;
+                    max-height: 90%;
+                    overflow-y: auto;
+                    position: relative;
+                ">
+                    <button onclick="this.closest('.note-modal').remove()" style="
+                        position: absolute;
+                        top: 1rem;
+                        right: 1rem;
+                        background: var(--danger);
+                        color: white;
+                        border: none;
+                        border-radius: 50%;
+                        width: 2rem;
+                        height: 2rem;
+                        cursor: pointer;
+                    ">X</button>
+                    <h2 contenteditable="true">${note.title}</h2>
+                    <div class="note-tags" style="margin: 1rem 0;">
+                        ${note.tags.map(tag => `<span class="tag" contenteditable="true">${tag}</span>`).join('')}
+                    </div>
+                    <div class="note-content" style="
+                        white-space: pre-wrap;
+                        line-height: 1.6;
+                        max-height: 60vh;
+                        overflow-y: auto;
+                        padding: 1rem;
+                        background: var(--bg-secondary);
+                        border-radius: 4px;
+                    " contenteditable="true">${note.content}</div>
+                    <div style="margin-top: 1rem; font-size: 0.9rem; color: var(--text-secondary);" contenteditable="true">
+                        Last updated: ${new Date(note.updated).toLocaleString()}
+                    </div>
+                </div>
+            `;
+
+            document.body.appendChild(modal);
+        }
+
+        function editNote(event, id) {
+            event.stopPropagation();
+            const note = notes.find(n => n.id === id);
+            if (!note) return;
+
+            editingNoteId = id;
+            document.getElementById('noteTitle').value = note.title;
+            document.getElementById('noteContent').value = note.content;
+            document.getElementById('noteTags').value = note.tags.join(', ');
+            
+            // Scroll to editor
+            document.querySelector('.card').scrollIntoView({ behavior: 'smooth' });
+        }
+
+        function deleteNote(event, id) {
+            event.stopPropagation();
+            if (!confirm('Delete this note?')) return;
+            
+            notes = notes.filter(n => n.id !== id);
+            localStorage.setItem('notes', JSON.stringify(notes));
+            loadNotes();
+            showNotification('Note deleted!', 'success');
+        }
+
+        function clearNote() {
+            editingNoteId = null;
+            document.getElementById('noteTitle').value = '';
+            document.getElementById('noteContent').value = '';
+            document.getElementById('noteTags').value = '';
+        }
+
+        function filterNotes() {
+            const searchTerm = document.getElementById('searchNotes').value.toLowerCase();
+            const noteItems = document.querySelectorAll('.note-item');
+            
+            noteItems.forEach(item => {
+                const title = item.querySelector('h3').textContent.toLowerCase();
+                const content = item.querySelector('.note-preview').textContent.toLowerCase();
+                const tags = Array.from(item.querySelectorAll('.tag')).map(tag => tag.textContent.toLowerCase());
+                
+                const matches = title.includes(searchTerm) || 
+                              content.includes(searchTerm) ||
+                              tags.some(tag => tag.includes(searchTerm));
+                
+                item.style.display = matches ? 'block' : 'none';
+            });
+        }
+    </script>
+
+    <style>
+        .notes-list {
+            display: grid;
+            gap: 1rem;
+        }
+
+        .note-item {
+            background: var(--bg-secondary);
+            padding: 1.5rem;
+            border-radius: 8px;
+            border-left: 4px solid var(--accent);
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .note-item:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px var(--shadow);
+        }
+
+        .note-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 0.5rem;
+        }
+
+        .note-header h3 {
+            color: var(--accent);
+            margin: 0;
+        }
+
+        .note-preview {
+            color: var(--text-secondary);
+            margin-bottom: 1rem;
+        }
+
+        .note-tags {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.5rem;
+            margin-bottom: 1rem;
+        }
+
+        .tag {
+            background: var(--accent);
+            color: var(--bg-primary);
+            padding: 0.25rem 0.5rem;
+            border-radius: 12px;
+            font-size: 0.8rem;
+        }
+
+        .note-actions {
+            display: flex;
+            gap: 0.5rem;
+        }
+
+        .note-actions button {
+            padding: 0.5rem 1rem;
+            font-size: 0.9rem;
+        }
+
+        .note-modal {
+            backdrop-filter: blur(5px);
+        }
+
+        @media (max-width: 768px) {
+            .note-header {
+                flex-direction: column;
+                align-items: flex-start;
+            }
+            
+            .note-actions {
+                flex-direction: column;
+            }
+            
+            .note-actions button {
+                width: 100%;
+            }
+        }
+    </style>
+</body>
+</html>

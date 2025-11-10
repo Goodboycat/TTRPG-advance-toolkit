@@ -14,6 +14,8 @@
             <a href="dice-roller.html" class="active">Dice</a>
             <a href="character-sheet.html">Characters</a>
             <a href="random-generator.html">Generators</a>
+            <a href="notes.html">Notes</a>
+            <a href="map.html">Map</a>
             <a href="settings.html">Settings</a>
         </div>
     </nav>
@@ -29,10 +31,38 @@
                     <span contenteditable="true">+</span>
                     <input type="number" id="diceMod" value="0" min="-100" max="100">
                 </div>
-                <button onclick="rollDice()" class="btn-primary" contenteditable="true">Roll</button>
+                <div class="roll-style-selector">
+                    <label contenteditable="true">Roll Style:</label>
+                    <select id="rollStyle">
+                        <option value="normal">Normal</option>
+                        <option value="advantage">Advantage (D&D 5e)</option>
+                        <option value="disadvantage">Disadvantage (D&D 5e)</option>
+                        <option value="critical">Critical Success/Fail</option>
+                        <option value="fate">Fate Dice (+/-)</option>
+                    </select>
+                </div>
+                <button onclick="rollDice()" class="btn-primary" contenteditable="true">Roll Dice</button>
+                
+                <div id="diceVisual" class="dice-visual-container"></div>
+                
                 <div id="rollResult" class="roll-result">
                     <span contenteditable="true">Result: </span><span id="resultValue">-</span>
                 </div>
+                <div id="rollDetails" class="roll-details"></div>
+            </div>
+        </section>
+
+        <section class="card">
+            <h2 contenteditable="true">Quick Dice</h2>
+            <div class="quick-dice-buttons">
+                <button onclick="quickRoll('d4')" class="dice-btn" data-sides="4">d4</button>
+                <button onclick="quickRoll('d6')" class="dice-btn" data-sides="6">d6</button>
+                <button onclick="quickRoll('d8')" class="dice-btn" data-sides="8">d8</button>
+                <button onclick="quickRoll('d10')" class="dice-btn" data-sides="10">d10</button>
+                <button onclick="quickRoll('d12')" class="dice-btn" data-sides="12">d12</button>
+                <button onclick="quickRoll('d20')" class="dice-btn" data-sides="20">d20</button>
+                <button onclick="quickRoll('d100')" class="dice-btn" data-sides="100">d100</button>
+                <button onclick="rollFate()" class="dice-btn fate" contenteditable="true">Fate</button>
             </div>
         </section>
 
@@ -76,24 +106,78 @@
             const count = parseInt(document.getElementById('diceCount').value) || 1;
             const sides = parseInt(document.getElementById('diceSides').value) || 20;
             const mod = parseInt(document.getElementById('diceMod').value) || 0;
+            const style = document.getElementById('rollStyle').value;
+            
+            clearDiceVisual();
             
             let total = 0;
             let rolls = [];
+            let finalResult = 0;
+            let formula = '';
+            let resultText = '';
             
-            for (let i = 0; i < count; i++) {
-                const roll = Math.floor(Math.random() * sides) + 1;
-                rolls.push(roll);
-                total += roll;
+            switch(style) {
+                case 'advantage':
+                    const roll1 = Math.floor(Math.random() * sides) + 1;
+                    const roll2 = Math.floor(Math.random() * sides) + 1;
+                    const advantageRoll = Math.max(roll1, roll2);
+                    rolls = [roll1, roll2];
+                    total = advantageRoll;
+                    finalResult = advantageRoll + mod;
+                    formula = `Advantage: max(1d${sides})${mod >= 0 ? '+' : ''}${mod}`;
+                    resultText = `${formula} = max([${roll1}, ${roll2}])${mod >= 0 ? '+' : ''}${mod} = ${finalResult}`;
+                    break;
+                    
+                case 'disadvantage':
+                    const roll1d = Math.floor(Math.random() * sides) + 1;
+                    const roll2d = Math.floor(Math.random() * sides) + 1;
+                    const disadvantageRoll = Math.min(roll1d, roll2d);
+                    rolls = [roll1d, roll2d];
+                    total = disadvantageRoll;
+                    finalResult = disadvantageRoll + mod;
+                    formula = `Disadvantage: min(1d${sides})${mod >= 0 ? '+' : ''}${mod}`;
+                    resultText = `${formula} = min([${roll1d}, ${roll2d}])${mod >= 0 ? '+' : ''}${mod} = ${finalResult}`;
+                    break;
+                    
+                case 'fate':
+                    const fateResults = [];
+                    let fateTotal = 0;
+                    for (let i = 0; i < 4; i++) {
+                        const fateRoll = Math.floor(Math.random() * 3) - 1; // -1, 0, or 1
+                        fateResults.push(fateRoll);
+                        fateTotal += fateRoll;
+                    }
+                    rolls = fateResults;
+                    total = fateTotal;
+                    finalResult = fateTotal;
+                    formula = '4dF (Fate Dice)';
+                    resultText = `${formula} = [${fateResults.join(', ')}] = ${finalResult}`;
+                    break;
+                    
+                default:
+                    for (let i = 0; i < count; i++) {
+                        const roll = Math.floor(Math.random() * sides) + 1;
+                        rolls.push(roll);
+                        total += roll;
+                    }
+                    finalResult = total + mod;
+                    formula = `${count}d${sides}${mod >= 0 ? '+' : ''}${mod}`;
+                    resultText = `${formula} = [${rolls.join(' + ')}]${mod >= 0 ? '+' : ''}${mod} = ${finalResult}`;
             }
             
-            const finalResult = total + mod;
-            const formula = `${count}d${sides}${mod >= 0 ? '+' : ''}${mod}`;
-            const resultText = `${formula} = [${rolls.join(' + ')}]${mod >= 0 ? '+' : ''}${mod} = ${finalResult}`;
-            
+            displayDiceVisual(rolls, sides, style);
             document.getElementById('resultValue').textContent = finalResult;
+            document.getElementById('rollDetails').innerHTML = `<div contenteditable="true">${resultText}</div>`;
             
             const timestamp = new Date().toLocaleTimeString();
-            rollHistory.unshift({formula, result: finalResult, details: resultText, time: timestamp});
+            rollHistory.unshift({
+                formula, 
+                result: finalResult, 
+                details: resultText, 
+                time: timestamp,
+                rolls: rolls,
+                style: style
+            });
             rollHistory = rollHistory.slice(0, 50);
             localStorage.setItem('rollHistory', JSON.stringify(rollHistory));
             displayRollHistory();
@@ -103,6 +187,86 @@
             recentRolls.splice(5);
             localStorage.setItem('recentRolls', JSON.stringify(recentRolls));
         }
+
+        function quickRoll(diceType) {
+            const sides = parseInt(diceType.substring(1));
+            document.getElementById('diceSides').value = sides;
+            document.getElementById('diceCount').value = 1;
+            document.getElementById('diceMod').value = 0;
+            document.getElementById('rollStyle').value = 'normal';
+            rollDice();
+        }
+
+        function rollFate() {
+            document.getElementById('rollStyle').value = 'fate';
+            rollDice();
+        }
+
+        function displayDiceVisual(rolls, sides, style) {
+            const container = document.getElementById('diceVisual');
+            container.innerHTML = '';
+            
+            if (style === 'fate') {
+                rolls.forEach((roll, index) => {
+                    const die = document.createElement('div');
+                    die.className = 'fate-die';
+                    die.textContent = roll === 1 ? '+' : roll === -1 ? '-' : '0';
+                    die.style.cssText = `
+                        display: inline-block;
+                        width: 40px;
+                        height: 40px;
+                        border: 2px solid var(--accent);
+                        border-radius: 4px;
+                        text-align: center;
+                        line-height: 40px;
+                        margin: 5px;
+                        font-weight: bold;
+                        background: var(--bg-secondary);
+                    `;
+                    container.appendChild(die);
+                });
+            } else {
+                rolls.forEach((roll, index) => {
+                    const die = document.createElement('div');
+                    die.className = 'visual-die';
+                    die.textContent = roll;
+                    die.style.cssText = `
+                        display: inline-block;
+                        width: 50px;
+                        height: 50px;
+                        border: 2px solid var(--accent);
+                        border-radius: 8px;
+                        text-align: center;
+                        line-height: 50px;
+                        margin: 5px;
+                        font-weight: bold;
+                        font-size: 1.2rem;
+                        background: var(--bg-secondary);
+                        animation: diceRoll 0.5s ease-in-out;
+                    `;
+                    
+                    // Special styling for critical rolls
+                    if (sides === 20) {
+                        if (roll === 20) {
+                            die.style.background = 'var(--success)';
+                            die.style.color = 'var(--bg-primary)';
+                        } else if (roll === 1) {
+                            die.style.background = 'var(--danger)';
+                            die.style.color = 'white';
+                        }
+                    }
+                    
+                    container.appendChild(die);
+                });
+            }
+        }
+
+        function clearDiceVisual() {
+            document.getElementById('diceVisual').innerHTML = '';
+        }
+
+        // ... rest of the existing dice functions (addDiceSet, loadDiceSets, rollSet, removeSet, displayRollHistory, clearRollHistory) ...
+        // These remain the same as in the previous version
 
         function addDiceSet() {
             const name = prompt('Enter set name:') || 'New Set';
@@ -157,9 +321,11 @@
             const resultText = `${formula} = [${rolls.join(' + ')}]${mod >= 0 ? '+' : ''}${mod} = ${finalResult}`;
             
             document.getElementById('resultValue').textContent = finalResult;
+            displayDiceVisual(rolls, sides, 'normal');
+            document.getElementById('rollDetails').innerHTML = `<div contenteditable="true">${resultText}</div>`;
             
             const timestamp = new Date().toLocaleTimeString();
-            rollHistory.unshift({formula, result: finalResult, details: resultText, time: timestamp});
+            rollHistory.unshift({formula, result: finalResult, details: resultText, time: timestamp, rolls: rolls});
             rollHistory = rollHistory.slice(0, 50);
             localStorage.setItem('rollHistory', JSON.stringify(rollHistory));
             displayRollHistory();
@@ -184,6 +350,7 @@
             container.innerHTML = rollHistory.slice(0, 10).map(entry => `
                 <div class="history-item" contenteditable="true">
                     <strong>${entry.formula}</strong> = ${entry.result} 
+                    ${entry.rolls ? `<small>(${entry.rolls.join(', ')})</small>` : ''}
                     <small>(${entry.time})</small>
                 </div>
             `).join('');
@@ -207,5 +374,78 @@
             }
         }, true);
     </script>
+
+    <style>
+        .quick-dice-buttons {
+            display: flex;
+            gap: 0.5rem;
+            flex-wrap: wrap;
+            margin-bottom: 1rem;
+        }
+
+        .dice-btn {
+            padding: 0.75rem 1rem;
+            border: 2px solid var(--accent);
+            background: var(--bg-secondary);
+            color: var(--text-primary);
+            border-radius: 6px;
+            cursor: pointer;
+            font-weight: bold;
+            transition: all 0.3s;
+        }
+
+        .dice-btn:hover {
+            background: var(--accent);
+            color: var(--bg-primary);
+        }
+
+        .dice-btn.fate {
+            background: linear-gradient(45deg, #8B4513, #A0522D);
+            color: white;
+        }
+
+        .dice-visual-container {
+            min-height: 80px;
+            padding: 1rem;
+            background: var(--bg-secondary);
+            border-radius: 8px;
+            margin: 1rem 0;
+            text-align: center;
+        }
+
+        .roll-details {
+            background: var(--bg-secondary);
+            padding: 1rem;
+            border-radius: 4px;
+            margin-top: 1rem;
+            font-family: monospace;
+        }
+
+        .roll-style-selector {
+            margin: 1rem 0;
+        }
+
+        .roll-style-selector select {
+            width: auto;
+            margin-left: 0.5rem;
+        }
+
+        @keyframes diceRoll {
+            0% { transform: rotate(0deg) scale(0.8); opacity: 0; }
+            50% { transform: rotate(180deg) scale(1.2); }
+            100% { transform: rotate(360deg) scale(1); opacity: 1; }
+        }
+
+        @media (max-width: 768px) {
+            .quick-dice-buttons {
+                justify-content: center;
+            }
+            
+            .dice-btn {
+                flex: 1;
+                min-width: 60px;
+            }
+        }
+    </style>
 </body>
 </html>

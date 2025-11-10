@@ -1,0 +1,682 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Map Builder - TTRPG Toolkit</title>
+    <link rel="stylesheet" href="file:///android_asset/css/style.css">
+</head>
+<body>
+    <nav class="navbar">
+        <h1>TTRPG Toolkit</h1>
+        <div class="nav-tabs">
+            <a href="index.html">Dashboard</a>
+            <a href="dice-roller.html">Dice</a>
+            <a href="character-sheet.html">Characters</a>
+            <a href="random-generator.html">Generators</a>
+            <a href="notes.html">Notes</a>
+            <a href="map.html" class="active">Map</a>
+            <a href="multiplayer.html">Multiplayer</a>
+            <a href="settings.html">Settings</a>
+        </div>
+    </nav>
+
+    <main class="container">
+        <section class="card">
+            <h2 contenteditable="true">Map Builder</h2>
+            <div class="map-controls">
+                <div class="form-group">
+                    <label contenteditable="true">Map Name:</label>
+                    <input type="text" id="mapName" placeholder="My Adventure Map">
+                </div>
+                <div class="map-size-controls">
+                    <div class="form-group">
+                        <label contenteditable="true">Width:</label>
+                        <input type="number" id="mapWidth" value="10" min="1" max="50">
+                    </div>
+                    <div class="form-group">
+                        <label contenteditable="true">Height:</label>
+                        <input type="number" id="mapHeight" value="10" min="1" max="50">
+                    </div>
+                    <button onclick="createNewMap()" class="btn-primary" contenteditable="true">New Map</button>
+                </div>
+            </div>
+        </section>
+
+        <section class="card">
+            <h2 contenteditable="true">Drawing Tools</h2>
+            <div class="toolbar">
+                <div class="tool-group">
+                    <label contenteditable="true">Tool:</label>
+                    <select id="drawingTool">
+                        <option value="paint">Paint</option>
+                        <option value="erase">Erase</option>
+                        <option value="fill">Fill</option>
+                        <option value="select">Select</option>
+                    </select>
+                </div>
+                <div class="tool-group">
+                    <label contenteditable="true">Brush Size:</label>
+                    <input type="range" id="brushSize" min="1" max="5" value="1">
+                    <span id="brushSizeValue">1</span>
+                </div>
+                <button onclick="clearMap()" class="btn-danger" contenteditable="true">Clear Map</button>
+                <button onclick="saveMap()" class="btn-primary" contenteditable="true">Save Map</button>
+            </div>
+        </section>
+
+        <section class="card">
+            <h2 contenteditable="true">Tile Palette</h2>
+            <div class="tile-palette-controls">
+                <div class="tile-editor">
+                    <div class="tile-preview" id="currentTile">
+                        <div class="tile" style="background-color: #4CAF50;">🌲</div>
+                    </div>
+                    <div class="tile-settings">
+                        <div class="form-group">
+                            <label contenteditable="true">Color:</label>
+                            <input type="color" id="tileColor" value="#4CAF50">
+                        </div>
+                        <div class="form-group">
+                            <label contenteditable="true">Emoji:</label>
+                            <select id="tileEmoji">
+                                <option value="🌲">🌲 Tree</option>
+                                <option value="🏔️">🏔️ Mountain</option>
+                                <option value="🌊">🌊 Water</option>
+                                <option value="🏰">🏰 Castle</option>
+                                <option value="🛣️">🛣️ Road</option>
+                                <option value="🌵">🌵 Desert</option>
+                                <option value="❄️">❄️ Snow</option>
+                                <option value="🔥">🔥 Fire</option>
+                            </select>
+                        </div>
+                        <button onclick="addToPalette()" class="btn-secondary" contenteditable="true">Add to Palette</button>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="palette-container">
+                <div id="tilePalette" class="tile-palette">
+                    <!-- Tiles will be added here -->
+                </div>
+            </div>
+        </section>
+
+        <section class="card">
+            <h2 contenteditable="true">Map Canvas</h2>
+            <div class="map-container">
+                <div id="mapGrid" class="map-grid">
+                    <!-- Map grid will be generated here -->
+                </div>
+            </div>
+        </section>
+
+        <section class="card">
+            <h2 contenteditable="true">Saved Maps</h2>
+            <div id="savedMaps" class="saved-maps">
+                <!-- Saved maps will appear here -->
+            </div>
+        </section>
+    </main>
+
+    <script src="file:///android_asset/js/main.js"></script>
+    <script src="file:///android_asset/js/emojis.js"></script>
+    <script>
+        let currentMap = {
+            id: null,
+            name: 'New Map',
+            width: 10,
+            height: 10,
+            tiles: [],
+            palette: []
+        };
+        
+        let maps = JSON.parse(localStorage.getItem('maps') || '[]');
+        let selectedTile = { color: '#4CAF50', emoji: '🌲' };
+        let isDrawing = false;
+
+        // Default palette tiles
+        const defaultPalette = [
+            { color: '#4CAF50', emoji: '🌲' }, // Forest
+            { color: '#795548', emoji: '🏔️' }, // Mountain
+            { color: '#2196F3', emoji: '🌊' }, // Water
+            { color: '#9E9E9E', emoji: '🏰' }, // Castle
+            { color: '#FFC107', emoji: '🛣️' }, // Road
+            { color: '#FF9800', emoji: '🌵' }, // Desert
+            { color: '#FFFFFF', emoji: '❄️' }, // Snow
+            { color: '#F44336', emoji: '🔥' }, // Fire/Lava
+            { color: '#8BC34A', emoji: '🌿' }, // Grass
+            { color: '#607D8B', emoji: '🪨' }  // Rock
+        ];
+
+        document.addEventListener('DOMContentLoaded', function() {
+            initializeMap();
+            loadPalette();
+            loadSavedMaps();
+            
+            // Update brush size display
+            document.getElementById('brushSize').addEventListener('input', function() {
+                document.getElementById('brushSizeValue').textContent = this.value;
+            });
+            
+            // Update current tile preview
+            document.getElementById('tileColor').addEventListener('input', updateCurrentTile);
+            document.getElementById('tileEmoji').addEventListener('change', updateCurrentTile);
+        });
+
+        function initializeMap() {
+            currentMap.width = parseInt(document.getElementById('mapWidth').value);
+            currentMap.height = parseInt(document.getElementById('mapHeight').value);
+            currentMap.name = document.getElementById('mapName').value;
+            
+            // Initialize empty tiles
+            currentMap.tiles = [];
+            for (let y = 0; y < currentMap.height; y++) {
+                const row = [];
+                for (let x = 0; x < currentMap.width; x++) {
+                    row.push({ color: '#FFFFFF', emoji: '' });
+                }
+                currentMap.tiles.push(row);
+            }
+            
+            renderMap();
+        }
+
+        function renderMap() {
+            const grid = document.getElementById('mapGrid');
+            grid.innerHTML = '';
+            
+            // Set grid template
+            grid.style.gridTemplateColumns = `repeat(${currentMap.width}, 40px)`;
+            grid.style.gridTemplateRows = `repeat(${currentMap.height}, 40px)`;
+            
+            for (let y = 0; y < currentMap.height; y++) {
+                for (let x = 0; x < currentMap.width; x++) {
+                    const tile = document.createElement('div');
+                    tile.className = 'map-tile';
+                    tile.dataset.x = x;
+                    tile.dataset.y = y;
+                    
+                    const tileData = currentMap.tiles[y][x];
+                    tile.style.backgroundColor = tileData.color;
+                    tile.innerHTML = tileData.emoji;
+                    
+                    // Add event listeners
+                    tile.addEventListener('mousedown', startDrawing);
+                    tile.addEventListener('mouseenter', continueDrawing);
+                    tile.addEventListener('mouseup', stopDrawing);
+                    tile.addEventListener('touchstart', handleTouch);
+                    tile.addEventListener('touchmove', handleTouch);
+                    
+                    grid.appendChild(tile);
+                }
+            }
+        }
+
+        function startDrawing(e) {
+            e.preventDefault();
+            isDrawing = true;
+            paintTile(e.target);
+        }
+
+        function continueDrawing(e) {
+            if (!isDrawing) return;
+            paintTile(e.target);
+        }
+
+        function stopDrawing() {
+            isDrawing = false;
+        }
+
+        function handleTouch(e) {
+            e.preventDefault();
+            const touch = e.touches[0];
+            const element = document.elementFromPoint(touch.clientX, touch.clientY);
+            if (element && element.classList.contains('map-tile')) {
+                if (e.type === 'touchstart') {
+                    isDrawing = true;
+                    paintTile(element);
+                } else if (e.type === 'touchmove' && isDrawing) {
+                    paintTile(element);
+                }
+            }
+            if (e.type === 'touchend') {
+                isDrawing = false;
+            }
+        }
+
+        function paintTile(tileElement) {
+            if (!tileElement || !tileElement.dataset.x) return;
+            
+            const x = parseInt(tileElement.dataset.x);
+            const y = parseInt(tileElement.dataset.y);
+            const tool = document.getElementById('drawingTool').value;
+            const brushSize = parseInt(document.getElementById('brushSize').value);
+            
+            switch(tool) {
+                case 'paint':
+                    for (let dy = -brushSize + 1; dy < brushSize; dy++) {
+                        for (let dx = -brushSize + 1; dx < brushSize; dx++) {
+                            const nx = x + dx;
+                            const ny = y + dy;
+                            if (nx >= 0 && nx < currentMap.width && ny >= 0 && ny < currentMap.height) {
+                                currentMap.tiles[ny][nx] = { ...selectedTile };
+                            }
+                        }
+                    }
+                    break;
+                    
+                case 'erase':
+                    for (let dy = -brushSize + 1; dy < brushSize; dy++) {
+                        for (let dx = -brushSize + 1; dx < brushSize; dx++) {
+                            const nx = x + dx;
+                            const ny = y + dy;
+                            if (nx >= 0 && nx < currentMap.width && ny >= 0 && ny < currentMap.height) {
+                                currentMap.tiles[ny][nx] = { color: '#FFFFFF', emoji: '' };
+                            }
+                        }
+                    }
+                    break;
+                    
+                case 'fill':
+                    const targetColor = currentMap.tiles[y][x].color;
+                    const targetEmoji = currentMap.tiles[y][x].emoji;
+                    floodFill(x, y, targetColor, targetEmoji, selectedTile.color, selectedTile.emoji);
+                    break;
+            }
+            
+            renderMap();
+        }
+
+        function floodFill(x, y, targetColor, targetEmoji, newColor, newEmoji) {
+            if (x < 0 || x >= currentMap.width || y < 0 || y >= currentMap.height) return;
+            if (currentMap.tiles[y][x].color !== targetColor || currentMap.tiles[y][x].emoji !== targetEmoji) return;
+            if (targetColor === newColor && targetEmoji === newEmoji) return;
+            
+            currentMap.tiles[y][x] = { color: newColor, emoji: newEmoji };
+            
+            floodFill(x + 1, y, targetColor, targetEmoji, newColor, newEmoji);
+            floodFill(x - 1, y, targetColor, targetEmoji, newColor, newEmoji);
+            floodFill(x, y + 1, targetColor, targetEmoji, newColor, newEmoji);
+            floodFill(x, y - 1, targetColor, targetEmoji, newColor, newEmoji);
+        }
+
+        function updateCurrentTile() {
+            selectedTile.color = document.getElementById('tileColor').value;
+            selectedTile.emoji = document.getElementById('tileEmoji').value;
+            
+            const preview = document.getElementById('currentTile');
+            preview.innerHTML = `
+                <div class="tile" style="background-color: ${selectedTile.color};">${selectedTile.emoji}</div>
+            `;
+        }
+
+        function loadPalette() {
+            const palette = document.getElementById('tilePalette');
+            palette.innerHTML = '';
+            
+            // Add default tiles to current map palette
+            currentMap.palette = [...defaultPalette];
+            
+            currentMap.palette.forEach((tile, index) => {
+                const paletteTile = document.createElement('div');
+                paletteTile.className = 'palette-tile';
+                paletteTile.innerHTML = `
+                    <div class="tile" style="background-color: ${tile.color};">${tile.emoji}</div>
+                `;
+                paletteTile.addEventListener('click', () => {
+                    selectedTile = { ...tile };
+                    updateCurrentTile();
+                });
+                
+                palette.appendChild(paletteTile);
+            });
+        }
+
+        function addToPalette() {
+            if (currentMap.palette.length >= 20) {
+                // Remove the oldest tile (first one)
+                currentMap.palette.shift();
+            }
+            
+            currentMap.palette.push({ ...selectedTile });
+            
+            // Update palette display
+            const palette = document.getElementById('tilePalette');
+            palette.innerHTML = '';
+            
+            currentMap.palette.forEach((tile, index) => {
+                const paletteTile = document.createElement('div');
+                paletteTile.className = 'palette-tile';
+                paletteTile.innerHTML = `
+                    <div class="tile" style="background-color: ${tile.color};">${tile.emoji}</div>
+                `;
+                paletteTile.addEventListener('click', () => {
+                    selectedTile = { ...tile };
+                    updateCurrentTile();
+                });
+                
+                palette.appendChild(paletteTile);
+            });
+        }
+
+        function createNewMap() {
+            if (confirm('Create new map? Current unsaved changes will be lost.')) {
+                currentMap.id = null;
+                initializeMap();
+                document.getElementById('mapName').value = 'New Map';
+            }
+        }
+
+        function saveMap() {
+            const name = document.getElementById('mapName').value.trim() || 'Unnamed Map';
+            currentMap.name = name;
+            
+            if (!currentMap.id) {
+                currentMap.id = Date.now().toString();
+                maps.unshift({ ...currentMap });
+            } else {
+                const index = maps.findIndex(m => m.id === currentMap.id);
+                if (index !== -1) {
+                    maps[index] = { ...currentMap };
+                } else {
+                    maps.unshift({ ...currentMap });
+                }
+            }
+            
+            localStorage.setItem('maps', JSON.stringify(maps));
+            loadSavedMaps();
+            showNotification('Map saved!', 'success');
+        }
+
+        function loadSavedMaps() {
+            const container = document.getElementById('savedMaps');
+            if (maps.length === 0) {
+                container.innerHTML = '<p contenteditable="true">No saved maps yet.</p>';
+                return;
+            }
+            
+            container.innerHTML = maps.map(map => `
+                <div class="saved-map-item" onclick="loadMap('${map.id}')">
+                    <div class="map-thumbnail">
+                        <div class="thumbnail-grid" style="grid-template-columns: repeat(5, 8px); grid-template-rows: repeat(5, 8px);">
+                            ${generateThumbnail(map)}
+                        </div>
+                    </div>
+                    <div class="map-info">
+                        <h3 contenteditable="true">${map.name}</h3>
+                        <small contenteditable="true">${map.width} × ${map.height}</small>
+                    </div>
+                    <button onclick="deleteMap(event, '${map.id}')" class="btn-danger">Delete</button>
+                </div>
+            `).join('');
+        }
+
+        function generateThumbnail(map) {
+            let thumbnail = '';
+            const stepX = Math.max(1, Math.floor(map.width / 5));
+            const stepY = Math.max(1, Math.floor(map.height / 5));
+            
+            for (let y = 0; y < 5; y++) {
+                for (let x = 0; x < 5; x++) {
+                    const tileY = Math.min(y * stepY, map.height - 1);
+                    const tileX = Math.min(x * stepX, map.width - 1);
+                    const tile = map.tiles[tileY][tileX];
+                    thumbnail += `<div style="background-color: ${tile.color};"></div>`;
+                }
+            }
+            return thumbnail;
+        }
+
+        function loadMap(id) {
+            const map = maps.find(m => m.id === id);
+            if (!map) return;
+            
+            currentMap = JSON.parse(JSON.stringify(map)); // Deep clone
+            document.getElementById('mapName').value = currentMap.name;
+            document.getElementById('mapWidth').value = currentMap.width;
+            document.getElementById('mapHeight').value = currentMap.height;
+            
+            renderMap();
+            showNotification('Map loaded!', 'success');
+        }
+
+        function deleteMap(event, id) {
+            event.stopPropagation();
+            if (!confirm('Delete this map?')) return;
+            
+            maps = maps.filter(m => m.id !== id);
+            localStorage.setItem('maps', JSON.stringify(maps));
+            loadSavedMaps();
+            
+            if (currentMap.id === id) {
+                createNewMap();
+            }
+            
+            showNotification('Map deleted!', 'success');
+        }
+
+        function clearMap() {
+            if (confirm('Clear the entire map?')) {
+                for (let y = 0; y < currentMap.height; y++) {
+                    for (let x = 0; x < currentMap.width; x++) {
+                        currentMap.tiles[y][x] = { color: '#FFFFFF', emoji: '' };
+                    }
+                }
+                renderMap();
+            }
+        }
+    </script>
+
+    <style>
+        .map-controls {
+            display: grid;
+            gap: 1rem;
+        }
+
+        .map-size-controls {
+            display: flex;
+            gap: 1rem;
+            align-items: end;
+            flex-wrap: wrap;
+        }
+
+        .map-size-controls .form-group {
+            flex: 1;
+            min-width: 100px;
+        }
+
+        .toolbar {
+            display: flex;
+            gap: 1rem;
+            align-items: center;
+            flex-wrap: wrap;
+        }
+
+        .tool-group {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .tool-group label {
+            margin-bottom: 0;
+            white-space: nowrap;
+        }
+
+        .tile-palette-controls {
+            display: grid;
+            gap: 1rem;
+        }
+
+        .tile-editor {
+            display: flex;
+            gap: 1rem;
+            align-items: start;
+            flex-wrap: wrap;
+        }
+
+        .tile-preview {
+            flex-shrink: 0;
+        }
+
+        .tile-settings {
+            flex: 1;
+            min-width: 200px;
+        }
+
+        .tile {
+            width: 60px;
+            height: 60px;
+            border: 2px solid var(--border);
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.5rem;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .tile:hover {
+            transform: scale(1.1);
+            border-color: var(--accent);
+        }
+
+        .palette-container {
+            overflow-x: auto;
+            padding: 1rem 0;
+        }
+
+        .tile-palette {
+            display: flex;
+            gap: 0.5rem;
+            padding: 0.5rem;
+            min-height: 80px;
+        }
+
+        .palette-tile {
+            flex-shrink: 0;
+        }
+
+        .palette-tile .tile {
+            width: 50px;
+            height: 50px;
+            font-size: 1.2rem;
+        }
+
+        .map-container {
+            overflow: auto;
+            max-width: 100%;
+            border: 2px solid var(--border);
+            border-radius: 8px;
+            padding: 1rem;
+            background: var(--bg-secondary);
+        }
+
+        .map-grid {
+            display: grid;
+            gap: 1px;
+            background: var(--border);
+            border: 1px solid var(--border);
+            margin: 0 auto;
+        }
+
+        .map-tile {
+            width: 40px;
+            height: 40px;
+            background: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.2rem;
+            cursor: pointer;
+            transition: all 0.2s;
+            user-select: none;
+        }
+
+        .map-tile:hover {
+            filter: brightness(1.1);
+        }
+
+        .saved-maps {
+            display: grid;
+            gap: 1rem;
+        }
+
+        .saved-map-item {
+            display: flex;
+            gap: 1rem;
+            align-items: center;
+            padding: 1rem;
+            background: var(--bg-secondary);
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .saved-map-item:hover {
+            background: var(--accent);
+            color: var(--bg-primary);
+        }
+
+        .map-thumbnail {
+            flex-shrink: 0;
+        }
+
+        .thumbnail-grid {
+            display: grid;
+            gap: 1px;
+            background: var(--border);
+            border: 1px solid var(--border);
+            width: 42px;
+            height: 42px;
+        }
+
+        .thumbnail-grid div {
+            width: 8px;
+            height: 8px;
+        }
+
+        .map-info {
+            flex: 1;
+        }
+
+        .map-info h3 {
+            margin: 0;
+            color: inherit;
+        }
+
+        @media (max-width: 768px) {
+            .map-size-controls {
+                flex-direction: column;
+                align-items: stretch;
+            }
+            
+            .toolbar {
+                flex-direction: column;
+                align-items: stretch;
+            }
+            
+            .tile-editor {
+                flex-direction: column;
+            }
+            
+            .saved-map-item {
+                flex-direction: column;
+                text-align: center;
+            }
+            
+            .map-tile {
+                width: 30px;
+                height: 30px;
+                font-size: 1rem;
+            }
+            
+            .map-grid {
+                gap: 0;
+            }
+        }
+    </style>
+</body>
+</html>

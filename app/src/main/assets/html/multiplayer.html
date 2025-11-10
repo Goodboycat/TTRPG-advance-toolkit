@@ -1,0 +1,631 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Multiplayer - TTRPG Toolkit</title>
+    <link rel="stylesheet" href="file:///android_asset/css/style.css">
+</head>
+<body>
+    <nav class="navbar">
+        <h1>TTRPG Toolkit</h1>
+        <div class="nav-tabs">
+            <a href="index.html">Dashboard</a>
+            <a href="dice-roller.html">Dice</a>
+            <a href="character-sheet.html">Characters</a>
+            <a href="random-generator.html">Generators</a>
+            <a href="notes.html">Notes</a>
+            <a href="map.html">Map</a>
+            <a href="multiplayer.html" class="active">Multiplayer</a>
+            <a href="settings.html">Settings</a>
+        </div>
+    </nav>
+
+    <main class="container">
+        <!-- Game Master View -->
+        <section id="gmView" class="card" style="display: none;">
+            <h2 contenteditable="true">Game Master Control Panel</h2>
+            <div class="party-info">
+                <h3 contenteditable="true">Party: <span id="partyNameDisplay">Unnamed Party</span></h3>
+                <p contenteditable="true">Party Code: <strong id="partyCodeDisplay">XXXX</strong></p>
+                <p contenteditable="true">Connected Players: <span id="playerCount">0</span></p>
+            </div>
+            
+            <div class="player-list">
+                <h3 contenteditable="true">Connected Players</h3>
+                <div id="playersList"></div>
+            </div>
+            
+            <div class="gm-controls">
+                <button onclick="endSession()" class="btn-danger" contenteditable="true">End Session</button>
+                <button onclick="broadcastMessage()" class="btn-secondary" contenteditable="true">Broadcast Message</button>
+            </div>
+            
+            <div class="shared-dice">
+                <h3 contenteditable="true">Shared Dice Rolls</h3>
+                <div id="sharedRolls"></div>
+            </div>
+        </section>
+
+        <!-- Player View -->
+        <section id="playerView" class="card" style="display: none;">
+            <h2 contenteditable="true">Player Session</h2>
+            <div class="session-info">
+                <h3 contenteditable="true">Party: <span id="playerPartyName">Unnamed Party</span></h3>
+                <p contenteditable="true">Game Master: <span id="gmName">Unknown</span></p>
+            </div>
+            
+            <div class="player-dice">
+                <h3 contenteditable="true">Roll Dice</h3>
+                <div class="quick-dice-buttons">
+                    <button onclick="sharedRoll('d4')" class="dice-btn">d4</button>
+                    <button onclick="sharedRoll('d6')" class="dice-btn">d6</button>
+                    <button onclick="sharedRoll('d8')" class="dice-btn">d8</button>
+                    <button onclick="sharedRoll('d10')" class="dice-btn">d10</button>
+                    <button onclick="sharedRoll('d12')" class="dice-btn">d12</button>
+                    <button onclick="sharedRoll('d20')" class="dice-btn">d20</button>
+                    <button onclick="sharedRoll('d100')" class="dice-btn">d100</button>
+                </div>
+                <div class="custom-roll">
+                    <input type="text" id="customRollFormula" placeholder="2d6+3">
+                    <button onclick="sharedCustomRoll()" class="btn-primary" contenteditable="true">Roll</button>
+                </div>
+            </div>
+            
+            <div class="shared-rolls">
+                <h3 contenteditable="true">Recent Rolls</h3>
+                <div id="playerSharedRolls"></div>
+            </div>
+            
+            <button onclick="leaveSession()" class="btn-danger" contenteditable="true">Leave Session</button>
+        </section>
+
+        <!-- Login View -->
+        <section id="loginView" class="card">
+            <h2 contenteditable="true">Multiplayer Session</h2>
+            <div class="login-options">
+                <div class="form-group">
+                    <label contenteditable="true">Your Name:</label>
+                    <input type="text" id="playerName" placeholder="Enter your character name" maxlength="20">
+                </div>
+                
+                <div class="role-selection">
+                    <h3 contenteditable="true">Join as:</h3>
+                    <div class="role-buttons">
+                        <button onclick="showGMCreation()" class="btn-primary" contenteditable="true">Game Master</button>
+                        <button onclick="showPlayerJoin()" class="btn-secondary" contenteditable="true">Player</button>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- GM Creation -->
+            <div id="gmCreation" style="display: none;">
+                <h3 contenteditable="true">Create New Session</h3>
+                <div class="form-group">
+                    <label contenteditable="true">Party Name:</label>
+                    <input type="text" id="partyName" placeholder="Adventurers Guild">
+                </div>
+                <button onclick="createSession()" class="btn-primary" contenteditable="true">Create Session</button>
+            </div>
+            
+            <!-- Player Join -->
+            <div id="playerJoin" style="display: none;">
+                <h3 contenteditable="true">Join Existing Session</h3>
+                <div class="form-group">
+                    <label contenteditable="true">Party Code:</label>
+                    <input type="text" id="partyCode" placeholder="Enter 4-digit code" maxlength="4" pattern="[0-9]{4}">
+                </div>
+                <button onclick="joinSession()" class="btn-primary" contenteditable="true">Join Session</button>
+            </div>
+        </section>
+
+        <!-- Session History -->
+        <section class="card">
+            <h2 contenteditable="true">Session History</h2>
+            <div id="sessionHistory">
+                <p contenteditable="true">No previous sessions.</p>
+            </div>
+        </section>
+    </main>
+
+    <script src="file:///android_asset/js/main.js"></script>
+    <script>
+        // Multiplayer state
+        let currentSession = null;
+        let isGM = false;
+        let playerId = null;
+        let sessionHistory = JSON.parse(localStorage.getItem('sessionHistory') || '[]');
+        
+        // Simulated "server" storage (in real app, this would be a backend)
+        const multiplayerSessions = JSON.parse(localStorage.getItem('multiplayerSessions') || '{}');
+
+        document.addEventListener('DOMContentLoaded', function() {
+            loadSessionHistory();
+            // Check if we're rejoining a session
+            const savedSession = localStorage.getItem('currentSession');
+            if (savedSession) {
+                currentSession = JSON.parse(savedSession);
+                if (currentSession.playerId) {
+                    joinExistingSession();
+                }
+            }
+        });
+
+        function showGMCreation() {
+            const playerName = document.getElementById('playerName').value.trim();
+            if (!playerName) {
+                alert('Please enter your name!');
+                return;
+            }
+            
+            document.getElementById('gmCreation').style.display = 'block';
+            document.getElementById('playerJoin').style.display = 'none';
+        }
+
+        function showPlayerJoin() {
+            const playerName = document.getElementById('playerName').value.trim();
+            if (!playerName) {
+                alert('Please enter your name!');
+                return;
+            }
+            
+            document.getElementById('playerJoin').style.display = 'block';
+            document.getElementById('gmCreation').style.display = 'none';
+        }
+
+        function createSession() {
+            const playerName = document.getElementById('playerName').value.trim();
+            const partyName = document.getElementById('partyName').value.trim() || 'Adventure Party';
+            
+            if (!playerName) {
+                alert('Please enter your name!');
+                return;
+            }
+            
+            // Generate random 4-digit code
+            const partyCode = Math.floor(1000 + Math.random() * 9000).toString();
+            
+            // Create session
+            currentSession = {
+                id: Date.now().toString(),
+                partyName: partyName,
+                partyCode: partyCode,
+                gm: playerName,
+                players: [],
+                rolls: [],
+                created: new Date().toISOString(),
+                isActive: true
+            };
+            
+            playerId = `gm_${Date.now()}`;
+            isGM = true;
+            
+            // Save to "server"
+            multiplayerSessions[partyCode] = currentSession;
+            localStorage.setItem('multiplayerSessions', JSON.stringify(multiplayerSessions));
+            localStorage.setItem('currentSession', JSON.stringify({
+                partyCode: partyCode,
+                playerId: playerId,
+                isGM: true
+            }));
+            
+            showGMView();
+            startSessionPolling();
+            
+            showNotification(`Session created! Party code: ${partyCode}`, 'success');
+        }
+
+        function joinSession() {
+            const playerName = document.getElementById('playerName').value.trim();
+            const partyCode = document.getElementById('partyCode').value.trim();
+            
+            if (!playerName || !partyCode) {
+                alert('Please enter both name and party code!');
+                return;
+            }
+            
+            if (partyCode.length !== 4 || !/^\d+$/.test(partyCode)) {
+                alert('Please enter a valid 4-digit party code!');
+                return;
+            }
+            
+            const session = multiplayerSessions[partyCode];
+            if (!session || !session.isActive) {
+                alert('Session not found or has ended!');
+                return;
+            }
+            
+            playerId = `player_${Date.now()}`;
+            isGM = false;
+            
+            // Add player to session
+            session.players.push({
+                id: playerId,
+                name: playerName,
+                joined: new Date().toISOString()
+            });
+            
+            multiplayerSessions[partyCode] = session;
+            localStorage.setItem('multiplayerSessions', JSON.stringify(multiplayerSessions));
+            localStorage.setItem('currentSession', JSON.stringify({
+                partyCode: partyCode,
+                playerId: playerId,
+                isGM: false
+            }));
+            
+            currentSession = session;
+            showPlayerView();
+            startSessionPolling();
+            
+            showNotification(`Joined session: ${session.partyName}`, 'success');
+        }
+
+        function joinExistingSession() {
+            const sessionData = JSON.parse(localStorage.getItem('currentSession'));
+            const session = multiplayerSessions[sessionData.partyCode];
+            
+            if (session && session.isActive) {
+                currentSession = session;
+                playerId = sessionData.playerId;
+                isGM = sessionData.isGM;
+                
+                if (isGM) {
+                    showGMView();
+                } else {
+                    showPlayerView();
+                }
+                startSessionPolling();
+            } else {
+                localStorage.removeItem('currentSession');
+                showNotification('Session no longer active', 'error');
+            }
+        }
+
+        function showGMView() {
+            document.getElementById('loginView').style.display = 'none';
+            document.getElementById('gmView').style.display = 'block';
+            document.getElementById('playerView').style.display = 'none';
+            
+            document.getElementById('partyNameDisplay').textContent = currentSession.partyName;
+            document.getElementById('partyCodeDisplay').textContent = currentSession.partyCode;
+            updatePlayerList();
+            updateSharedRolls();
+        }
+
+        function showPlayerView() {
+            document.getElementById('loginView').style.display = 'none';
+            document.getElementById('gmView').style.display = 'none';
+            document.getElementById('playerView').style.display = 'block';
+            
+            document.getElementById('playerPartyName').textContent = currentSession.partyName;
+            document.getElementById('gmName').textContent = currentSession.gm;
+            updatePlayerSharedRolls();
+        }
+
+        function startSessionPolling() {
+            // Poll for updates every 3 seconds
+            setInterval(() => {
+                const session = multiplayerSessions[currentSession.partyCode];
+                if (!session || !session.isActive) {
+                    showNotification('Session ended by GM', 'error');
+                    leaveSession();
+                    return;
+                }
+                
+                if (isGM) {
+                    updatePlayerList();
+                    updateSharedRolls();
+                } else {
+                    updatePlayerSharedRolls();
+                }
+            }, 3000);
+        }
+
+        function updatePlayerList() {
+            const container = document.getElementById('playersList');
+            const playerCount = document.getElementById('playerCount');
+            
+            playerCount.textContent = currentSession.players.length;
+            
+            if (currentSession.players.length === 0) {
+                container.innerHTML = '<p contenteditable="true">No players connected yet.</p>';
+                return;
+            }
+            
+            container.innerHTML = currentSession.players.map(player => `
+                <div class="player-item">
+                    <span class="player-name" contenteditable="true">${player.name}</span>
+                    <small contenteditable="true">Joined: ${new Date(player.joined).toLocaleTimeString()}</small>
+                </div>
+            `).join('');
+        }
+
+        function updateSharedRolls() {
+            const container = document.getElementById('sharedRolls');
+            
+            if (currentSession.rolls.length === 0) {
+                container.innerHTML = '<p contenteditable="true">No rolls yet.</p>';
+                return;
+            }
+            
+            container.innerHTML = currentSession.rolls.slice(0, 10).map(roll => `
+                <div class="roll-item">
+                    <strong contenteditable="true">${roll.playerName}</strong>: 
+                    <span contenteditable="true">${roll.formula} = ${roll.result}</span>
+                    <small contenteditable="true">(${roll.details})</small>
+                    <br><small contenteditable="true">${new Date(roll.timestamp).toLocaleTimeString()}</small>
+                </div>
+            `).join('');
+        }
+
+        function updatePlayerSharedRolls() {
+            const container = document.getElementById('playerSharedRolls');
+            
+            if (currentSession.rolls.length === 0) {
+                container.innerHTML = '<p contenteditable="true">No rolls yet.</p>';
+                return;
+            }
+            
+            container.innerHTML = currentSession.rolls.slice(0, 10).map(roll => `
+                <div class="roll-item">
+                    <strong contenteditable="true">${roll.playerName}</strong>: 
+                    <span contenteditable="true">${roll.formula} = ${roll.result}</span>
+                    <small contenteditable="true">${new Date(roll.timestamp).toLocaleTimeString()}</small>
+                </div>
+            `).join('');
+        }
+
+        function sharedRoll(diceType) {
+            const sides = parseInt(diceType.substring(1));
+            const roll = Math.floor(Math.random() * sides) + 1;
+            
+            const rollData = {
+                playerName: document.getElementById('playerName').value.trim(),
+                formula: diceType,
+                result: roll,
+                details: `${diceType} = ${roll}`,
+                timestamp: new Date().toISOString()
+            };
+            
+            addRollToSession(rollData);
+        }
+
+        function sharedCustomRoll() {
+            const formula = document.getElementById('customRollFormula').value.trim();
+            if (!formula) return;
+            
+            // Simple dice formula parser (supports nds+m format)
+            const match = formula.match(/(\d*)d(\d+)([+-]\d+)?/i);
+            if (!match) {
+                alert('Invalid dice formula! Use format like "2d6+3"');
+                return;
+            }
+            
+            const count = parseInt(match[1]) || 1;
+            const sides = parseInt(match[2]);
+            const mod = parseInt(match[3]) || 0;
+            
+            let total = 0;
+            let rolls = [];
+            
+            for (let i = 0; i < count; i++) {
+                const roll = Math.floor(Math.random() * sides) + 1;
+                rolls.push(roll);
+                total += roll;
+            }
+            
+            const finalResult = total + mod;
+            const resultText = `${formula} = [${rolls.join(' + ')}]${mod >= 0 ? '+' : ''}${mod} = ${finalResult}`;
+            
+            const rollData = {
+                playerName: document.getElementById('playerName').value.trim(),
+                formula: formula,
+                result: finalResult,
+                details: resultText,
+                timestamp: new Date().toISOString()
+            };
+            
+            addRollToSession(rollData);
+        }
+
+        function addRollToSession(rollData) {
+            currentSession.rolls.unshift(rollData);
+            currentSession.rolls = currentSession.rolls.slice(0, 50); // Keep last 50 rolls
+            
+            multiplayerSessions[currentSession.partyCode] = currentSession;
+            localStorage.setItem('multiplayerSessions', JSON.stringify(multiplayerSessions));
+            
+            if (isGM) {
+                updateSharedRolls();
+            } else {
+                updatePlayerSharedRolls();
+            }
+        }
+
+        function broadcastMessage() {
+            const message = prompt('Enter message to broadcast:');
+            if (message) {
+                showNotification(`Broadcast: ${message}`, 'info');
+                // In a real app, this would send to all players
+            }
+        }
+
+        function endSession() {
+            if (confirm('End session for all players?')) {
+                currentSession.isActive = false;
+                delete multiplayerSessions[currentSession.partyCode];
+                localStorage.setItem('multiplayerSessions', JSON.stringify(multiplayerSessions));
+                
+                // Add to history
+                sessionHistory.unshift({
+                    ...currentSession,
+                    ended: new Date().toISOString()
+                });
+                localStorage.setItem('sessionHistory', JSON.stringify(sessionHistory));
+                
+                localStorage.removeItem('currentSession');
+                location.reload();
+            }
+        }
+
+        function leaveSession() {
+            if (confirm('Leave this session?')) {
+                if (!isGM) {
+                    // Remove player from session
+                    currentSession.players = currentSession.players.filter(p => p.id !== playerId);
+                    multiplayerSessions[currentSession.partyCode] = currentSession;
+                    localStorage.setItem('multiplayerSessions', JSON.stringify(multiplayerSessions));
+                }
+                
+                localStorage.removeItem('currentSession');
+                location.reload();
+            }
+        }
+
+        function loadSessionHistory() {
+            const container = document.getElementById('sessionHistory');
+            
+            if (sessionHistory.length === 0) {
+                container.innerHTML = '<p contenteditable="true">No previous sessions.</p>';
+                return;
+            }
+            
+            container.innerHTML = sessionHistory.slice(0, 5).map(session => `
+                <div class="session-item">
+                    <h4 contenteditable="true">${session.partyName}</h4>
+                    <p contenteditable="true">
+                        ${session.isActive ? 'Active' : 'Ended'} • 
+                        ${session.players.length} players • 
+                        ${new Date(session.created).toLocaleDateString()}
+                    </p>
+                    <small contenteditable="true">Code: ${session.partyCode}</small>
+                </div>
+            `).join('');
+        }
+    </script>
+
+    <style>
+        .login-options {
+            display: grid;
+            gap: 1rem;
+        }
+
+        .role-selection {
+            text-align: center;
+        }
+
+        .role-buttons {
+            display: flex;
+            gap: 1rem;
+            justify-content: center;
+            flex-wrap: wrap;
+        }
+
+        .role-buttons button {
+            min-width: 150px;
+        }
+
+        .party-info {
+            background: var(--bg-secondary);
+            padding: 1rem;
+            border-radius: 8px;
+            margin-bottom: 1rem;
+        }
+
+        .player-list {
+            margin-bottom: 1rem;
+        }
+
+        .player-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 0.5rem;
+            background: var(--bg-secondary);
+            border-radius: 4px;
+            margin-bottom: 0.5rem;
+        }
+
+        .gm-controls {
+            display: flex;
+            gap: 0.5rem;
+            margin-bottom: 1rem;
+            flex-wrap: wrap;
+        }
+
+        .shared-dice, .shared-rolls {
+            background: var(--bg-secondary);
+            padding: 1rem;
+            border-radius: 8px;
+            max-height: 300px;
+            overflow-y: auto;
+        }
+
+        .roll-item {
+            padding: 0.5rem;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .roll-item:last-child {
+            border-bottom: none;
+        }
+
+        .session-info {
+            background: var(--bg-secondary);
+            padding: 1rem;
+            border-radius: 8px;
+            margin-bottom: 1rem;
+        }
+
+        .player-dice {
+            margin-bottom: 1rem;
+        }
+
+        .quick-dice-buttons {
+            display: flex;
+            gap: 0.5rem;
+            flex-wrap: wrap;
+            margin-bottom: 1rem;
+        }
+
+        .custom-roll {
+            display: flex;
+            gap: 0.5rem;
+        }
+
+        .custom-roll input {
+            flex: 1;
+        }
+
+        .session-item {
+            background: var(--bg-secondary);
+            padding: 1rem;
+            border-radius: 8px;
+            margin-bottom: 0.5rem;
+        }
+
+        .session-item h4 {
+            color: var(--accent);
+            margin: 0 0 0.5rem 0;
+        }
+
+        @media (max-width: 768px) {
+            .role-buttons {
+                flex-direction: column;
+            }
+            
+            .role-buttons button {
+                width: 100%;
+            }
+            
+            .gm-controls {
+                flex-direction: column;
+            }
+            
+            .custom-roll {
+                flex-direction: column;
+            }
+        }
+    </style>
+</body>
+</html>
