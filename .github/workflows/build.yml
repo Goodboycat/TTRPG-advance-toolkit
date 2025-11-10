@@ -3,11 +3,11 @@ name: Build Android APK
 on:
   push:
     branches: [ main ]
-
+    
 jobs:
   build:
     runs-on: ubuntu-latest
-    
+
     steps:
     - name: Checkout code
       uses: actions/checkout@v4
@@ -18,15 +18,22 @@ jobs:
         java-version: '17'
         distribution: 'temurin'
 
+    - name: Create keystore from secret
+      run: |
+        echo "${{ secrets.KEYSTORE_FILE }}" | base64 -d > app/ttrpg-toolkit.keystore
+
     - name: Grant execute permission for gradlew
       run: chmod +x ./gradlew
 
-    - name: Build with Gradle
-      run: ./gradlew assembleDebug
+    - name: Build Release APK
+      run: ./gradlew assembleRelease
+      env:
+        KEYSTORE_PASSWORD: ${{ secrets.KEYSTORE_PASSWORD }}
+        KEY_PASSWORD: ${{ secrets.KEY_PASSWORD }}
 
-    - name: Upload APK
+    - name: Upload Release APK
       uses: actions/upload-artifact@v4
       with:
-        name: TTRPG-Advance-Toolkit-APK
-        path: app/build/outputs/apk/debug/app-debug.apk
-        retention-days: 7
+        name: TTRPG-Advance-Toolkit-Release-APK
+        path: app/build/outputs/apk/release/app-release.apk
+        retention-days: 30
