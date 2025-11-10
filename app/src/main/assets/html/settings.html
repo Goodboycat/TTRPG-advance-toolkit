@@ -24,22 +24,22 @@
             <div class="settings-group">
                 <div class="setting-item">
                     <label contenteditable="true">Game System Name:</label>
-                    <input type="text" id="systemName" placeholder="My TTRPG System">
+                    <input type="text" id="systemName" placeholder="My TTRPG System" onblur="saveSetting('systemName', this.value)">
                 </div>
                 <div class="setting-item">
                     <label contenteditable="true">Default Dice:</label>
-                    <input type="text" id="defaultDice" placeholder="d20">
+                    <input type="text" id="defaultDice" placeholder="d20" onblur="saveSetting('defaultDice', this.value)">
                 </div>
                 <div class="setting-item">
                     <label contenteditable="true">Max Character Level:</label>
-                    <input type="number" id="maxLevel" value="20" min="1" max="100">
+                    <input type="number" id="maxLevel" value="20" min="1" max="100" onblur="saveSetting('maxLevel', this.value)">
                 </div>
             </div>
         </section>
 
         <section class="card">
             <h2 contenteditable="true">Character Stats</h2>
-            <p contenteditable="true">Define the stats used in your game:</p>
+            <p contenteditable="true">Define the stats used in your game (affects all characters):</p>
             <div id="statList" class="stat-list"></div>
             <button onclick="addStat()" class="btn-secondary" contenteditable="true">Add Stat</button>
         </section>
@@ -59,7 +59,7 @@
             <div class="settings-group">
                 <div class="setting-item">
                     <label contenteditable="true">Theme:</label>
-                    <select id="themeSelect">
+                    <select id="themeSelect" onchange="saveSetting('theme', this.value); applyTheme(this.value)">
                         <option value="dark">Dark (Default)</option>
                         <option value="light">Light</option>
                         <option value="cyber">Cyberpunk</option>
@@ -68,7 +68,7 @@
                 </div>
                 <div class="setting-item">
                     <label contenteditable="true">Font Size:</label>
-                    <input type="range" id="fontSize" min="12" max="24" value="16">
+                    <input type="range" id="fontSize" min="12" max="24" value="16" oninput="saveSetting('fontSize', this.value); applyFontSize(this.value)">
                     <span id="fontSizeValue">16px</span>
                 </div>
             </div>
@@ -82,19 +82,13 @@
         document.addEventListener('DOMContentLoaded', function() {
             loadSettings();
             loadStatList();
-            
-            const fontSlider = document.getElementById('fontSize');
-            fontSlider.addEventListener('input', function() {
-                document.getElementById('fontSizeValue').textContent = this.value + 'px';
-                document.documentElement.style.fontSize = this.value + 'px';
-                localStorage.setItem('fontSize', this.value);
-            });
-            
-            document.getElementById('themeSelect').addEventListener('change', function() {
-                document.documentElement.setAttribute('data-theme', this.value);
-                localStorage.setItem('theme', this.value);
-            });
         });
+
+        function saveSetting(key, value) {
+            localStorage.setItem(key, value);
+            // Show notification that settings are saved and will reflect on other pages
+            showNotification(`${key} saved! Changes will appear on all pages.`, 'success');
+        }
 
         function loadSettings() {
             const systemName = localStorage.getItem('systemName') || 'Flexible TTRPG';
@@ -110,8 +104,17 @@
             document.getElementById('fontSizeValue').textContent = fontSize + 'px';
             document.getElementById('themeSelect').value = theme;
             
-            document.documentElement.style.fontSize = fontSize + 'px';
+            applyTheme(theme);
+            applyFontSize(fontSize);
+        }
+
+        function applyTheme(theme) {
             document.documentElement.setAttribute('data-theme', theme);
+        }
+
+        function applyFontSize(size) {
+            document.documentElement.style.fontSize = size + 'px';
+            document.getElementById('fontSizeValue').textContent = size + 'px';
         }
 
         function loadStatList() {
@@ -126,21 +129,49 @@
 
         function addStat() {
             const newStat = prompt('Enter stat name:') || 'NEW';
-            characterStats.push(newStat);
-            localStorage.setItem('characterStats', JSON.stringify(characterStats));
-            loadStatList();
+            if (newStat && !characterStats.includes(newStat)) {
+                characterStats.push(newStat);
+                localStorage.setItem('characterStats', JSON.stringify(characterStats));
+                loadStatList();
+                showNotification(`Added stat: ${newStat}`, 'success');
+            } else {
+                showNotification('Stat already exists or invalid name!', 'error');
+            }
         }
 
         function updateStat(index, value) {
+            const oldStat = characterStats[index];
             characterStats[index] = value;
             localStorage.setItem('characterStats', JSON.stringify(characterStats));
+            
+            // Update all existing characters with new stat name
+            const characters = JSON.parse(localStorage.getItem('characters') || '[]');
+            characters.forEach(char => {
+                if (char.stats[oldStat] !== undefined) {
+                    char.stats[value] = char.stats[oldStat];
+                    delete char.stats[oldStat];
+                }
+            });
+            localStorage.setItem('characters', JSON.stringify(characters));
+            
+            showNotification(`Stat updated from ${oldStat} to ${value}`, 'success');
         }
 
         function removeStat(index) {
-            if (confirm('Remove this stat? This will affect all characters.')) {
+            const statToRemove = characterStats[index];
+            if (confirm(`Remove stat "${statToRemove}"? This will delete it from ALL characters!`)) {
                 characterStats.splice(index, 1);
                 localStorage.setItem('characterStats', JSON.stringify(characterStats));
+                
+                // Remove stat from all characters
+                const characters = JSON.parse(localStorage.getItem('characters') || '[]');
+                characters.forEach(char => {
+                    delete char.stats[statToRemove];
+                });
+                localStorage.setItem('characters', JSON.stringify(characters));
+                
                 loadStatList();
+                showNotification(`Removed stat: ${statToRemove}`, 'success');
             }
         }
 
@@ -189,7 +220,7 @@
                 if (data.theme) localStorage.setItem('theme', data.theme);
                 if (data.fontSize) localStorage.setItem('fontSize', data.fontSize);
                 
-                alert('Data imported successfully! Refresh the page to see changes.');
+                alert('Data imported successfully! Please refresh all pages to see changes.');
                 exportArea.style.display = 'none';
             } catch (e) {
                 alert('Error importing data: ' + e.message);
@@ -198,22 +229,12 @@
 
         function clearAllData() {
             if (confirm('Are you sure you want to delete ALL data? This cannot be undone!')) {
-                if (confirm('Last chance! This will delete everything!')) {
+                if (confirm('Last chance! This will delete everything including all characters and tables!')) {
                     localStorage.clear();
                     alert('All data cleared. Please refresh the page.');
                 }
             }
         }
-
-        document.getElementById('systemName').addEventListener('blur', function() {
-            localStorage.setItem('systemName', this.value);
-        });
-        document.getElementById('defaultDice').addEventListener('blur', function() {
-            localStorage.setItem('defaultDice', this.value);
-        });
-        document.getElementById('maxLevel').addEventListener('blur', function() {
-            localStorage.setItem('maxLevel', this.value);
-        });
     </script>
 </body>
 </html>

@@ -69,6 +69,7 @@
         let tables = JSON.parse(localStorage.getItem('randomTables') || '[]');
         let currentTableId = null;
 
+        // Create default tables if none exist
         if (tables.length === 0) {
             tables = [
                 {
@@ -240,7 +241,6 @@
                 npc: ['Friendly merchant', 'Hostile guard', 'Mysterious stranger', 'Injured traveler', 'Lost child', 'Villain in disguise'],
                 location: ['Dense forest', 'Abandoned temple', 'Bustling tavern', 'Dark cave', 'Peaceful village', 'Castle courtyard']
             };
-
             
             const results = oracles[type] || ['Unknown'];
             const roll = Math.floor(Math.random() * results.length);

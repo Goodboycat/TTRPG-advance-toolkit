@@ -55,13 +55,14 @@
     <script src="file:///android_asset/js/main.js"></script>
     <script>
         document.addEventListener('DOMContentLoaded', function() {
-            loadDashboardData();
+            // Global settings are loaded by main.js automatically
             loadActiveCharacters();
             loadRecentRolls();
-        });
-
-        document.querySelectorAll('[contenteditable="true"]').forEach(el => {
-            el.addEventListener('blur', saveDashboardData);
+            
+            // Auto-save dashboard edits
+            document.querySelectorAll('[contenteditable="true"]').forEach(el => {
+                el.addEventListener('blur', saveDashboardData);
+            });
         });
 
         function saveDashboardData() {
@@ -72,17 +73,6 @@
                 maxLevel: document.getElementById('maxLevel').textContent
             };
             localStorage.setItem('dashboardData', JSON.stringify(data));
-        }
-
-        function loadDashboardData() {
-            const saved = localStorage.getItem('dashboardData');
-            if (saved) {
-                const data = JSON.parse(saved);
-                document.getElementById('gameTitle').textContent = data.gameTitle || 'My TTRPG System';
-                document.getElementById('systemName').textContent = data.systemName || 'Flexible RPG';
-                document.getElementById('diceType').textContent = data.diceType || 'd20';
-                document.getElementById('maxLevel').textContent = data.maxLevel || '10';
-            }
         }
 
         function loadActiveCharacters() {

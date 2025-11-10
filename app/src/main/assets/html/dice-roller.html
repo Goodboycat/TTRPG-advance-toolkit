@@ -63,6 +63,13 @@
         document.addEventListener('DOMContentLoaded', function() {
             loadDiceSets();
             displayRollHistory();
+            
+            // Load default dice from settings
+            const defaultDice = localStorage.getItem('defaultDice') || 'd20';
+            const diceMatch = defaultDice.match(/d(\d+)/i);
+            if (diceMatch) {
+                document.getElementById('diceSides').value = diceMatch[1];
+            }
         });
 
         function rollDice() {
