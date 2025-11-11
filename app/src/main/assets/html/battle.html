@@ -26,47 +26,48 @@
     <main class="container">
         <!-- Battle Setup -->
         <section class="card">
-            <h2 contenteditable="true">Battle Setup</h2>
+            <h2>Battle Setup</h2>
             <div class="battle-controls">
                 <div class="form-group">
-                    <label contenteditable="true">Battle Name:</label>
-                    <input type="text" id="battleName" placeholder="Epic Encounter">
+                    <label>Battle Name:</label>
+                    <input type="text" id="battleName" placeholder="Epic Encounter" class="editable-content">
                 </div>
                 <div class="battle-actions">
-                    <button onclick="startNewBattle()" class="btn-primary" contenteditable="true">New Battle</button>
-                    <button onclick="loadBattle()" class="btn-secondary" contenteditable="true">Load Battle</button>
-                    <button onclick="saveBattle()" class="btn-secondary" contenteditable="true">Save Battle</button>
+                    <button onclick="startNewBattle()" class="btn-primary">New Battle</button>
+                    <button onclick="loadBattleModal()" class="btn-secondary">Load Battle</button>
+                    <button onclick="saveBattle()" class="btn-secondary">Save Battle</button>
+                    <button onclick="exportBattle()" class="btn-secondary">Export</button>
                 </div>
             </div>
         </section>
 
         <!-- Combatants Section -->
         <section class="card">
-            <h2 contenteditable="true">Combatants</h2>
-            <div class="combatant-management">
-                <div class="add-combatant">
+            <div class="card-header">
+                <h2>Combatants</h2>
+                <div class="combatant-management">
                     <select id="combatantSource">
                         <option value="characters">From Characters</option>
                         <option value="database">From Database</option>
                         <option value="custom">Custom Entry</option>
                     </select>
-                    <button onclick="addCombatant()" class="btn-primary" contenteditable="true">Add Combatant</button>
+                    <button onclick="addCombatant()" class="btn-primary">Add Combatant</button>
                 </div>
-                <div class="combatant-filters">
-                    <label contenteditable="true">Filter:</label>
-                    <select id="teamFilter" onchange="filterCombatants()">
-                        <option value="all">All Teams</option>
-                        <option value="party">Party</option>
-                        <option value="enemies">Enemies</option>
-                        <option value="neutral">Neutral</option>
-                    </select>
-                    <select id="statusFilter" onchange="filterCombatants()">
-                        <option value="all">All Status</option>
-                        <option value="alive">Alive</option>
-                        <option value="unconscious">Unconscious</option>
-                        <option value="dead">Dead</option>
-                    </select>
-                </div>
+            </div>
+            <div class="combatant-filters">
+                <label>Filter:</label>
+                <select id="teamFilter" onchange="filterCombatants()">
+                    <option value="all">All Teams</option>
+                    <option value="party">Party</option>
+                    <option value="enemies">Enemies</option>
+                    <option value="neutral">Neutral</option>
+                </select>
+                <select id="statusFilter" onchange="filterCombatants()">
+                    <option value="all">All Status</option>
+                    <option value="alive">Alive</option>
+                    <option value="unconscious">Unconscious</option>
+                    <option value="dead">Dead</option>
+                </select>
             </div>
             <div id="combatantsList" class="combatants-list">
                 <!-- Combatants will be listed here -->
@@ -75,12 +76,14 @@
 
         <!-- Initiative Tracker -->
         <section class="card">
-            <h2 contenteditable="true">Initiative Order</h2>
-            <div class="initiative-controls">
-                <button onclick="rollAllInitiative()" class="btn-primary" contenteditable="true">Roll All Initiative</button>
-                <button onclick="sortInitiative()" class="btn-secondary" contenteditable="true">Sort Initiative</button>
-                <button onclick="nextTurn()" class="btn-secondary" contenteditable="true">Next Turn</button>
-                <button onclick="previousTurn()" class="btn-secondary" contenteditable="true">Previous Turn</button>
+            <div class="card-header">
+                <h2>Initiative Order <small id="roundCounter">Round: 1</small></h2>
+                <div class="initiative-controls">
+                    <button onclick="rollAllInitiative()" class="btn-primary">Roll All Initiative</button>
+                    <button onclick="sortInitiative()" class="btn-secondary">Sort</button>
+                    <button onclick="nextTurn()" class="btn-secondary">Next Turn</button>
+                    <button onclick="previousTurn()" class="btn-secondary">Previous</button>
+                </div>
             </div>
             <div id="initiativeOrder" class="initiative-order">
                 <!-- Initiative order will be displayed here -->
@@ -89,14 +92,16 @@
 
         <!-- Battle Map -->
         <section class="card">
-            <h2 contenteditable="true">Battle Map <small id="roundCounter">Round: 1</small></h2>
-            <div class="battle-map-controls">
-                <div class="form-group">
-                    <label contenteditable="true">Grid Size:</label>
-                    <input type="number" id="gridSize" value="5" min="3" max="20" onchange="generateBattleMap()">
+            <div class="card-header">
+                <h2>Battle Map</h2>
+                <div class="battle-map-controls">
+                    <div class="form-group">
+                        <label>Grid Size:</label>
+                        <input type="number" id="gridSize" value="8" min="3" max="20">
+                    </div>
+                    <button onclick="generateBattleMap()" class="btn-secondary">Regenerate</button>
+                    <button onclick="clearBattleMap()" class="btn-danger">Clear</button>
                 </div>
-                <button onclick="generateBattleMap()" class="btn-secondary" contenteditable="true">Regenerate Map</button>
-                <button onclick="clearBattleMap()" class="btn-danger" contenteditable="true">Clear Map</button>
             </div>
             <div id="battleMap" class="battle-map">
                 <!-- Battle map grid will be generated here -->
@@ -105,25 +110,47 @@
 
         <!-- Combat Log -->
         <section class="card">
-            <h2 contenteditable="true">Combat Log</h2>
-            <div id="combatLog" class="combat-log">
-                <div class="log-entry system" contenteditable="true">Battle started. Ready for combat!</div>
+            <div class="card-header">
+                <h2>Combat Log</h2>
+                <button onclick="clearCombatLog()" class="btn-danger">Clear Log</button>
             </div>
-            <button onclick="clearCombatLog()" class="btn-danger" contenteditable="true">Clear Log</button>
+            <div id="combatLog" class="combat-log">
+                <div class="log-entry system">Battle started. Ready for combat!</div>
+            </div>
+        </section>
+
+        <!-- Action Panel -->
+        <section class="card" id="actionPanel" style="display: none;">
+            <div class="card-header">
+                <h2>Current Turn: <span id="currentCombatant">-</span></h2>
+                <button onclick="endTurn()" class="btn-danger">End Turn</button>
+            </div>
+            <div class="action-buttons">
+                <button onclick="performAttack()" class="btn-primary">Attack</button>
+                <button onclick="moveCombatant()" class="btn-secondary">Move</button>
+                <button onclick="dashAction()" class="btn-secondary">Dash</button>
+                <button onclick="dodgeAction()" class="btn-secondary">Dodge</button>
+                <button onclick="helpAction()" class="btn-secondary">Help</button>
+                <button onclick="useItem()" class="btn-secondary">Use Item</button>
+                <button onclick="castSpell()" class="btn-secondary">Cast Spell</button>
+            </div>
+            <div class="action-details" id="actionDetails">
+                <!-- Action details will be shown here -->
+            </div>
         </section>
 
         <!-- Advanced Options -->
         <section class="card">
-            <h2 contenteditable="true">Advanced Battle Options 
+            <div class="card-header">
+                <h2>Advanced Battle Options</h2>
                 <button onclick="toggleAdvancedOptions()" class="btn-secondary" id="toggleAdvancedBtn">Show Advanced</button>
-            </h2>
+            </div>
             <div id="advancedOptions" class="advanced-options" style="display: none;">
                 <div class="advanced-grid">
-                    <!-- Environment -->
                     <div class="option-group">
-                        <h3 contenteditable="true">Environment</h3>
+                        <h3>Environment</h3>
                         <div class="form-group">
-                            <label contenteditable="true">Terrain:</label>
+                            <label>Terrain:</label>
                             <select id="battleTerrain">
                                 <option value="plains">Plains</option>
                                 <option value="forest">Forest</option>
@@ -136,7 +163,7 @@
                             </select>
                         </div>
                         <div class="form-group">
-                            <label contenteditable="true">Weather:</label>
+                            <label>Weather:</label>
                             <select id="battleWeather">
                                 <option value="clear">Clear</option>
                                 <option value="rain">Rain</option>
@@ -147,7 +174,7 @@
                             </select>
                         </div>
                         <div class="form-group">
-                            <label contenteditable="true">Lighting:</label>
+                            <label>Lighting:</label>
                             <select id="battleLighting">
                                 <option value="daylight">Daylight</option>
                                 <option value="dim">Dim Light</option>
@@ -157,57 +184,38 @@
                         </div>
                     </div>
 
-                    <!-- Battle Conditions -->
                     <div class="option-group">
-                        <h3 contenteditable="true">Special Rules</h3>
-                        <div class="form-group">
-                            <label contenteditable="true">Morale System:</label>
+                        <h3>Special Rules</h3>
+                        <div class="form-group checkbox-group">
                             <input type="checkbox" id="moraleSystem">
+                            <label>Morale System</label>
                         </div>
-                        <div class="form-group">
-                            <label contenteditable="true">Friendly Fire:</label>
+                        <div class="form-group checkbox-group">
                             <input type="checkbox" id="friendlyFire">
+                            <label>Friendly Fire</label>
                         </div>
-                        <div class="form-group">
-                            <label contenteditable="true">AoE Templates:</label>
+                        <div class="form-group checkbox-group">
                             <input type="checkbox" id="aoeTemplates" checked>
+                            <label>AoE Templates</label>
                         </div>
-                        <div class="form-group">
-                            <label contenteditable="true">Flanking Rules:</label>
+                        <div class="form-group checkbox-group">
                             <input type="checkbox" id="flankingRules" checked>
+                            <label>Flanking Rules</label>
                         </div>
-                        <div class="form-group">
-                            <label contenteditable="true">Cover System:</label>
+                        <div class="form-group checkbox-group">
                             <input type="checkbox" id="coverSystem" checked>
+                            <label>Cover System</label>
                         </div>
                     </div>
 
-                    <!-- Status Effects -->
                     <div class="option-group">
-                        <h3 contenteditable="true">Active Effects</h3>
+                        <h3>Active Effects</h3>
                         <div id="activeEffects" class="active-effects">
                             <!-- Active effects will be listed here -->
                         </div>
-                        <button onclick="addGlobalEffect()" class="btn-secondary" contenteditable="true">Add Global Effect</button>
+                        <button onclick="addGlobalEffect()" class="btn-secondary">Add Global Effect</button>
                     </div>
                 </div>
-            </div>
-        </section>
-
-        <!-- Action Panel -->
-        <section class="card" id="actionPanel" style="display: none;">
-            <h2 contenteditable="true">Current Turn: <span id="currentCombatant">-</span></h2>
-            <div class="action-buttons">
-                <button onclick="performAttack()" class="btn-primary" contenteditable="true">Attack</button>
-                <button onclick="performSkill()" class="btn-secondary" contenteditable="true">Use Skill</button>
-                <button onclick="moveCombatant()" class="btn-secondary" contenteditable="true">Move</button>
-                <button onclick="dashAction()" class="btn-secondary" contenteditable="true">Dash</button>
-                <button onclick="dodgeAction()" class="btn-secondary" contenteditable="true">Dodge</button>
-                <button onclick="helpAction()" class="btn-secondary" contenteditable="true">Help</button>
-                <button onclick="endTurn()" class="btn-danger" contenteditable="true">End Turn</button>
-            </div>
-            <div class="action-details" id="actionDetails">
-                <!-- Action details will be shown here -->
             </div>
         </section>
     </main>
@@ -215,7 +223,7 @@
     <!-- Modals -->
     <div id="combatantModal" class="modal" style="display: none;">
         <div class="modal-content">
-            <h2 contenteditable="true">Add Combatant</h2>
+            <h2>Add Combatant</h2>
             <div id="combatantModalContent">
                 <!-- Dynamic content based on source -->
             </div>
@@ -224,20 +232,20 @@
 
     <div id="attackModal" class="modal" style="display: none;">
         <div class="modal-content">
-            <h2 contenteditable="true">Perform Attack</h2>
+            <h2>Perform Attack</h2>
             <div class="attack-form">
                 <div class="form-group">
-                    <label contenteditable="true">Attacker:</label>
+                    <label>Attacker:</label>
                     <span id="attackAttacker">-</span>
                 </div>
                 <div class="form-group">
-                    <label contenteditable="true">Target:</label>
+                    <label>Target:</label>
                     <select id="attackTarget">
                         <!-- Targets will be populated -->
                     </select>
                 </div>
                 <div class="form-group">
-                    <label contenteditable="true">Attack Type:</label>
+                    <label>Attack Type:</label>
                     <select id="attackType">
                         <option value="melee">Melee</option>
                         <option value="ranged">Ranged</option>
@@ -246,7 +254,7 @@
                     </select>
                 </div>
                 <div class="form-group" id="aoeOptions" style="display: none;">
-                    <label contenteditable="true">AoE Shape:</label>
+                    <label>AoE Shape:</label>
                     <select id="aoeShape">
                         <option value="circle">Circle</option>
                         <option value="cone">Cone</option>
@@ -256,18 +264,31 @@
                     <input type="number" id="aoeSize" value="5" min="1" max="10" placeholder="Size">
                 </div>
                 <div class="form-group">
-                    <label contenteditable="true">Bonus/Penalty:</label>
+                    <label>Bonus/Penalty:</label>
                     <input type="number" id="attackBonus" value="0">
                 </div>
                 <div class="modal-actions">
-                    <button onclick="executeAttack()" class="btn-primary" contenteditable="true">Roll Attack</button>
-                    <button onclick="closeAttackModal()" class="btn-secondary" contenteditable="true">Cancel</button>
+                    <button onclick="executeAttack()" class="btn-primary">Roll Attack</button>
+                    <button onclick="closeAttackModal()" class="btn-secondary">Cancel</button>
                 </div>
             </div>
         </div>
     </div>
 
+    <div id="loadBattleModal" class="modal" style="display: none;">
+        <div class="modal-content">
+            <h2>Load Saved Battle</h2>
+            <div id="savedBattlesList" class="saved-list">
+                <!-- Saved battles will be listed here -->
+            </div>
+            <div class="modal-actions">
+                <button onclick="closeLoadBattleModal()" class="btn-secondary">Cancel</button>
+            </div>
+        </div>
+    </div>
+
     <script src="file:///android_asset/js/main.js"></script>
+    <script src="file:///android_asset/js/emojis.js"></script>
     <script>
         // Battle state
         let currentBattle = {
@@ -302,45 +323,50 @@
         });
 
         function startNewBattle() {
-            if (confirm('Start new battle? Current battle will be lost.')) {
-                currentBattle = {
-                    id: Date.now().toString(),
-                    name: document.getElementById('battleName').value || 'New Battle',
-                    combatants: [],
-                    initiative: [],
-                    currentTurn: 0,
-                    round: 1,
-                    environment: {
-                        terrain: document.getElementById('battleTerrain').value,
-                        weather: document.getElementById('battleWeather').value,
-                        lighting: document.getElementById('battleLighting').value
-                    },
-                    rules: {
-                        morale: document.getElementById('moraleSystem').checked,
-                        friendlyFire: document.getElementById('friendlyFire').checked,
-                        aoeTemplates: document.getElementById('aoeTemplates').checked,
-                        flanking: document.getElementById('flankingRules').checked,
-                        cover: document.getElementById('coverSystem').checked
-                    },
-                    activeEffects: [],
-                    map: [],
-                    log: [`Battle "${currentBattle.name}" started!`]
-                };
-                
-                updateCombatLog('system', `Battle "${currentBattle.name}" started!`);
-                updateRoundCounter();
-                generateBattleMap();
-                updateCombatantsList();
+            if (currentBattle.combatants.length > 0 && !confirm('Start new battle? Current battle will be lost.')) {
+                return;
             }
+
+            currentBattle = {
+                id: TTRPGToolkit.generateId(),
+                name: document.getElementById('battleName').value || 'New Battle',
+                combatants: [],
+                initiative: [],
+                currentTurn: 0,
+                round: 1,
+                environment: {
+                    terrain: document.getElementById('battleTerrain').value,
+                    weather: document.getElementById('battleWeather').value,
+                    lighting: document.getElementById('battleLighting').value
+                },
+                rules: {
+                    morale: document.getElementById('moraleSystem').checked,
+                    friendlyFire: document.getElementById('friendlyFire').checked,
+                    aoeTemplates: document.getElementById('aoeTemplates').checked,
+                    flanking: document.getElementById('flankingRules').checked,
+                    cover: document.getElementById('coverSystem').checked
+                },
+                activeEffects: [],
+                map: [],
+                log: []
+            };
+            
+            updateCombatLog('system', `Battle "${currentBattle.name}" started!`);
+            updateRoundCounter();
+            generateBattleMap();
+            updateCombatantsList();
+            updateInitiativeOrder();
+            
+            TTRPGToolkit.showNotification('New battle started!', 'success');
         }
 
         function generateBattleMap() {
-            const gridSize = parseInt(document.getElementById('gridSize').value) || 5;
+            const gridSize = parseInt(document.getElementById('gridSize').value) || 8;
             const mapContainer = document.getElementById('battleMap');
             
             mapContainer.innerHTML = '';
-            mapContainer.style.gridTemplateColumns = `repeat(${gridSize}, 60px)`;
-            mapContainer.style.gridTemplateRows = `repeat(${gridSize}, 60px)`;
+            mapContainer.style.gridTemplateColumns = `repeat(${gridSize}, 50px)`;
+            mapContainer.style.gridTemplateRows = `repeat(${gridSize}, 50px)`;
             
             currentBattle.map = [];
             
@@ -361,17 +387,87 @@
                 }
                 currentBattle.map.push(row);
             }
+            
+            updateMapDisplay();
         }
 
         function clearBattleMap() {
+            if (!confirm('Clear the entire battle map?')) return;
+            
             currentBattle.map.forEach(row => {
                 row.forEach(cell => {
                     cell.occupants = [];
                     cell.terrain = 'clear';
                 });
             });
+            
+            // Remove combatants from map
+            currentBattle.combatants.forEach(combatant => {
+                combatant.position = null;
+            });
+            
             generateBattleMap();
             updateCombatantsList();
+            TTRPGToolkit.showNotification('Battle map cleared!', 'success');
+        }
+
+        function selectMapCell(x, y) {
+            const currentCombatant = getCurrentCombatant();
+            if (!currentCombatant) {
+                TTRPGToolkit.showNotification('No active combatant selected!', 'warning');
+                return;
+            }
+
+            // Check if cell is occupied
+            const occupants = currentBattle.map[y][x].occupants;
+            if (occupants.length > 0 && occupants[0] !== currentCombatant.id) {
+                TTRPGToolkit.showNotification('Cell is occupied!', 'warning');
+                return;
+            }
+
+            // Remove from old position
+            if (currentCombatant.position) {
+                const oldCell = currentBattle.map[currentCombatant.position.y][currentCombatant.position.x];
+                oldCell.occupants = oldCell.occupants.filter(id => id !== currentCombatant.id);
+            }
+
+            // Add to new position
+            currentCombatant.position = { x, y };
+            currentBattle.map[y][x].occupants.push(currentCombatant.id);
+            
+            updateMapDisplay();
+            updateCombatLog('move', `${currentCombatant.name} moved to (${x}, ${y})`);
+        }
+
+        function updateMapDisplay() {
+            document.querySelectorAll('.map-cell').forEach(cell => {
+                const content = cell.querySelector('.cell-content');
+                content.innerHTML = '';
+                content.style.background = '';
+            });
+            
+            currentBattle.combatants.forEach(combatant => {
+                if (!combatant.position) return;
+                
+                const cell = document.querySelector(`.map-cell[data-x="${combatant.position.x}"][data-y="${combatant.position.y}"]`);
+                if (cell) {
+                    const content = cell.querySelector('.cell-content');
+                    const token = document.createElement('div');
+                    token.className = `combatant-token ${combatant.team}`;
+                    token.textContent = combatant.name.charAt(0).toUpperCase();
+                    token.title = `${combatant.name} (HP: ${combatant.hp}/${combatant.maxHP})`;
+                    
+                    // Add health indicator
+                    const healthPercent = (combatant.hp / combatant.maxHP) * 100;
+                    if (healthPercent <= 25) {
+                        token.style.background = 'var(--danger)';
+                    } else if (healthPercent <= 50) {
+                        token.style.background = 'var(--warning)';
+                    }
+                    
+                    content.appendChild(token);
+                }
+            });
         }
 
         function addCombatant() {
@@ -398,21 +494,24 @@
             const characters = JSON.parse(localStorage.getItem('characters') || '[]');
             
             if (characters.length === 0) {
-                container.innerHTML = '<p contenteditable="true">No characters available. Create some in the Characters section first.</p>';
+                container.innerHTML = '<p>No characters available. Create some in the Characters section first.</p>';
                 return;
             }
             
             container.innerHTML = `
-                <h3 contenteditable="true">Select Character</h3>
+                <h3>Select Character</h3>
                 <div class="character-selection">
                     ${characters.map(char => `
                         <div class="selectable-item" onclick="addCharacterAsCombatant('${char.id}')">
-                            <strong contenteditable="true">${char.name}</strong>
-                            <span contenteditable="true">${char.race} ${char.class} Lvl ${char.level}</span>
+                            <strong>${char.name}</strong>
+                            <span>${char.race} ${char.class} Lvl ${char.level}</span>
+                            <small>HP: ${char.combat?.hp || 10}/${char.combat?.maxHP || 10}</small>
                         </div>
                     `).join('')}
                 </div>
-                <button onclick="closeCombatantModal()" class="btn-secondary" contenteditable="true">Cancel</button>
+                <div class="modal-actions">
+                    <button onclick="closeCombatantModal()" class="btn-secondary">Cancel</button>
+                </div>
             `;
         }
 
@@ -423,18 +522,20 @@
             if (!character) return;
             
             const combatant = {
-                id: Date.now().toString(),
+                id: TTRPGToolkit.generateId(),
                 name: character.name,
                 type: 'character',
                 team: 'party',
                 stats: character.stats,
-                combat: character.combat,
-                skills: character.skills,
-                position: { x: 0, y: 0 },
-                conditions: [],
+                hp: character.combat?.hp || 10,
+                maxHP: character.combat?.maxHP || 10,
+                ac: character.combat?.ac || 10,
+                speed: character.combat?.speed || 30,
                 initiative: 0,
+                position: null,
+                conditions: [],
                 actions: {
-                    movement: 0,
+                    movement: character.combat?.speed || 30,
                     action: true,
                     bonusAction: true,
                     reaction: true
@@ -449,67 +550,51 @@
         }
 
         function placeCombatantOnMap(combatant) {
-            // Find empty cell for placement
-            for (let y = 0; y < currentBattle.map.length; y++) {
-                for (let x = 0; x < currentBattle.map[y].length; x++) {
-                    if (currentBattle.map[y][x].occupants.length === 0) {
-                        combatant.position = { x, y };
-                        currentBattle.map[y][x].occupants.push(combatant.id);
-                        updateMapDisplay();
-                        return;
+            // Find empty cell near center
+            const center = Math.floor(currentBattle.map.length / 2);
+            for (let radius = 0; radius < currentBattle.map.length; radius++) {
+                for (let y = Math.max(0, center - radius); y <= Math.min(currentBattle.map.length - 1, center + radius); y++) {
+                    for (let x = Math.max(0, center - radius); x <= Math.min(currentBattle.map[0].length - 1, center + radius); x++) {
+                        if (currentBattle.map[y][x].occupants.length === 0) {
+                            combatant.position = { x, y };
+                            currentBattle.map[y][x].occupants.push(combatant.id);
+                            updateMapDisplay();
+                            return;
+                        }
                     }
                 }
             }
         }
 
-        function updateMapDisplay() {
-            document.querySelectorAll('.map-cell').forEach(cell => {
-                const content = cell.querySelector('.cell-content');
-                content.innerHTML = '';
-            });
-            
-            currentBattle.combatants.forEach(combatant => {
-                const cell = document.querySelector(`.map-cell[data-x="${combatant.position.x}"][data-y="${combatant.position.y}"]`);
-                if (cell) {
-                    const content = cell.querySelector('.cell-content');
-                    const token = document.createElement('div');
-                    token.className = `combatant-token ${combatant.team}`;
-                    token.textContent = combatant.name.charAt(0);
-                    token.title = combatant.name;
-                    content.appendChild(token);
-                }
-            });
-        }
-
         function updateCombatantsList() {
             const container = document.getElementById('combatantsList');
-            const filteredCombatants = filterCombatants();
+            const filteredCombatants = getFilteredCombatants();
             
             if (filteredCombatants.length === 0) {
-                container.innerHTML = '<p contenteditable="true">No combatants added yet.</p>';
+                container.innerHTML = '<p>No combatants added yet.</p>';
                 return;
             }
             
             container.innerHTML = filteredCombatants.map(combatant => `
                 <div class="combatant-item ${combatant.team} ${getCombatantStatus(combatant)}" data-id="${combatant.id}">
                     <div class="combatant-header">
-                        <span class="combatant-name" contenteditable="true">${combatant.name}</span>
-                        <span class="combatant-initiative" contenteditable="true">Init: ${combatant.initiative}</span>
+                        <span class="combatant-name">${combatant.name}</span>
+                        <span class="combatant-initiative">Init: ${combatant.initiative}</span>
                     </div>
                     <div class="combatant-stats">
-                        <span class="hp" contenteditable="true">HP: ${combatant.combat.hp}/${combatant.combat.maxHP}</span>
-                        <span class="ac" contenteditable="true">AC: ${combatant.combat.ac}</span>
-                        <span class="position" contenteditable="true">Pos: ${combatant.position.x},${combatant.position.y}</span>
+                        <span class="hp">HP: ${combatant.hp}/${combatant.maxHP}</span>
+                        <span class="ac">AC: ${combatant.ac}</span>
+                        ${combatant.position ? `<span class="position">Pos: ${combatant.position.x},${combatant.position.y}</span>` : ''}
                     </div>
                     <div class="combatant-actions">
-                        <button onclick="editCombatant('${combatant.id}')" contenteditable="true">Edit</button>
-                        <button onclick="removeCombatant('${combatant.id}')" class="btn-danger" contenteditable="true">Remove</button>
+                        <button onclick="editCombatant('${combatant.id}')" class="btn-secondary">Edit</button>
+                        <button onclick="removeCombatant('${combatant.id}')" class="btn-danger">Remove</button>
                     </div>
                 </div>
             `).join('');
         }
 
-        function filterCombatants() {
+        function getFilteredCombatants() {
             const teamFilter = document.getElementById('teamFilter').value;
             const statusFilter = document.getElementById('statusFilter').value;
             
@@ -520,15 +605,19 @@
             });
         }
 
+        function filterCombatants() {
+            updateCombatantsList();
+        }
+
         function getCombatantStatus(combatant) {
-            if (combatant.combat.hp <= 0) return 'dead';
-            if (combatant.combat.hp <= combatant.combat.maxHP * 0.25) return 'unconscious';
+            if (combatant.hp <= 0) return 'dead';
+            if (combatant.hp <= combatant.maxHP * 0.25) return 'unconscious';
             return 'alive';
         }
 
         function rollAllInitiative() {
             currentBattle.combatants.forEach(combatant => {
-                const dexMod = Math.floor(((combatant.stats.DEX || 10) - 10) / 2);
+                const dexMod = Math.floor(((combatant.stats?.DEX || 10) - 10) / 2);
                 combatant.initiative = Math.floor(Math.random() * 20) + 1 + dexMod;
             });
             
@@ -557,10 +646,10 @@
                 const initiativeItem = document.createElement('div');
                 initiativeItem.className = `initiative-item ${index === currentBattle.currentTurn ? 'current-turn' : ''} ${combatant.team}`;
                 initiativeItem.innerHTML = `
-                    <span class="initiative-order" contenteditable="true">${index + 1}.</span>
-                    <span class="initiative-name" contenteditable="true">${combatant.name}</span>
-                    <span class="initiative-score" contenteditable="true">${combatant.initiative}</span>
-                    <span class="initiative-hp" contenteditable="true">${combatant.combat.hp}/${combatant.combat.maxHP}</span>
+                    <span class="initiative-order">${index + 1}.</span>
+                    <span class="initiative-name">${combatant.name}</span>
+                    <span class="initiative-score">${combatant.initiative}</span>
+                    <span class="initiative-hp">${combatant.hp}/${combatant.maxHP}</span>
                 `;
                 initiativeItem.addEventListener('click', () => setCurrentTurn(index));
                 container.appendChild(initiativeItem);
@@ -576,6 +665,11 @@
         }
 
         function nextTurn() {
+            if (currentBattle.initiative.length === 0) {
+                TTRPGToolkit.showNotification('No combatants in initiative order!', 'warning');
+                return;
+            }
+            
             currentBattle.currentTurn = (currentBattle.currentTurn + 1) % currentBattle.initiative.length;
             if (currentBattle.currentTurn === 0) {
                 currentBattle.round++;
@@ -587,9 +681,8 @@
             
             const currentCombatant = getCurrentCombatant();
             if (currentCombatant) {
-                // Reset actions for new turn
                 currentCombatant.actions = {
-                    movement: currentCombatant.combat.speed || 30,
+                    movement: currentCombatant.speed || 30,
                     action: true,
                     bonusAction: true,
                     reaction: true
@@ -598,6 +691,8 @@
         }
 
         function previousTurn() {
+            if (currentBattle.initiative.length === 0) return;
+            
             currentBattle.currentTurn = (currentBattle.currentTurn - 1 + currentBattle.initiative.length) % currentBattle.initiative.length;
             updateInitiativeOrder();
             updateActionPanel();
@@ -612,19 +707,6 @@
             
             document.getElementById('actionPanel').style.display = 'block';
             document.getElementById('currentCombatant').textContent = currentCombatant.name;
-            
-            // Update attack target options
-            const targetSelect = document.getElementById('attackTarget');
-            targetSelect.innerHTML = '<option value="">Select Target</option>';
-            
-            currentBattle.combatants
-                .filter(c => c.id !== currentCombatant.id && c.combat.hp > 0)
-                .forEach(combatant => {
-                    const option = document.createElement('option');
-                    option.value = combatant.id;
-                    option.textContent = `${combatant.name} (${combatant.team})`;
-                    targetSelect.appendChild(option);
-                });
         }
 
         function getCurrentCombatant() {
@@ -637,6 +719,25 @@
             if (!currentCombatant) return;
             
             document.getElementById('attackAttacker').textContent = currentCombatant.name;
+            
+            // Update target options
+            const targetSelect = document.getElementById('attackTarget');
+            targetSelect.innerHTML = '<option value="">Select Target</option>';
+            
+            currentBattle.combatants
+                .filter(c => c.id !== currentCombatant.id && c.hp > 0)
+                .forEach(combatant => {
+                    const option = document.createElement('option');
+                    option.value = combatant.id;
+                    option.textContent = `${combatant.name} (${combatant.team}) - HP: ${combatant.hp}/${combatant.maxHP}`;
+                    targetSelect.appendChild(option);
+                });
+            
+            // Show/hide AoE options based on attack type
+            document.getElementById('attackType').addEventListener('change', function() {
+                document.getElementById('aoeOptions').style.display = this.value === 'aoe' ? 'block' : 'none';
+            });
+            
             document.getElementById('attackModal').style.display = 'flex';
         }
 
@@ -646,41 +747,72 @@
             const attackType = document.getElementById('attackType').value;
             const bonus = parseInt(document.getElementById('attackBonus').value) || 0;
             
-            if (!targetId) {
-                alert('Please select a target!');
+            if (!targetId && attackType !== 'aoe') {
+                TTRPGToolkit.showNotification('Please select a target!', 'error');
                 return;
             }
             
-            const target = currentBattle.combatants.find(c => c.id === targetId);
-            if (!target) return;
-            
-            // Calculate attack roll
-            const attackRoll = Math.floor(Math.random() * 20) + 1;
-            const attackMod = Math.floor(((attacker.stats.STR || 10) - 10) / 2) + bonus;
-            const totalAttack = attackRoll + attackMod;
-            
-            // Calculate damage
-            const damageRoll = Math.floor(Math.random() * 8) + 1; // 1d8
-            const damageMod = Math.floor(((attacker.stats.STR || 10) - 10) / 2);
-            const totalDamage = Math.max(1, damageRoll + damageMod);
-            
             let resultText = '';
             
-            if (attackRoll === 20) {
-                // Critical hit
-                const critDamage = totalDamage * 2;
-                target.combat.hp = Math.max(0, target.combat.hp - critDamage);
-                resultText = `CRITICAL HIT! ${attacker.name} hits ${target.name} for ${critDamage} damage!`;
-            } else if (attackRoll === 1) {
-                // Critical miss
-                resultText = `CRITICAL MISS! ${attacker.name} fails to hit ${target.name}!`;
-            } else if (totalAttack >= target.combat.ac) {
-                // Normal hit
-                target.combat.hp = Math.max(0, target.combat.hp - totalDamage);
-                resultText = `${attacker.name} hits ${target.name} for ${totalDamage} damage!`;
+            if (attackType === 'aoe') {
+                // Area of effect attack
+                const shape = document.getElementById('aoeShape').value;
+                const size = parseInt(document.getElementById('aoeSize').value) || 5;
+                
+                const affectedCombatants = currentBattle.combatants.filter(combatant => 
+                    combatant.id !== attacker.id && 
+                    combatant.hp > 0 &&
+                    isInAoE(attacker.position, combatant.position, shape, size)
+                );
+                
+                affectedCombatants.forEach(combatant => {
+                    const damage = Math.floor(Math.random() * 6) + 3; // 1d6+3
+                    combatant.hp = Math.max(0, combatant.hp - damage);
+                    resultText += `${attacker.name}'s ${shape} attack hits ${combatant.name} for ${damage} damage! `;
+                    
+                    if (combatant.hp <= 0) {
+                        resultText += `${combatant.name} has been defeated! `;
+                    }
+                });
+                
+                if (affectedCombatants.length === 0) {
+                    resultText = `${attacker.name}'s ${shape} attack hits nobody!`;
+                }
             } else {
-                // Miss
-                resultText = `${attacker.name} misses ${target.name}!`;
+                // Single target attack
+                const target = currentBattle.combatants.find(c => c.id === targetId);
+                if (!target) return;
+                
+                // Calculate attack roll
+                const attackRoll = Math.floor(Math.random() * 20) + 1;
+                const attackMod = Math.floor(((attacker.stats?.STR || 10) - 10) / 2) + bonus;
+                const totalAttack = attackRoll + attackMod;
+                
+                // Calculate damage
+                const damageRoll = Math.floor(Math.random() * 8) + 1; // 1d8
+                const damageMod = Math.floor(((attacker.stats?.STR || 10) - 10) / 2);
+                const totalDamage = Math.max(1, damageRoll + damageMod);
+                
+                if (attackRoll === 20) {
+                    // Critical hit
+                    const critDamage = totalDamage * 2;
+                    target.hp = Math.max(0, target.hp - critDamage);
+                    resultText = `CRITICAL HIT! ${attacker.name} hits ${target.name} for ${critDamage} damage!`;
+                } else if (attackRoll === 1) {
+                    // Critical miss
+                    resultText = `CRITICAL MISS! ${attacker.name} fails to hit ${target.name}!`;
+                } else if (totalAttack >= target.ac) {
+                    // Normal hit
+                    target.hp = Math.max(0, target.hp - totalDamage);
+                    resultText = `${attacker.name} hits ${target.name} for ${totalDamage} damage!`;
+                } else {
+                    // Miss
+                    resultText = `${attacker.name} misses ${target.name}!`;
+                }
+                
+                if (target.hp <= 0) {
+                    resultText += ` ${target.name} has been defeated!`;
+                }
             }
             
             updateCombatLog('attack', resultText);
@@ -688,13 +820,81 @@
             updateInitiativeOrder();
             closeAttackModal();
             
-            // Check if target is defeated
-            if (target.combat.hp <= 0) {
-                updateCombatLog('system', `${target.name} has been defeated!`);
-            }
-            
             // Use action
             attacker.actions.action = false;
+        }
+
+        function isInAoE(center, target, shape, size) {
+            if (!center || !target) return false;
+            
+            const dx = Math.abs(center.x - target.x);
+            const dy = Math.abs(center.y - target.y);
+            
+            switch(shape) {
+                case 'circle':
+                    return Math.sqrt(dx*dx + dy*dy) <= size;
+                case 'square':
+                    return dx <= size && dy <= size;
+                case 'cone':
+                    return dx <= size && dy <= size && dx + dy <= size;
+                case 'line':
+                    return (dx === 0 && dy <= size) || (dy === 0 && dx <= size);
+                default:
+                    return false;
+            }
+        }
+
+        function moveCombatant() {
+            const combatant = getCurrentCombatant();
+            if (!combatant) return;
+            
+            TTRPGToolkit.showNotification(`Select a map cell to move ${combatant.name}`, 'info');
+            // Map cell selection is handled by selectMapCell function
+        }
+
+        function dashAction() {
+            const combatant = getCurrentCombatant();
+            if (combatant) {
+                combatant.actions.movement += combatant.speed;
+                updateCombatLog('action', `${combatant.name} takes the Dash action!`);
+                combatant.actions.action = false;
+            }
+        }
+
+        function dodgeAction() {
+            const combatant = getCurrentCombatant();
+            if (combatant) {
+                updateCombatLog('action', `${combatant.name} takes the Dodge action!`);
+                combatant.actions.action = false;
+            }
+        }
+
+        function helpAction() {
+            const combatant = getCurrentCombatant();
+            if (combatant) {
+                updateCombatLog('action', `${combatant.name} takes the Help action!`);
+                combatant.actions.action = false;
+            }
+        }
+
+        function useItem() {
+            const combatant = getCurrentCombatant();
+            if (combatant) {
+                updateCombatLog('action', `${combatant.name} uses an item!`);
+                combatant.actions.action = false;
+            }
+        }
+
+        function castSpell() {
+            const combatant = getCurrentCombatant();
+            if (combatant) {
+                updateCombatLog('action', `${combatant.name} casts a spell!`);
+                combatant.actions.action = false;
+            }
+        }
+
+        function endTurn() {
+            nextTurn();
         }
 
         function updateCombatLog(type, message) {
@@ -702,11 +902,9 @@
             const entry = document.createElement('div');
             entry.className = `log-entry ${type}`;
             entry.textContent = `[Round ${currentBattle.round}] ${message}`;
-            entry.contentEditable = true;
             log.appendChild(entry);
             log.scrollTop = log.scrollHeight;
             
-            // Add to battle log
             currentBattle.log.push(message);
         }
 
@@ -729,99 +927,94 @@
 
         function saveBattle() {
             if (!currentBattle.id) {
-                currentBattle.id = Date.now().toString();
+                currentBattle.id = TTRPGToolkit.generateId();
             }
+            
+            // Update battle name from input
+            currentBattle.name = document.getElementById('battleName').value || currentBattle.name;
             
             // Update battle index
             const existingIndex = battles.findIndex(b => b.id === currentBattle.id);
             if (existingIndex !== -1) {
-                battles[existingIndex] = currentBattle;
+                battles[existingIndex] = JSON.parse(JSON.stringify(currentBattle));
             } else {
-                battles.unshift(currentBattle);
+                battles.unshift(JSON.parse(JSON.stringify(currentBattle)));
             }
             
             localStorage.setItem('battles', JSON.stringify(battles));
-            showNotification('Battle saved!', 'success');
+            TTRPGToolkit.showNotification('Battle saved!', 'success');
         }
 
-        function loadBattle() {
-            // Implementation for loading saved battles
-            // This would show a modal with saved battles to choose from
-            alert('Load battle functionality would show a list of saved battles here.');
+        function loadBattleModal() {
+            const container = document.getElementById('savedBattlesList');
+            
+            if (battles.length === 0) {
+                container.innerHTML = '<p>No saved battles yet.</p>';
+            } else {
+                container.innerHTML = battles.map(battle => `
+                    <div class="saved-item" onclick="loadBattle('${battle.id}')">
+                        <strong>${battle.name}</strong>
+                        <small>${battle.combatants.length} combatants, Round ${battle.round}</small>
+                        <small>Saved: ${new Date().toLocaleDateString()}</small>
+                    </div>
+                `).join('');
+            }
+            
+            document.getElementById('loadBattleModal').style.display = 'flex';
         }
 
-        // Modal management functions
+        function loadBattle(id) {
+            const battle = battles.find(b => b.id === id);
+            if (!battle) return;
+            
+            currentBattle = JSON.parse(JSON.stringify(battle));
+            
+            document.getElementById('battleName').value = currentBattle.name;
+            document.getElementById('battleTerrain').value = currentBattle.environment.terrain;
+            document.getElementById('battleWeather').value = currentBattle.environment.weather;
+            document.getElementById('battleLighting').value = currentBattle.environment.lighting;
+            
+            document.getElementById('moraleSystem').checked = currentBattle.rules.morale;
+            document.getElementById('friendlyFire').checked = currentBattle.rules.friendlyFire;
+            document.getElementById('aoeTemplates').checked = currentBattle.rules.aoeTemplates;
+            document.getElementById('flankingRules').checked = currentBattle.rules.flanking;
+            document.getElementById('coverSystem').checked = currentBattle.rules.cover;
+            
+            updateCombatantsList();
+            updateInitiativeOrder();
+            updateRoundCounter();
+            generateBattleMap();
+            updateMapDisplay();
+            
+            // Reload combat log
+            const logContainer = document.getElementById('combatLog');
+            logContainer.innerHTML = '';
+            currentBattle.log.forEach(message => {
+                const entry = document.createElement('div');
+                entry.className = 'log-entry system';
+                entry.textContent = message;
+                logContainer.appendChild(entry);
+            });
+            
+            closeLoadBattleModal();
+            TTRPGToolkit.showNotification('Battle loaded!', 'success');
+        }
+
+        function exportBattle() {
+            TTRPGToolkit.exportData(currentBattle, `battle-${currentBattle.name.replace(/[^a-z0-9]/gi, '_')}.json`);
+            TTRPGToolkit.showNotification('Battle exported!', 'success');
+        }
+
+        function closeLoadBattleModal() {
+            document.getElementById('loadBattleModal').style.display = 'none';
+        }
+
         function closeCombatantModal() {
             document.getElementById('combatantModal').style.display = 'none';
         }
 
         function closeAttackModal() {
             document.getElementById('attackModal').style.display = 'none';
-        }
-
-        // Additional battle functions would be implemented here
-        function moveCombatant() {
-            // Implementation for movement
-            alert('Movement system would allow moving the current combatant on the map.');
-        }
-
-        function performSkill() {
-            // Implementation for skill usage
-            alert('Skill system would allow using skills from the combatant\'s skill list.');
-        }
-
-        function dashAction() {
-            const combatant = getCurrentCombatant();
-            if (combatant) {
-                combatant.actions.movement += combatant.combat.speed;
-                updateCombatLog('action', `${combatant.name} takes the Dash action!`);
-                combatant.actions.action = false;
-            }
-        }
-
-        function dodgeAction() {
-            const combatant = getCurrentCombatant();
-            if (combatant) {
-                // Implement dodge mechanics
-                updateCombatLog('action', `${combatant.name} takes the Dodge action!`);
-                combatant.actions.action = false;
-            }
-        }
-
-        function helpAction() {
-            const combatant = getCurrentCombatant();
-            if (combatant) {
-                // Implement help action
-                updateCombatLog('action', `${combatant.name} takes the Help action!`);
-                combatant.actions.action = false;
-            }
-        }
-
-        function endTurn() {
-            nextTurn();
-        }
-
-        // Placeholder functions for unimplemented features
-        function showDatabaseSelection(container) {
-            container.innerHTML = '<p contenteditable="true">Database selection would show monsters and NPCs from the database.</p>';
-        }
-
-        function showCustomCombatantForm(container) {
-            container.innerHTML = '<p contenteditable="true">Custom combatant form would allow creating new combatants manually.</p>';
-        }
-
-        function editCombatant(id) {
-            // Implementation for editing combatant details
-            alert('Edit combatant functionality would open a form to modify combatant stats.');
-        }
-
-        function removeCombatant(id) {
-            if (confirm('Remove this combatant from battle?')) {
-                currentBattle.combatants = currentBattle.combatants.filter(c => c.id !== id);
-                currentBattle.initiative = currentBattle.initiative.filter(combatantId => combatantId !== id);
-                updateCombatantsList();
-                updateInitiativeOrder();
-            }
         }
 
         function clearCombatLog() {
@@ -831,14 +1024,139 @@
             }
         }
 
-        function selectMapCell(x, y) {
-            // Implementation for map cell selection
-            console.log(`Selected cell: ${x}, ${y}`);
+        // Placeholder functions for future implementation
+        function showDatabaseSelection(container) {
+            container.innerHTML = `
+                <p>Database selection would show monsters and NPCs from the database.</p>
+                <div class="modal-actions">
+                    <button onclick="closeCombatantModal()" class="btn-secondary">Cancel</button>
+                </div>
+            `;
+        }
+
+        function showCustomCombatantForm(container) {
+            container.innerHTML = `
+                <h3>Custom Combatant</h3>
+                <div class="form-group">
+                    <label>Name:</label>
+                    <input type="text" id="customName" placeholder="Combatant Name">
+                </div>
+                <div class="form-group">
+                    <label>Team:</label>
+                    <select id="customTeam">
+                        <option value="party">Party</option>
+                        <option value="enemies">Enemies</option>
+                        <option value="neutral">Neutral</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>HP:</label>
+                    <input type="number" id="customHP" value="10" min="1">
+                </div>
+                <div class="form-group">
+                    <label>AC:</label>
+                    <input type="number" id="customAC" value="10" min="1">
+                </div>
+                <div class="modal-actions">
+                    <button onclick="addCustomCombatant()" class="btn-primary">Add</button>
+                    <button onclick="closeCombatantModal()" class="btn-secondary">Cancel</button>
+                </div>
+            `;
+        }
+
+        function addCustomCombatant() {
+            const name = document.getElementById('customName').value.trim();
+            const team = document.getElementById('customTeam').value;
+            const hp = parseInt(document.getElementById('customHP').value) || 10;
+            const ac = parseInt(document.getElementById('customAC').value) || 10;
+            
+            if (!name) {
+                TTRPGToolkit.showNotification('Please enter a name!', 'error');
+                return;
+            }
+            
+            const combatant = {
+                id: TTRPGToolkit.generateId(),
+                name,
+                type: 'custom',
+                team,
+                hp,
+                maxHP: hp,
+                ac,
+                speed: 30,
+                initiative: 0,
+                position: null,
+                conditions: [],
+                actions: {
+                    movement: 30,
+                    action: true,
+                    bonusAction: true,
+                    reaction: true
+                }
+            };
+            
+            currentBattle.combatants.push(combatant);
+            placeCombatantOnMap(combatant);
+            updateCombatantsList();
+            closeCombatantModal();
+            updateCombatLog('join', `${combatant.name} joined the battle!`);
+        }
+
+        function editCombatant(id) {
+            const combatant = currentBattle.combatants.find(c => c.id === id);
+            if (!combatant) return;
+            
+            const newHP = prompt(`Edit HP for ${combatant.name}:`, combatant.hp);
+            if (newHP !== null) {
+                const hpValue = parseInt(newHP);
+                if (!isNaN(hpValue)) {
+                    combatant.hp = Math.max(0, hpValue);
+                    updateCombatantsList();
+                    updateInitiativeOrder();
+                    updateCombatLog('system', `${combatant.name}'s HP set to ${combatant.hp}`);
+                }
+            }
+        }
+
+        function removeCombatant(id) {
+            if (!confirm('Remove this combatant from battle?')) return;
+            
+            const combatant = currentBattle.combatants.find(c => c.id === id);
+            if (combatant) {
+                // Remove from map
+                if (combatant.position) {
+                    const cell = currentBattle.map[combatant.position.y][combatant.position.x];
+                    cell.occupants = cell.occupants.filter(occupantId => occupantId !== id);
+                }
+                
+                // Remove from initiative
+                currentBattle.initiative = currentBattle.initiative.filter(combatantId => combatantId !== id);
+                
+                // Adjust current turn if needed
+                if (currentBattle.currentTurn >= currentBattle.initiative.length) {
+                    currentBattle.currentTurn = Math.max(0, currentBattle.initiative.length - 1);
+                }
+            }
+            
+            currentBattle.combatants = currentBattle.combatants.filter(c => c.id !== id);
+            updateCombatantsList();
+            updateInitiativeOrder();
+            updateMapDisplay();
+            
+            TTRPGToolkit.showNotification('Combatant removed!', 'success');
         }
 
         function addGlobalEffect() {
-            // Implementation for adding global effects
-            alert('Global effect system would allow adding environmental effects to the battle.');
+            const effect = prompt('Enter global effect name:');
+            if (effect) {
+                currentBattle.activeEffects.push(effect);
+                updateCombatLog('system', `Global effect added: ${effect}`);
+                // This would update the active effects display in a real implementation
+            }
+        }
+
+        function loadSavedBattles() {
+            // Load battles into memory (already done at top)
         }
     </script>
 
@@ -856,23 +1174,16 @@
 
         .combatant-management {
             display: flex;
-            justify-content: space-between;
-            align-items: end;
-            flex-wrap: wrap;
-            gap: 1rem;
-            margin-bottom: 1rem;
-        }
-
-        .add-combatant {
-            display: flex;
             gap: 0.5rem;
-            align-items: end;
+            align-items: center;
         }
 
         .combatant-filters {
             display: flex;
             gap: 0.5rem;
-            align-items: end;
+            align-items: center;
+            margin: 1rem 0;
+            flex-wrap: wrap;
         }
 
         .combatants-list {
@@ -885,6 +1196,7 @@
             padding: 1rem;
             border-radius: 8px;
             border-left: 4px solid var(--accent);
+            transition: all 0.3s;
         }
 
         .combatant-item.party {
@@ -926,7 +1238,6 @@
         .initiative-controls {
             display: flex;
             gap: 0.5rem;
-            margin-bottom: 1rem;
             flex-wrap: wrap;
         }
 
@@ -944,20 +1255,22 @@
             border-radius: 4px;
             cursor: pointer;
             transition: all 0.3s;
+            border-left: 3px solid var(--accent);
         }
 
         .initiative-item.current-turn {
             background: var(--accent);
             color: var(--bg-primary);
             font-weight: bold;
+            transform: scale(1.02);
         }
 
         .initiative-item.party {
-            border-left: 3px solid var(--success);
+            border-left-color: var(--success);
         }
 
         .initiative-item.enemies {
-            border-left: 3px solid var(--danger);
+            border-left-color: var(--danger);
         }
 
         .initiative-order {
@@ -971,25 +1284,25 @@
 
         .battle-map-controls {
             display: flex;
-            gap: 1rem;
-            align-items: end;
+            gap: 0.5rem;
+            align-items: center;
             flex-wrap: wrap;
-            margin-bottom: 1rem;
         }
 
         .battle-map {
             display: grid;
-            gap: 2px;
+            gap: 1px;
             background: var(--border);
             border: 2px solid var(--border);
-            padding: 2px;
+            padding: 1px;
             max-width: 100%;
             overflow: auto;
+            margin: 1rem 0;
         }
 
         .map-cell {
-            width: 60px;
-            height: 60px;
+            width: 50px;
+            height: 50px;
             background: var(--bg-card);
             position: relative;
             cursor: pointer;
@@ -1005,8 +1318,8 @@
             position: absolute;
             top: 2px;
             left: 2px;
-            font-size: 0.7rem;
-            opacity: 0.7;
+            font-size: 0.6rem;
+            opacity: 0.5;
         }
 
         .cell-content {
@@ -1018,14 +1331,16 @@
         }
 
         .combatant-token {
-            width: 40px;
-            height: 40px;
+            width: 35px;
+            height: 35px;
             border-radius: 50%;
             display: flex;
             align-items: center;
             justify-content: center;
             font-weight: bold;
             color: white;
+            border: 2px solid white;
+            font-size: 0.8rem;
         }
 
         .combatant-token.party {
@@ -1071,6 +1386,28 @@
             color: var(--success);
         }
 
+        .log-entry.move {
+            color: var(--warning);
+        }
+
+        .log-entry.action {
+            color: var(--text-secondary);
+        }
+
+        .action-buttons {
+            display: flex;
+            gap: 0.5rem;
+            flex-wrap: wrap;
+            margin: 1rem 0;
+        }
+
+        .action-details {
+            background: var(--bg-secondary);
+            padding: 1rem;
+            border-radius: 4px;
+            margin-top: 1rem;
+        }
+
         .advanced-options {
             margin-top: 1rem;
         }
@@ -1092,40 +1429,67 @@
             color: var(--accent);
         }
 
-        .action-buttons {
+        .checkbox-group {
             display: flex;
+            align-items: center;
             gap: 0.5rem;
-            flex-wrap: wrap;
+        }
+
+        .checkbox-group input[type="checkbox"] {
+            width: auto;
+        }
+
+        .checkbox-group label {
+            margin: 0;
+        }
+
+        .active-effects {
+            min-height: 100px;
+            background: var(--bg-primary);
+            padding: 0.5rem;
+            border-radius: 4px;
             margin-bottom: 1rem;
         }
 
-        .selectable-item {
-            padding: 1rem;
-            background: var(--bg-secondary);
-            border-radius: 4px;
-            cursor: pointer;
-            transition: all 0.3s;
-            margin-bottom: 0.5rem;
+        .character-selection, .saved-list {
+            max-height: 400px;
+            overflow-y: auto;
+            margin: 1rem 0;
         }
 
-        .selectable-item:hover {
+        .selectable-item, .saved-item {
+            background: var(--bg-secondary);
+            padding: 1rem;
+            border-radius: 4px;
+            margin-bottom: 0.5rem;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .selectable-item:hover, .saved-item:hover {
             background: var(--accent);
             color: var(--bg-primary);
         }
 
+        .attack-form {
+            display: grid;
+            gap: 1rem;
+            margin: 1rem 0;
+        }
+
         @media (max-width: 768px) {
-            .combatant-management {
+            .battle-actions {
                 flex-direction: column;
-                align-items: stretch;
             }
             
-            .add-combatant {
+            .combatant-management {
                 flex-direction: column;
                 align-items: stretch;
             }
             
             .combatant-filters {
                 flex-direction: column;
+                align-items: stretch;
             }
             
             .initiative-controls {
@@ -1134,24 +1498,30 @@
             
             .battle-map-controls {
                 flex-direction: column;
+                align-items: stretch;
             }
             
             .map-cell {
-                width: 50px;
-                height: 50px;
+                width: 40px;
+                height: 40px;
             }
             
             .advanced-grid {
                 grid-template-columns: 1fr;
             }
-            
-            .action-buttons {
+                        .action-buttons {
                 flex-direction: column;
             }
             
             .combatant-stats {
                 flex-direction: column;
                 gap: 0.25rem;
+            }
+            
+            .combatant-header {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 0.5rem;
             }
         }
     </style>

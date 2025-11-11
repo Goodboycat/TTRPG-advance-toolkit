@@ -16,39 +16,101 @@
             <a href="random-generator.html">Generators</a>
             <a href="notes.html" class="active">Notes</a>
             <a href="map.html">Map</a>
+            <a href="battle.html">Battle</a>
+            <a href="database.html">Database</a>
+            <a href="multiplayer.html">Multiplayer</a>
             <a href="settings.html">Settings</a>
         </div>
     </nav>
 
     <main class="container">
+        <!-- Note Editor -->
         <section class="card">
-            <h2 contenteditable="true">New Note</h2>
+            <h2 class="editable-content">Campaign Notes</h2>
             <div class="form-group">
-                <label contenteditable="true">Title:</label>
-                <input type="text" id="noteTitle" placeholder="Note Title">
+                <label>Title:</label>
+                <input type="text" id="noteTitle" placeholder="Note Title" class="editable-content">
             </div>
             <div class="form-group">
-                <label contenteditable="true">Tags (comma separated):</label>
-                <input type="text" id="noteTags" placeholder="NPC, Location, Quest">
+                <label>Tags (comma separated):</label>
+                <div class="tag-input-container">
+                    <input type="text" id="noteTags" placeholder="NPC, Location, Quest, Lore">
+                    <button onclick="showEmojiPicker()" class="btn-secondary">Add Emoji</button>
+                </div>
+                <div id="tagSuggestions" class="tag-suggestions"></div>
             </div>
             <div class="form-group">
-                <label contenteditable="true">Content:</label>
-                <textarea id="noteContent" placeholder="Write your notes here..." style="min-height: 200px; resize: vertical;"></textarea>
+                <label>Content:</label>
+                <textarea id="noteContent" placeholder="Write your notes here..." 
+                         style="min-height: 200px; resize: vertical;" class="editable-content"></textarea>
             </div>
-            <button onclick="saveNote()" class="btn-primary" contenteditable="true">Save Note</button>
-            <button onclick="clearNote()" class="btn-secondary" contenteditable="true">Clear</button>
+            <div class="form-group">
+                <label>Category:</label>
+                <select id="noteCategory" class="editable-content">
+                    <option value="general">General</option>
+                    <option value="session">Session Notes</option>
+                    <option value="npc">NPC</option>
+                    <option value="location">Location</option>
+                    <option value="quest">Quest</option>
+                    <option value="lore">Lore</option>
+                    <option value="player">Player Notes</option>
+                    <option value="plot">Plot</option>
+                </select>
+            </div>
+            <div class="button-group">
+                <button onclick="saveNote()" class="btn-primary">Save Note</button>
+                <button onclick="clearNote()" class="btn-secondary">Clear</button>
+                <button onclick="exportNotes()" class="btn-secondary">Export All</button>
+            </div>
         </section>
 
+        <!-- Saved Notes -->
         <section class="card">
-            <h2 contenteditable="true">Saved Notes</h2>
-            <div class="form-group">
-                <input type="text" id="searchNotes" placeholder="Search notes..." onkeyup="filterNotes()">
+            <div class="card-header">
+                <h2>Saved Notes</h2>
+                <div class="search-controls">
+                    <input type="text" id="searchNotes" placeholder="Search notes..." onkeyup="filterNotes()">
+                    <select id="categoryFilter" onchange="filterNotes()">
+                        <option value="all">All Categories</option>
+                        <option value="general">General</option>
+                        <option value="session">Session Notes</option>
+                        <option value="npc">NPC</option>
+                        <option value="location">Location</option>
+                        <option value="quest">Quest</option>
+                        <option value="lore">Lore</option>
+                        <option value="player">Player Notes</option>
+                        <option value="plot">Plot</option>
+                    </select>
+                </div>
             </div>
             <div id="notesList" class="notes-list">
                 <!-- Notes will be loaded here -->
             </div>
         </section>
     </main>
+
+    <!-- Emoji Picker Modal -->
+    <div id="emojiModal" class="modal" style="display: none;">
+        <div class="modal-content">
+            <h2>Select Emoji</h2>
+            <div id="emojiPicker" class="emoji-picker">
+                <!-- Emojis will be loaded here -->
+            </div>
+            <div class="modal-actions">
+                <button onclick="closeEmojiPicker()" class="btn-secondary">Cancel</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Note Preview Modal -->
+    <div id="noteModal" class="modal" style="display: none;">
+        <div class="modal-content">
+            <div id="noteModalContent"></div>
+            <div class="modal-actions">
+                <button onclick="closeNoteModal()" class="btn-secondary">Close</button>
+            </div>
+        </div>
+    </div>
 
     <script src="file:///android_asset/js/main.js"></script>
     <script src="file:///android_asset/js/emojis.js"></script>
@@ -58,23 +120,109 @@
 
         document.addEventListener('DOMContentLoaded', function() {
             loadNotes();
+            setupTagSuggestions();
         });
+
+        function setupTagSuggestions() {
+            const tagInput = document.getElementById('noteTags');
+            tagInput.addEventListener('input', function() {
+                const tags = this.value.split(',').map(tag => tag.trim()).filter(tag => tag);
+                const lastTag = tags[tags.length - 1];
+                
+                if (lastTag) {
+                    showTagSuggestions(lastTag);
+                } else {
+                    hideTagSuggestions();
+                }
+            });
+        }
+
+        function showTagSuggestions(tag) {
+            const container = document.getElementById('tagSuggestions');
+            const suggestions = TTRPGEmojiUtils.suggestFromText(tag);
+            
+            if (suggestions.length === 0) {
+                container.innerHTML = '';
+                return;
+            }
+            
+            container.innerHTML = `
+                <div class="suggestion-title">Suggested emojis:</div>
+                <div class="suggestion-list">
+                    ${suggestions.map(emoji => `
+                        <span class="suggestion-item" onclick="addEmojiToTags('${emoji}')">${emoji}</span>
+                    `).join('')}
+                </div>
+            `;
+        }
+
+        function hideTagSuggestions() {
+            document.getElementById('tagSuggestions').innerHTML = '';
+        }
+
+        function addEmojiToTags(emoji) {
+            const tagInput = document.getElementById('noteTags');
+            const tags = tagInput.value.split(',').map(tag => tag.trim());
+            tags[tags.length - 1] = emoji + ' ' + (tags[tags.length - 1] || '');
+            tagInput.value = tags.join(', ');
+            hideTagSuggestions();
+            tagInput.focus();
+        }
+
+        function showEmojiPicker() {
+            const modal = document.getElementById('emojiModal');
+            const picker = document.getElementById('emojiPicker');
+            
+            picker.innerHTML = '';
+            
+            // Create category tabs
+            const categories = Object.keys(TTRPGEmojis);
+            categories.forEach(category => {
+                const section = document.createElement('div');
+                section.className = 'emoji-category';
+                section.innerHTML = `<h4>${category}</h4>`;
+                
+                const emojis = TTRPGEmojis[category];
+                emojis.forEach(emoji => {
+                    const button = document.createElement('button');
+                    button.textContent = emoji;
+                    button.className = 'emoji-btn';
+                    button.onclick = () => {
+                        addEmojiToTags(emoji);
+                        closeEmojiPicker();
+                    };
+                    section.appendChild(button);
+                });
+                
+                picker.appendChild(section);
+            });
+            
+            modal.style.display = 'flex';
+        }
+
+        function closeEmojiPicker() {
+            document.getElementById('emojiModal').style.display = 'none';
+        }
 
         function saveNote() {
             const title = document.getElementById('noteTitle').value.trim();
             const content = document.getElementById('noteContent').value.trim();
-            const tags = document.getElementById('noteTags').value.split(',').map(tag => tag.trim()).filter(tag => tag);
+            const tags = document.getElementById('noteTags').value.split(',')
+                .map(tag => tag.trim())
+                .filter(tag => tag);
+            const category = document.getElementById('noteCategory').value;
             
             if (!title || !content) {
-                alert('Please enter both title and content!');
+                TTRPGToolkit.showNotification('Please enter both title and content!', 'error');
                 return;
             }
 
             const note = {
-                id: editingNoteId || Date.now().toString(),
+                id: editingNoteId || TTRPGToolkit.generateId(),
                 title,
                 content,
                 tags,
+                category,
                 created: editingNoteId ? notes.find(n => n.id === editingNoteId).created : new Date().toISOString(),
                 updated: new Date().toISOString()
             };
@@ -89,102 +237,66 @@
             localStorage.setItem('notes', JSON.stringify(notes));
             loadNotes();
             clearNote();
-            showNotification('Note saved!', 'success');
+            TTRPGToolkit.showNotification('Note saved!', 'success');
         }
 
         function loadNotes() {
             const container = document.getElementById('notesList');
+            
             if (notes.length === 0) {
-                container.innerHTML = '<p contenteditable="true">No notes yet. Create your first note!</p>';
+                container.innerHTML = '<p>No notes yet. Create your first note!</p>';
                 return;
             }
 
             container.innerHTML = notes.map(note => `
-                <div class="note-item" onclick="openNote('${note.id}')">
+                <div class="note-item" data-category="${note.category}">
                     <div class="note-header">
-                        <h3 contenteditable="true">${note.title}</h3>
-                        <small contenteditable="true">${new Date(note.updated).toLocaleDateString()}</small>
+                        <h3>${note.title}</h3>
+                        <div class="note-meta">
+                            <span class="note-category">${note.category}</span>
+                            <small>${new Date(note.updated).toLocaleDateString()}</small>
+                        </div>
                     </div>
-                    <div class="note-preview" contenteditable="true">
+                    <div class="note-preview">
                         ${note.content.substring(0, 100)}${note.content.length > 100 ? '...' : ''}
                     </div>
                     <div class="note-tags">
-                        ${note.tags.map(tag => `<span class="tag" contenteditable="true">${tag}</span>`).join('')}
+                        ${note.tags.map(tag => `<span class="tag">${tag}</span>`).join('')}
                     </div>
                     <div class="note-actions">
-                        <button onclick="editNote(event, '${note.id}')" contenteditable="true">Edit</button>
-                        <button onclick="deleteNote(event, '${note.id}')" class="btn-danger" contenteditable="true">Delete</button>
+                        <button onclick="viewNote('${note.id}')" class="btn-secondary">View</button>
+                        <button onclick="editNote('${note.id}')" class="btn-secondary">Edit</button>
+                        <button onclick="deleteNote('${note.id}')" class="btn-danger">Delete</button>
                     </div>
                 </div>
             `).join('');
         }
 
-        function openNote(id) {
+        function viewNote(id) {
             const note = notes.find(n => n.id === id);
             if (!note) return;
 
-            // Create modal view
-            const modal = document.createElement('div');
-            modal.className = 'note-modal';
-            modal.style.cssText = `
-                position: fixed;
-                top: 0;
-                left: 0;
-                width: 100%;
-                height: 100%;
-                background: rgba(0,0,0,0.8);
-                display: flex;
-                justify-content: center;
-                align-items: center;
-                z-index: 1000;
-            `;
+            const modal = document.getElementById('noteModal');
+            const content = document.getElementById('noteModalContent');
             
-            modal.innerHTML = `
-                <div class="note-modal-content" style="
-                    background: var(--bg-card);
-                    padding: 2rem;
-                    border-radius: 8px;
-                    max-width: 90%;
-                    max-height: 90%;
-                    overflow-y: auto;
-                    position: relative;
-                ">
-                    <button onclick="this.closest('.note-modal').remove()" style="
-                        position: absolute;
-                        top: 1rem;
-                        right: 1rem;
-                        background: var(--danger);
-                        color: white;
-                        border: none;
-                        border-radius: 50%;
-                        width: 2rem;
-                        height: 2rem;
-                        cursor: pointer;
-                    ">X</button>
-                    <h2 contenteditable="true">${note.title}</h2>
-                    <div class="note-tags" style="margin: 1rem 0;">
-                        ${note.tags.map(tag => `<span class="tag" contenteditable="true">${tag}</span>`).join('')}
-                    </div>
-                    <div class="note-content" style="
-                        white-space: pre-wrap;
-                        line-height: 1.6;
-                        max-height: 60vh;
-                        overflow-y: auto;
-                        padding: 1rem;
-                        background: var(--bg-secondary);
-                        border-radius: 4px;
-                    " contenteditable="true">${note.content}</div>
-                    <div style="margin-top: 1rem; font-size: 0.9rem; color: var(--text-secondary);" contenteditable="true">
-                        Last updated: ${new Date(note.updated).toLocaleString()}
-                    </div>
+            content.innerHTML = `
+                <h2>${note.title}</h2>
+                <div class="note-meta">
+                    <span class="note-category">${note.category}</span>
+                    <span class="note-date">Last updated: ${new Date(note.updated).toLocaleString()}</span>
+                </div>
+                <div class="note-tags">
+                    ${note.tags.map(tag => `<span class="tag">${tag}</span>`).join('')}
+                </div>
+                <div class="note-content">
+                    ${note.content.replace(/\n/g, '<br>')}
                 </div>
             `;
-
-            document.body.appendChild(modal);
+            
+            modal.style.display = 'flex';
         }
 
-        function editNote(event, id) {
-            event.stopPropagation();
+        function editNote(id) {
             const note = notes.find(n => n.id === id);
             if (!note) return;
 
@@ -192,19 +304,21 @@
             document.getElementById('noteTitle').value = note.title;
             document.getElementById('noteContent').value = note.content;
             document.getElementById('noteTags').value = note.tags.join(', ');
+            document.getElementById('noteCategory').value = note.category;
             
             // Scroll to editor
             document.querySelector('.card').scrollIntoView({ behavior: 'smooth' });
+            
+            TTRPGToolkit.showNotification('Editing note: ' + note.title, 'info');
         }
 
-        function deleteNote(event, id) {
-            event.stopPropagation();
-            if (!confirm('Delete this note?')) return;
+        function deleteNote(id) {
+            if (!confirm('Are you sure you want to delete this note?')) return;
             
             notes = notes.filter(n => n.id !== id);
             localStorage.setItem('notes', JSON.stringify(notes));
             loadNotes();
-            showNotification('Note deleted!', 'success');
+            TTRPGToolkit.showNotification('Note deleted!', 'success');
         }
 
         function clearNote() {
@@ -212,27 +326,114 @@
             document.getElementById('noteTitle').value = '';
             document.getElementById('noteContent').value = '';
             document.getElementById('noteTags').value = '';
+            document.getElementById('noteCategory').value = 'general';
+            hideTagSuggestions();
         }
 
         function filterNotes() {
             const searchTerm = document.getElementById('searchNotes').value.toLowerCase();
+            const categoryFilter = document.getElementById('categoryFilter').value;
             const noteItems = document.querySelectorAll('.note-item');
             
             noteItems.forEach(item => {
                 const title = item.querySelector('h3').textContent.toLowerCase();
                 const content = item.querySelector('.note-preview').textContent.toLowerCase();
                 const tags = Array.from(item.querySelectorAll('.tag')).map(tag => tag.textContent.toLowerCase());
+                const category = item.dataset.category;
                 
-                const matches = title.includes(searchTerm) || 
-                              content.includes(searchTerm) ||
-                              tags.some(tag => tag.includes(searchTerm));
+                const matchesSearch = title.includes(searchTerm) || 
+                                   content.includes(searchTerm) ||
+                                   tags.some(tag => tag.includes(searchTerm));
                 
-                item.style.display = matches ? 'block' : 'none';
+                const matchesCategory = categoryFilter === 'all' || category === categoryFilter;
+                
+                item.style.display = (matchesSearch && matchesCategory) ? 'block' : 'none';
             });
         }
+
+        function closeNoteModal() {
+            document.getElementById('noteModal').style.display = 'none';
+        }
+
+        function exportNotes() {
+            if (notes.length === 0) {
+                TTRPGToolkit.showNotification('No notes to export!', 'warning');
+                return;
+            }
+            
+            const exportData = {
+                exportedAt: new Date().toISOString(),
+                noteCount: notes.length,
+                notes: notes
+            };
+            
+            TTRPGToolkit.exportData(exportData, 'ttrpg-notes-export.json');
+            TTRPGToolkit.showNotification('Notes exported successfully!', 'success');
+        }
+
+        // Auto-save for contenteditable fields
+        document.addEventListener('blur', function(e) {
+            if (e.target.classList.contains('editable-content')) {
+                const key = e.target.id || 'note_' + Date.now();
+                const value = e.target.value || e.target.textContent;
+                localStorage.setItem(key, value);
+            }
+        }, true);
     </script>
 
     <style>
+        .tag-input-container {
+            display: flex;
+            gap: 0.5rem;
+        }
+
+        .tag-input-container input {
+            flex: 1;
+        }
+
+        .tag-suggestions {
+            margin-top: 0.5rem;
+            padding: 0.5rem;
+            background: var(--bg-secondary);
+            border-radius: 4px;
+            border: 1px solid var(--border);
+        }
+
+        .suggestion-title {
+            font-size: 0.8rem;
+            color: var(--text-secondary);
+            margin-bottom: 0.5rem;
+        }
+
+        .suggestion-list {
+            display: flex;
+            gap: 0.25rem;
+            flex-wrap: wrap;
+        }
+
+        .suggestion-item {
+            background: var(--accent);
+            color: var(--bg-primary);
+            padding: 0.25rem 0.5rem;
+            border-radius: 12px;
+            cursor: pointer;
+            font-size: 1.2rem;
+            transition: transform 0.2s;
+        }
+
+        .suggestion-item:hover {
+            transform: scale(1.1);
+        }
+
+        .search-controls {
+            display: flex;
+            gap: 0.5rem;
+        }
+
+        .search-controls input {
+            flex: 1;
+        }
+
         .notes-list {
             display: grid;
             gap: 1rem;
@@ -243,7 +444,6 @@
             padding: 1.5rem;
             border-radius: 8px;
             border-left: 4px solid var(--accent);
-            cursor: pointer;
             transition: all 0.3s;
         }
 
@@ -255,18 +455,36 @@
         .note-header {
             display: flex;
             justify-content: space-between;
-            align-items: center;
+            align-items: flex-start;
             margin-bottom: 0.5rem;
         }
 
         .note-header h3 {
             color: var(--accent);
             margin: 0;
+            flex: 1;
+        }
+
+        .note-meta {
+            display: flex;
+            flex-direction: column;
+            align-items: flex-end;
+            gap: 0.25rem;
+        }
+
+        .note-category {
+            background: var(--accent);
+            color: var(--bg-primary);
+            padding: 0.25rem 0.5rem;
+            border-radius: 12px;
+            font-size: 0.8rem;
+            font-weight: bold;
         }
 
         .note-preview {
             color: var(--text-secondary);
             margin-bottom: 1rem;
+            line-height: 1.4;
         }
 
         .note-tags {
@@ -274,14 +492,6 @@
             flex-wrap: wrap;
             gap: 0.5rem;
             margin-bottom: 1rem;
-        }
-
-        .tag {
-            background: var(--accent);
-            color: var(--bg-primary);
-            padding: 0.25rem 0.5rem;
-            border-radius: 12px;
-            font-size: 0.8rem;
         }
 
         .note-actions {
@@ -294,8 +504,55 @@
             font-size: 0.9rem;
         }
 
-        .note-modal {
-            backdrop-filter: blur(5px);
+        .emoji-picker {
+            max-height: 400px;
+            overflow-y: auto;
+            padding: 1rem;
+            background: var(--bg-secondary);
+            border-radius: 8px;
+            margin: 1rem 0;
+        }
+
+        .emoji-category {
+            margin-bottom: 1.5rem;
+        }
+
+        .emoji-category h4 {
+            color: var(--accent);
+            margin-bottom: 0.5rem;
+            text-transform: capitalize;
+        }
+
+        .emoji-btn {
+            background: none;
+            border: 1px solid var(--border);
+            border-radius: 4px;
+            padding: 0.5rem;
+            margin: 0.1rem;
+            cursor: pointer;
+            font-size: 1.5rem;
+            transition: all 0.3s;
+        }
+
+        .emoji-btn:hover {
+            background: var(--accent);
+            border-color: var(--accent);
+            transform: scale(1.1);
+        }
+
+        #noteModalContent {
+            max-width: 800px;
+        }
+
+        #noteModalContent .note-content {
+            white-space: pre-wrap;
+            line-height: 1.6;
+            margin-top: 1rem;
+            padding: 1rem;
+            background: var(--bg-secondary);
+            border-radius: 4px;
+            max-height: 60vh;
+            overflow-y: auto;
         }
 
         @media (max-width: 768px) {
@@ -304,12 +561,22 @@
                 align-items: flex-start;
             }
             
+            .note-meta {
+                flex-direction: row;
+                align-items: center;
+                margin-top: 0.5rem;
+            }
+            
             .note-actions {
                 flex-direction: column;
             }
             
-            .note-actions button {
-                width: 100%;
+            .search-controls {
+                flex-direction: column;
+            }
+            
+            .tag-input-container {
+                flex-direction: column;
             }
         }
     </style>

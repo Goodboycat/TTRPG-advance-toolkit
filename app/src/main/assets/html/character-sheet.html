@@ -24,132 +24,189 @@
     </nav>
 
     <main class="container">
+        <!-- Character List -->
         <section class="card">
-            <h2 contenteditable="true">Character List</h2>
-            <div id="characterList" class="character-list"></div>
-            <div class="character-actions">
-                <button onclick="createCharacter()" class="btn-primary" contenteditable="true">New Character</button>
-                <button onclick="showTemplateSelection()" class="btn-secondary" contenteditable="true">From Template</button>
-                <button onclick="generateRandomCharacter()" class="btn-secondary" contenteditable="true">Random Character</button>
+            <div class="card-header">
+                <h2>Character List</h2>
+                <div class="character-actions">
+                    <button onclick="createCharacter()" class="btn-primary">New Character</button>
+                    <button onclick="showTemplateSelection()" class="btn-secondary">From Template</button>
+                    <button onclick="generateRandomCharacter()" class="btn-secondary">Random Character</button>
+                </div>
+            </div>
+            <div id="characterList" class="character-list">
+                <!-- Characters will be loaded here -->
             </div>
         </section>
 
+        <!-- Character Editor -->
         <section class="card" id="characterEditor" style="display: none;">
-            <h2 contenteditable="true">Character Editor</h2>
-            <div class="char-header">
-                <div class="form-group">
-                    <label contenteditable="true">Name:</label>
-                    <input type="text" id="charName" placeholder="Character Name">
-                </div>
-                <div class="form-group">
-                    <label contenteditable="true">Race:</label>
-                    <input type="text" id="charRace" placeholder="Character Race" list="raceList">
-                </div>
-                <div class="form-group">
-                    <label contenteditable="true">Class:</label>
-                    <input type="text" id="charClass" placeholder="Character Class" list="classList">
-                </div>
-                <div class="form-group">
-                    <label contenteditable="true">Level:</label>
-                    <input type="number" id="charLevel" value="1" min="1" max="30">
+            <div class="card-header">
+                <h2>Character Editor</h2>
+                <button onclick="closeEditor()" class="btn-secondary">Close Editor</button>
+            </div>
+
+            <!-- Basic Info -->
+            <div class="char-basic-info">
+                <h3>Basic Information</h3>
+                <div class="form-grid">
+                    <div class="form-group">
+                        <label>Name:</label>
+                        <input type="text" id="charName" placeholder="Character Name" class="editable-content">
+                    </div>
+                    <div class="form-group">
+                        <label>Race:</label>
+                        <input type="text" id="charRace" placeholder="Character Race" list="raceList" class="editable-content">
+                    </div>
+                    <div class="form-group">
+                        <label>Class:</label>
+                        <input type="text" id="charClass" placeholder="Character Class" list="classList" class="editable-content">
+                    </div>
+                    <div class="form-group">
+                        <label>Level:</label>
+                        <input type="number" id="charLevel" value="1" min="1" max="30" class="editable-content">
+                    </div>
+                    <div class="form-group">
+                        <label>Background:</label>
+                        <input type="text" id="charBackground" placeholder="Character Background" class="editable-content">
+                    </div>
+                    <div class="form-group">
+                        <label>Alignment:</label>
+                        <select id="charAlignment" class="editable-content">
+                            <option value="LG">Lawful Good</option>
+                            <option value="NG">Neutral Good</option>
+                            <option value="CG">Chaotic Good</option>
+                            <option value="LN">Lawful Neutral</option>
+                            <option value="N">True Neutral</option>
+                            <option value="CN">Chaotic Neutral</option>
+                            <option value="LE">Lawful Evil</option>
+                            <option value="NE">Neutral Evil</option>
+                            <option value="CE">Chaotic Evil</option>
+                        </select>
+                    </div>
                 </div>
             </div>
 
+            <!-- Attributes Section -->
             <div class="stats-section">
                 <div class="section-header">
-                    <h3 contenteditable="true">Attributes</h3>
+                    <h3>Attributes</h3>
                     <div class="stat-controls">
-                        <button onclick="addCustomStat()" class="btn-secondary" contenteditable="true">Add Stat</button>
-                        <button onclick="generateStats()" class="btn-secondary" contenteditable="true">Generate Stats</button>
+                        <button onclick="addCustomStat()" class="btn-secondary">Add Stat</button>
+                        <button onclick="generateStats()" class="btn-secondary">Generate Stats</button>
+                        <button onclick="autoCalculateModifiers()" class="btn-secondary">Auto Calculate</button>
                     </div>
                 </div>
                 <div class="stats-grid" id="statsGrid">
-                    <!-- Stats will be generated by main.js -->
+                    <!-- Stats will be generated here -->
                 </div>
             </div>
 
+            <!-- Combat Stats -->
+            <div class="combat-stats">
+                <h3>Combat Stats</h3>
+                <div class="combat-grid">
+                    <div class="form-group">
+                        <label>HP:</label>
+                        <div class="hp-controls">
+                            <input type="number" id="charHP" value="10" min="0" class="editable-content">
+                            <span>/</span>
+                            <input type="number" id="charMaxHP" value="10" min="1" class="editable-content">
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label>AC:</label>
+                        <input type="number" id="charAC" value="10" min="1" class="editable-content">
+                    </div>
+                    <div class="form-group">
+                        <label>Speed:</label>
+                        <input type="number" id="charSpeed" value="30" min="0" class="editable-content">
+                    </div>
+                    <div class="form-group">
+                        <label>Initiative:</label>
+                        <input type="number" id="charInitiative" value="0" class="editable-content">
+                    </div>
+                    <div class="form-group">
+                        <label>Proficiency:</label>
+                        <input type="number" id="charProficiency" value="2" min="0" class="editable-content">
+                    </div>
+                </div>
+            </div>
+
+            <!-- Skills & Abilities -->
             <div class="skills-section">
                 <div class="section-header">
-                    <h3 contenteditable="true">Skills & Abilities</h3>
-                    <button onclick="showSkillGenerator()" class="btn-secondary" contenteditable="true">Generate Skills</button>
+                    <h3>Skills & Abilities</h3>
+                    <div class="skill-controls">
+                        <button onclick="showSkillGenerator()" class="btn-secondary">Add from Database</button>
+                        <button onclick="addCustomSkill()" class="btn-secondary">Add Custom Skill</button>
+                    </div>
                 </div>
                 <div id="skillsList" class="skills-list">
                     <!-- Skills will be loaded here -->
                 </div>
-                <button onclick="addSkill()" class="btn-secondary" contenteditable="true">Add Skill</button>
             </div>
 
-            <div class="combat-stats">
-                <h3 contenteditable="true">Combat Stats</h3>
-                <div class="combat-grid">
-                    <div class="form-group">
-                        <label contenteditable="true">HP:</label>
-                        <input type="number" id="charHP" value="10" min="1">
-                        <span contenteditable="true">/</span>
-                        <input type="number" id="charMaxHP" value="10" min="1">
-                    </div>
-                    <div class="form-group">
-                        <label contenteditable="true">AC:</label>
-                        <input type="number" id="charAC" value="10" min="1">
-                    </div>
-                    <div class="form-group">
-                        <label contenteditable="true">Speed:</label>
-                        <input type="number" id="charSpeed" value="30" min="0">
-                    </div>
-                    <div class="form-group">
-                        <label contenteditable="true">Initiative:</label>
-                        <input type="number" id="charInitiative" value="0">
-                    </div>
+            <!-- Equipment -->
+            <div class="equipment-section">
+                <h3>Equipment & Inventory</h3>
+                <div class="form-group">
+                    <textarea id="charEquipment" placeholder="Weapons, armor, items..." class="editable-content" style="min-height: 100px;"></textarea>
                 </div>
             </div>
 
+            <!-- Notes & Background -->
             <div class="notes-section">
-                <h3 contenteditable="true">Notes & Background</h3>
-                <textarea id="charNotes" placeholder="Character background, personality, notes..."></textarea>
+                <h3>Notes & Background</h3>
+                <div class="form-group">
+                    <textarea id="charNotes" placeholder="Character background, personality, notes..." class="editable-content" style="min-height: 150px;"></textarea>
+                </div>
             </div>
 
+            <!-- Action Buttons -->
             <div class="button-group">
-                <button onclick="saveCharacter()" class="btn-primary" contenteditable="true">Save Character</button>
-                <button onclick="duplicateCharacter()" class="btn-secondary" contenteditable="true">Duplicate</button>
-                <button onclick="exportCharacter()" class="btn-secondary" contenteditable="true">Export</button>
-                <button onclick="deleteCharacter()" class="btn-danger" contenteditable="true">Delete</button>
-                <button onclick="closeEditor()" class="btn-secondary" contenteditable="true">Close</button>
+                <button onclick="saveCharacter()" class="btn-primary">Save Character</button>
+                <button onclick="duplicateCharacter()" class="btn-secondary">Duplicate</button>
+                <button onclick="exportCharacter()" class="btn-secondary">Export</button>
+                <button onclick="deleteCharacter()" class="btn-danger">Delete</button>
             </div>
         </section>
 
         <!-- Template Selection Modal -->
         <div id="templateModal" class="modal" style="display: none;">
             <div class="modal-content">
-                <h2 contenteditable="true">Choose Character Template</h2>
+                <h2>Choose Character Template</h2>
                 <div class="template-list">
                     <div class="template-item" onclick="createFromTemplate('dnd5e')">
-                        <h4 contenteditable="true">D&D 5e</h4>
-                        <p contenteditable="true">Standard D&D 5th edition template with STR, DEX, CON, INT, WIS, CHA</p>
+                        <h4>D&D 5e</h4>
+                        <p>Standard D&D 5th edition template with STR, DEX, CON, INT, WIS, CHA</p>
                     </div>
                     <div class="template-item" onclick="createFromTemplate('pathfinder')">
-                        <h4 contenteditable="true">Pathfinder</h4>
-                        <p contenteditable="true">Pathfinder RPG template with additional skills and feats</p>
+                        <h4>Pathfinder</h4>
+                        <p>Pathfinder RPG template with additional skills and feats</p>
                     </div>
                     <div class="template-item" onclick="createFromTemplate('shadowrun')">
-                        <h4 contenteditable="true">Shadowrun</h4>
-                        <p contenteditable="true">Cyberpunk fantasy with Body, Agility, Reaction, Strength, etc.</p>
+                        <h4>Shadowrun</h4>
+                        <p>Cyberpunk fantasy with Body, Agility, Reaction, Strength, etc.</p>
                     </div>
                     <div class="template-item" onclick="createFromTemplate('custom')">
-                        <h4 contenteditable="true">Custom</h4>
-                        <p contenteditable="true">Create your own stat template</p>
+                        <h4>Custom</h4>
+                        <p>Create your own stat template</p>
                     </div>
                 </div>
-                <button onclick="closeTemplateModal()" class="btn-secondary" contenteditable="true">Cancel</button>
+                <div class="modal-actions">
+                    <button onclick="closeTemplateModal()" class="btn-secondary">Cancel</button>
+                </div>
             </div>
         </div>
 
         <!-- Skill Generator Modal -->
         <div id="skillModal" class="modal" style="display: none;">
             <div class="modal-content">
-                <h2 contenteditable="true">Generate Skills from Database</h2>
+                <h2>Add Skills from Database</h2>
                 <div class="skill-filters">
                     <div class="form-group">
-                        <label contenteditable="true">Filter by Type:</label>
+                        <label>Filter by Type:</label>
                         <select id="skillTypeFilter">
                             <option value="all">All Skills</option>
                             <option value="combat">Combat</option>
@@ -159,7 +216,7 @@
                         </select>
                     </div>
                     <div class="form-group">
-                        <label contenteditable="true">Max Skills:</label>
+                        <label>Max Skills:</label>
                         <input type="number" id="maxSkills" value="5" min="1" max="20">
                     </div>
                 </div>
@@ -167,8 +224,8 @@
                     <!-- Skills from database will appear here -->
                 </div>
                 <div class="modal-actions">
-                    <button onclick="addSelectedSkills()" class="btn-primary" contenteditable="true">Add Selected</button>
-                    <button onclick="closeSkillModal()" class="btn-secondary" contenteditable="true">Cancel</button>
+                    <button onclick="addSelectedSkills()" class="btn-primary">Add Selected</button>
+                    <button onclick="closeSkillModal()" class="btn-secondary">Cancel</button>
                 </div>
             </div>
         </div>
@@ -178,30 +235,34 @@
     </main>
 
     <script src="file:///android_asset/js/main.js"></script>
+    <script src="file:///android_asset/js/emojis.js"></script>
     <script>
         let characters = JSON.parse(localStorage.getItem('characters') || '[]');
         let currentCharacterId = null;
         let availableRaces = [];
         let availableClasses = [];
-        let availableSkills = [];
 
         // Character templates
         const characterTemplates = {
             dnd5e: {
                 stats: ['STR', 'DEX', 'CON', 'INT', 'WIS', 'CHA'],
-                skills: ['Acrobatics', 'Arcana', 'Athletics', 'Deception', 'History', 'Insight', 'Intimidation', 'Investigation', 'Medicine', 'Nature', 'Perception', 'Performance', 'Persuasion', 'Religion', 'Sleight of Hand', 'Stealth', 'Survival']
+                skills: ['Acrobatics', 'Arcana', 'Athletics', 'Deception', 'History', 'Insight', 'Intimidation', 'Investigation', 'Medicine', 'Nature', 'Perception', 'Performance', 'Persuasion', 'Religion', 'Sleight of Hand', 'Stealth', 'Survival'],
+                combat: { hp: 10, maxHP: 10, ac: 10, speed: 30, initiative: 0, proficiency: 2 }
             },
             pathfinder: {
                 stats: ['STR', 'DEX', 'CON', 'INT', 'WIS', 'CHA'],
-                skills: ['Acrobatics', 'Appraise', 'Bluff', 'Climb', 'Craft', 'Diplomacy', 'Disable Device', 'Disguise', 'Escape Artist', 'Fly', 'Handle Animal', 'Heal', 'Intimidate', 'Knowledge (Arcana)', 'Knowledge (Dungeoneering)', 'Knowledge (Engineering)', 'Knowledge (Geography)', 'Knowledge (History)', 'Knowledge (Local)', 'Knowledge (Nature)', 'Knowledge (Nobility)', 'Knowledge (Planes)', 'Knowledge (Religion)', 'Linguistics', 'Perception', 'Perform', 'Profession', 'Ride', 'Sense Motive', 'Sleight of Hand', 'Spellcraft', 'Stealth', 'Survival', 'Swim', 'Use Magic Device']
+                skills: ['Acrobatics', 'Appraise', 'Bluff', 'Climb', 'Craft', 'Diplomacy', 'Disable Device', 'Disguise', 'Escape Artist', 'Fly', 'Handle Animal', 'Heal', 'Intimidate', 'Knowledge (Arcana)', 'Knowledge (Dungeoneering)', 'Knowledge (Engineering)', 'Knowledge (Geography)', 'Knowledge (History)', 'Knowledge (Local)', 'Knowledge (Nature)', 'Knowledge (Nobility)', 'Knowledge (Planes)', 'Knowledge (Religion)', 'Linguistics', 'Perception', 'Perform', 'Profession', 'Ride', 'Sense Motive', 'Sleight of Hand', 'Spellcraft', 'Stealth', 'Survival', 'Swim', 'Use Magic Device'],
+                combat: { hp: 8, maxHP: 8, ac: 10, speed: 30, initiative: 0, proficiency: 1 }
             },
             shadowrun: {
                 stats: ['Body', 'Agility', 'Reaction', 'Strength', 'Willpower', 'Logic', 'Intuition', 'Charisma', 'Edge', 'Essence', 'Magic', 'Resonance'],
-                skills: ['Athletics', 'Biotech', 'Close Combat', 'Con', 'Cracking', 'Electronics', 'Firearms', 'Negotiation', 'Piloting', 'Sorcery', 'Stealth', 'Tasking', 'Engineering', 'Outdoors', 'Influence', 'Enchanting']
+                skills: ['Athletics', 'Biotech', 'Close Combat', 'Con', 'Cracking', 'Electronics', 'Firearms', 'Negotiation', 'Piloting', 'Sorcery', 'Stealth', 'Tasking', 'Engineering', 'Outdoors', 'Influence', 'Enchanting'],
+                combat: { hp: 12, maxHP: 12, ac: 8, speed: 25, initiative: 0, proficiency: 0 }
             },
             custom: {
                 stats: [],
-                skills: []
+                skills: [],
+                combat: { hp: 10, maxHP: 10, ac: 10, speed: 30, initiative: 0, proficiency: 1 }
             }
         };
 
@@ -211,14 +272,11 @@
         });
 
         function loadDatabaseReferences() {
-            // Load races and classes from database for autocomplete
             const database = JSON.parse(localStorage.getItem('gameDatabase') || '{}');
             
             availableRaces = (database.races || []).map(race => race.name);
             availableClasses = (database.classes || []).map(cls => cls.name);
-            availableSkills = (database.skills || []).map(skill => skill.name);
             
-            // Populate datalists
             const raceList = document.getElementById('raceList');
             const classList = document.getElementById('classList');
             
@@ -229,19 +287,25 @@
         function loadCharacterList() {
             const container = document.getElementById('characterList');
             if (characters.length === 0) {
-                container.innerHTML = '<p contenteditable="true">No characters yet. Create your first!</p>';
+                container.innerHTML = '<p>No characters yet. Create your first!</p>';
                 return;
             }
+            
             container.innerHTML = characters.map(char => `
                 <div class="character-item" onclick="editCharacter('${char.id}')">
                     <div class="char-basic-info">
-                        <span class="char-name" contenteditable="true">${char.name || 'Unnamed'}</span>
-                        <span class="char-details" contenteditable="true">${char.race || ''} ${char.class || ''} Lvl ${char.level || 1}</span>
+                        <span class="char-name">${char.name || 'Unnamed'}</span>
+                        <span class="char-details">${char.race || ''} ${char.class || ''} Lvl ${char.level || 1}</span>
                     </div>
                     <div class="char-stats-preview">
                         ${Object.entries(char.stats || {}).slice(0, 3).map(([stat, value]) => `
-                            <span class="stat-preview" contenteditable="true">${stat} ${value}</span>
+                            <span class="stat-preview">${stat} ${value}</span>
                         `).join('')}
+                    </div>
+                    <div class="char-actions">
+                        <button onclick="event.stopPropagation(); quickRollCharacter('${char.id}')" class="btn-secondary">Roll</button>
+                        <button onclick="event.stopPropagation(); duplicateCharacter('${char.id}')" class="btn-secondary">Copy</button>
+                        <button onclick="event.stopPropagation(); deleteCharacter('${char.id}')" class="btn-danger">Delete</button>
                     </div>
                 </div>
             `).join('');
@@ -250,11 +314,13 @@
         function createCharacter() {
             const characterStats = JSON.parse(localStorage.getItem('characterStats') || '["STR","DEX","CON","INT","WIS","CHA"]');
             const newChar = {
-                id: Date.now().toString(),
+                id: TTRPGToolkit.generateId(),
                 name: 'New Character',
                 race: '',
                 class: '',
                 level: 1,
+                background: '',
+                alignment: 'N',
                 stats: {},
                 skills: [],
                 combat: {
@@ -262,12 +328,13 @@
                     maxHP: 10,
                     ac: 10,
                     speed: 30,
-                    initiative: 0
+                    initiative: 0,
+                    proficiency: 2
                 },
+                equipment: '',
                 notes: ''
             };
             
-            // Initialize stats from current settings
             characterStats.forEach(stat => {
                 newChar.stats[stat] = 10;
             });
@@ -289,29 +356,24 @@
         function createFromTemplate(templateName) {
             const template = characterTemplates[templateName];
             const newChar = {
-                id: Date.now().toString(),
+                id: TTRPGToolkit.generateId(),
                 name: `New ${templateName.charAt(0).toUpperCase() + templateName.slice(1)} Character`,
                 race: '',
                 class: '',
                 level: 1,
+                background: '',
+                alignment: 'N',
                 stats: {},
                 skills: template.skills.map(skill => ({ name: skill, value: '+0' })),
-                combat: {
-                    hp: 10,
-                    maxHP: 10,
-                    ac: 10,
-                    speed: 30,
-                    initiative: 0
-                },
+                combat: template.combat,
+                equipment: '',
                 notes: ''
             };
             
-            // Initialize stats from template
             template.stats.forEach(stat => {
                 newChar.stats[stat] = 10;
             });
             
-            // Save template as current stat settings
             localStorage.setItem('characterStats', JSON.stringify(template.stats));
             
             characters.push(newChar);
@@ -319,22 +381,22 @@
             editCharacter(newChar.id);
             loadCharacterList();
             closeTemplateModal();
-            
-            // Reload global settings to update stats grid
-            loadGlobalSettings();
         }
 
         function generateRandomCharacter() {
             const races = ['Human', 'Elf', 'Dwarf', 'Halfling', 'Gnome', 'Half-Elf', 'Half-Orc', 'Tiefling'];
             const classes = ['Fighter', 'Wizard', 'Rogue', 'Cleric', 'Ranger', 'Paladin', 'Barbarian', 'Bard'];
             const names = ['Aelar', 'Borin', 'Celia', 'Darian', 'Elena', 'Fargrim', 'Gwen', 'Hakon'];
+            const backgrounds = ['Acolyte', 'Criminal', 'Folk Hero', 'Noble', 'Sage', 'Soldier'];
             
             const newChar = {
-                id: Date.now().toString(),
+                id: TTRPGToolkit.generateId(),
                 name: names[Math.floor(Math.random() * names.length)],
                 race: races[Math.floor(Math.random() * races.length)],
                 class: classes[Math.floor(Math.random() * classes.length)],
                 level: Math.floor(Math.random() * 10) + 1,
+                background: backgrounds[Math.floor(Math.random() * backgrounds.length)],
+                alignment: ['LG', 'NG', 'CG', 'N', 'CN', 'LE', 'NE'][Math.floor(Math.random() * 7)],
                 stats: {},
                 skills: [],
                 combat: {
@@ -342,23 +404,23 @@
                     maxHP: 0,
                     ac: Math.floor(Math.random() * 10) + 10,
                     speed: 30,
-                    initiative: Math.floor(Math.random() * 5)
+                    initiative: Math.floor(Math.random() * 5),
+                    proficiency: Math.min(6, Math.floor(newChar.level / 4) + 2)
                 },
+                equipment: 'Random starting gear',
                 notes: 'Randomly generated character'
             };
             
-            // Generate random stats (3d6 method)
             const characterStats = JSON.parse(localStorage.getItem('characterStats') || '["STR","DEX","CON","INT","WIS","CHA"]');
             characterStats.forEach(stat => {
                 let total = 0;
                 let min = 6;
-                for (let i = 0; i < 3; i++) {
+                for (let i = 0; i < 4; i++) {
                     const roll = Math.floor(Math.random() * 6) + 1;
                     total += roll;
                     if (roll < min) min = roll;
                 }
-                // Drop lowest and add
-                newChar.stats[stat] = total - min + 3; // +3 to make stats more reasonable
+                newChar.stats[stat] = total - min;
             });
             
             newChar.combat.maxHP = newChar.combat.hp;
@@ -367,7 +429,7 @@
             localStorage.setItem('characters', JSON.stringify(characters));
             editCharacter(newChar.id);
             loadCharacterList();
-            showNotification('Random character generated!', 'success');
+            TTRPGToolkit.showNotification('Random character generated!', 'success');
         }
 
         function editCharacter(id) {
@@ -375,22 +437,38 @@
             const char = characters.find(c => c.id === id);
             if (!char) return;
             
+            // Basic info
             document.getElementById('charName').value = char.name || '';
             document.getElementById('charRace').value = char.race || '';
             document.getElementById('charClass').value = char.class || '';
             document.getElementById('charLevel').value = char.level || 1;
-            document.getElementById('charNotes').value = char.notes || '';
+            document.getElementById('charBackground').value = char.background || '';
+            document.getElementById('charAlignment').value = char.alignment || 'N';
             
-            // Load combat stats
+            // Combat stats
             if (char.combat) {
                 document.getElementById('charHP').value = char.combat.hp || 10;
                 document.getElementById('charMaxHP').value = char.combat.maxHP || 10;
                 document.getElementById('charAC').value = char.combat.ac || 10;
                 document.getElementById('charSpeed').value = char.combat.speed || 30;
                 document.getElementById('charInitiative').value = char.combat.initiative || 0;
+                document.getElementById('charProficiency').value = char.combat.proficiency || 2;
             }
             
-            // Load stats - regenerate from current settings first
+            // Equipment and notes
+            document.getElementById('charEquipment').value = char.equipment || '';
+            document.getElementById('charNotes').value = char.notes || '';
+            
+            // Load stats
+            loadCharacterStats(char);
+            
+            // Load skills
+            loadCharacterSkills(char);
+            
+            document.getElementById('characterEditor').style.display = 'block';
+        }
+
+        function loadCharacterStats(char) {
             const characterStats = JSON.parse(localStorage.getItem('characterStats') || '["STR","DEX","CON","INT","WIS","CHA"]');
             const statsGrid = document.getElementById('statsGrid');
             
@@ -399,7 +477,7 @@
                 const mod = Math.floor((value - 10) / 2);
                 return `
                     <div class="stat-item" data-stat="${stat}">
-                        <label contenteditable="true">${stat}:</label>
+                        <label>${stat}:</label>
                         <input type="number" value="${value}" min="1" max="30" onchange="updateStatMod(this)">
                         <span class="stat-mod">${mod >= 0 ? '+' : ''}${mod}</span>
                         <button onclick="removeStat('${stat}')" class="btn-danger stat-remove">X</button>
@@ -407,7 +485,7 @@
                 `;
             }).join('');
             
-            // Load custom stats that aren't in the template
+            // Load custom stats
             Object.keys(char.stats).forEach(stat => {
                 if (!characterStats.includes(stat)) {
                     const value = char.stats[stat];
@@ -416,7 +494,7 @@
                     statItem.className = 'stat-item';
                     statItem.dataset.stat = stat;
                     statItem.innerHTML = `
-                        <label contenteditable="true">${stat}:</label>
+                        <label>${stat}:</label>
                         <input type="number" value="${value}" min="1" max="30" onchange="updateStatMod(this)">
                         <span class="stat-mod">${mod >= 0 ? '+' : ''}${mod}</span>
                         <button onclick="removeStat('${stat}')" class="btn-danger stat-remove">X</button>
@@ -424,22 +502,21 @@
                     statsGrid.appendChild(statItem);
                 }
             });
-            
-            // Load skills
+        }
+
+        function loadCharacterSkills(char) {
             const skillsContainer = document.getElementById('skillsList');
             if (char.skills && char.skills.length > 0) {
                 skillsContainer.innerHTML = char.skills.map(skill => `
                     <div class="skill-item">
-                        <span contenteditable="true" class="skill-name">${skill.name}</span>
-                        <span contenteditable="true" class="skill-value">${skill.value}</span>
+                        <span class="skill-name editable-content">${skill.name}</span>
+                        <span class="skill-value editable-content">${skill.value}</span>
                         <button onclick="removeSkill(this)" class="btn-danger">X</button>
                     </div>
                 `).join('');
             } else {
-                skillsContainer.innerHTML = '<p contenteditable="true">No skills yet. Add some!</p>';
+                skillsContainer.innerHTML = '<p>No skills yet. Add some!</p>';
             }
-            
-            document.getElementById('characterEditor').style.display = 'block';
         }
 
         function updateStatMod(input) {
@@ -459,7 +536,7 @@
                 statItem.className = 'stat-item';
                 statItem.dataset.stat = statName;
                 statItem.innerHTML = `
-                    <label contenteditable="true">${statName}:</label>
+                    <label>${statName}:</label>
                     <input type="number" value="10" min="1" max="30" onchange="updateStatMod(this)">
                     <span class="stat-mod">+0</span>
                     <button onclick="removeStat('${statName}')" class="btn-danger stat-remove">X</button>
@@ -509,7 +586,6 @@
                     break;
             }
             
-            // Shuffle and assign to stats
             stats.sort(() => Math.random() - 0.5);
             statItems.forEach((item, index) => {
                 if (index < stats.length) {
@@ -519,7 +595,19 @@
                 }
             });
             
-            showNotification('Stats generated!', 'success');
+            TTRPGToolkit.showNotification('Stats generated!', 'success');
+        }
+
+        function autoCalculateModifiers() {
+            const statsGrid = document.getElementById('statsGrid');
+            const statItems = statsGrid.querySelectorAll('.stat-item');
+            
+            statItems.forEach(item => {
+                const input = item.querySelector('input[type="number"]');
+                updateStatMod(input);
+            });
+            
+            TTRPGToolkit.showNotification('Modifiers calculated!', 'success');
         }
 
         function showSkillGenerator() {
@@ -528,14 +616,14 @@
             
             const container = document.getElementById('availableSkills');
             if (skills.length === 0) {
-                container.innerHTML = '<p contenteditable="true">No skills in database. Add some in the Database section first.</p>';
+                container.innerHTML = '<p>No skills in database. Add some in the Database section first.</p>';
             } else {
                 container.innerHTML = skills.map(skill => `
                     <div class="skill-option">
                         <input type="checkbox" id="skill-${skill.id}" value="${skill.id}">
                         <label for="skill-${skill.id}">
-                            <strong contenteditable="true">${skill.name}</strong>
-                            <span contenteditable="true"> - ${skill.description || 'No description'}</span>
+                            <strong>${skill.name}</strong>
+                            <span> - ${skill.description || 'No description'}</span>
                         </label>
                     </div>
                 `).join('');
@@ -562,7 +650,14 @@
             });
             
             closeSkillModal();
-            showNotification(`Added ${selectedSkills.length} skills`, 'success');
+            TTRPGToolkit.showNotification(`Added ${selectedSkills.length} skills`, 'success');
+        }
+
+        function addCustomSkill() {
+            const skillName = prompt('Enter skill name:');
+            if (skillName && skillName.trim()) {
+                addSkillToCharacter(skillName, '+0');
+            }
         }
 
         function addSkillToCharacter(name, value) {
@@ -574,35 +669,42 @@
             const skillItem = document.createElement('div');
             skillItem.className = 'skill-item';
             skillItem.innerHTML = `
-                <span contenteditable="true" class="skill-name">${name}</span>
-                <span contenteditable="true" class="skill-value">${value}</span>
+                <span class="skill-name editable-content">${name}</span>
+                <span class="skill-value editable-content">${value}</span>
                 <button onclick="removeSkill(this)" class="btn-danger">X</button>
             `;
             skillsContainer.appendChild(skillItem);
         }
 
-        // ... rest of the existing functions (saveCharacter, deleteCharacter, closeEditor, addSkill, removeSkill) ...
+        function removeSkill(button) {
+            button.parentElement.remove();
+        }
 
         function saveCharacter() {
             const char = characters.find(c => c.id === currentCharacterId);
             if (!char) return;
             
+            // Basic info
             char.name = document.getElementById('charName').value;
             char.race = document.getElementById('charRace').value;
             char.class = document.getElementById('charClass').value;
             char.level = parseInt(document.getElementById('charLevel').value) || 1;
+            char.background = document.getElementById('charBackground').value;
+            char.alignment = document.getElementById('charAlignment').value;
+            char.equipment = document.getElementById('charEquipment').value;
             char.notes = document.getElementById('charNotes').value;
             
-            // Save combat stats
+            // Combat stats
             char.combat = {
                 hp: parseInt(document.getElementById('charHP').value) || 10,
                 maxHP: parseInt(document.getElementById('charMaxHP').value) || 10,
                 ac: parseInt(document.getElementById('charAC').value) || 10,
                 speed: parseInt(document.getElementById('charSpeed').value) || 30,
-                initiative: parseInt(document.getElementById('charInitiative').value) || 0
+                initiative: parseInt(document.getElementById('charInitiative').value) || 0,
+                proficiency: parseInt(document.getElementById('charProficiency').value) || 2
             };
             
-            // Save stats
+            // Stats
             char.stats = {};
             document.querySelectorAll('.stat-item').forEach(item => {
                 const statName = item.dataset.stat;
@@ -610,7 +712,7 @@
                 char.stats[statName] = value;
             });
             
-            // Save skills
+            // Skills
             const skillItems = document.querySelectorAll('.skill-item');
             char.skills = Array.from(skillItems).map(item => ({
                 name: item.querySelector('.skill-name').textContent,
@@ -619,53 +721,51 @@
             
             localStorage.setItem('characters', JSON.stringify(characters));
             loadCharacterList();
-            showNotification('Character saved!', 'success');
+            TTRPGToolkit.showNotification('Character saved!', 'success');
         }
 
-        function duplicateCharacter() {
-            const char = characters.find(c => c.id === currentCharacterId);
+        function duplicateCharacter(existingId = null) {
+            const charId = existingId || currentCharacterId;
+            const char = characters.find(c => c.id === charId);
             if (!char) return;
             
             const newChar = JSON.parse(JSON.stringify(char));
-            newChar.id = Date.now().toString();
+            newChar.id = TTRPGToolkit.generateId();
             newChar.name = char.name + ' (Copy)';
             
             characters.push(newChar);
             localStorage.setItem('characters', JSON.stringify(characters));
-            editCharacter(newChar.id);
+            
+            if (!existingId) {
+                editCharacter(newChar.id);
+            }
             loadCharacterList();
-            showNotification('Character duplicated!', 'success');
+            TTRPGToolkit.showNotification('Character duplicated!', 'success');
         }
 
         function exportCharacter() {
             const char = characters.find(c => c.id === currentCharacterId);
             if (!char) return;
             
-            const exportData = JSON.stringify(char, null, 2);
-            const blob = new Blob([exportData], { type: 'application/json' });
-            const url = URL.createObjectURL(blob);
-            
-            const a = document.createElement('a');
-            a.href = url;
-            a.download = `${char.name.replace(/[^a-z0-9]/gi, '_').toLowerCase()}.json`;
-            document.body.appendChild(a);
-            a.click();
-            document.body.removeChild(a);
-            URL.revokeObjectURL(url);
-            
-            showNotification('Character exported!', 'success');
+            TTRPGToolkit.exportData(char, `${char.name.replace(/[^a-z0-9]/gi, '_').toLowerCase()}.json`);
+            TTRPGToolkit.showNotification('Character exported!', 'success');
         }
 
-        function deleteCharacter() {
-            if (!currentCharacterId) return;
+        function deleteCharacter(charId = null) {
+            const idToDelete = charId || currentCharacterId;
+            if (!idToDelete) return;
+            
             if (!confirm('Delete this character?')) return;
             
-            characters = characters.filter(c => c.id !== currentCharacterId);
+            characters = characters.filter(c => c.id !== idToDelete);
             localStorage.setItem('characters', JSON.stringify(characters));
-            currentCharacterId = null;
-            document.getElementById('characterEditor').style.display = 'none';
+            
+            if (!charId) {
+                currentCharacterId = null;
+                document.getElementById('characterEditor').style.display = 'none';
+            }
             loadCharacterList();
-            showNotification('Character deleted!', 'success');
+            TTRPGToolkit.showNotification('Character deleted!', 'success');
         }
 
         function closeEditor() {
@@ -673,25 +773,24 @@
             currentCharacterId = null;
         }
 
-        function addSkill() {
-            const skillsContainer = document.getElementById('skillsList');
-            if (skillsContainer.innerHTML.includes('No skills yet')) {
-                skillsContainer.innerHTML = '';
-            }
+        function quickRollCharacter(charId) {
+            const char = characters.find(c => c.id === charId);
+            if (!char) return;
             
-            const newSkill = document.createElement('div');
-            newSkill.className = 'skill-item';
-            newSkill.innerHTML = `
-                <span contenteditable="true" class="skill-name">New Skill</span>
-                <span contenteditable="true" class="skill-value">+0</span>
-                <button onclick="removeSkill(this)" class="btn-danger">X</button>
-            `;
-            skillsContainer.appendChild(newSkill);
+            // Simple attack roll using character's stats
+            const dexMod = Math.floor(((char.stats.DEX || 10) - 10) / 2);
+            const attackRoll = Math.floor(Math.random() * 20) + 1 + dexMod;
+            const damageRoll = Math.floor(Math.random() * 6) + 1 + dexMod;
+            
+            TTRPGToolkit.showNotification(`${char.name} attacks: ${attackRoll} (damage: ${damageRoll})`, 'info');
         }
 
-        function removeSkill(button) {
-            button.parentElement.remove();
-        }
+        // Auto-save for editable content
+        document.addEventListener('blur', function(e) {
+            if (e.target.classList.contains('editable-content')) {
+                // Auto-save is handled in the main save function
+            }
+        }, true);
     </script>
 
     <style>
@@ -701,8 +800,38 @@
             flex-wrap: wrap;
         }
 
+        .character-list {
+            display: grid;
+            gap: 0.5rem;
+        }
+
+        .character-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 1rem;
+            background: var(--bg-secondary);
+            border-radius: 4px;
+            border-left: 4px solid var(--accent);
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .character-item:hover {
+            background: var(--accent);
+            color: var(--bg-primary);
+            transform: translateY(-2px);
+        }
+
         .char-basic-info {
             flex: 1;
+        }
+
+        .char-name {
+            display: block;
+            font-weight: bold;
+            font-size: 1.1rem;
+            color: var(--accent);
         }
 
         .char-details {
@@ -716,6 +845,7 @@
             display: flex;
             gap: 0.5rem;
             flex-wrap: wrap;
+            margin: 0 1rem;
         }
 
         .stat-preview {
@@ -723,6 +853,22 @@
             padding: 0.25rem 0.5rem;
             border-radius: 4px;
             font-size: 0.8rem;
+        }
+
+        .char-actions {
+            display: flex;
+            gap: 0.25rem;
+        }
+
+        .char-actions button {
+            padding: 0.5rem;
+            font-size: 0.8rem;
+        }
+
+        .form-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1rem;
         }
 
         .section-header {
@@ -734,13 +880,15 @@
             gap: 0.5rem;
         }
 
-        .stat-controls {
+        .stat-controls, .skill-controls {
             display: flex;
             gap: 0.5rem;
+            flex-wrap: wrap;
         }
 
         .stats-grid {
             display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
             gap: 0.5rem;
         }
 
@@ -748,25 +896,28 @@
             display: flex;
             align-items: center;
             gap: 0.5rem;
-            padding: 0.5rem;
+            padding: 0.75rem;
             background: var(--bg-secondary);
             border-radius: 4px;
-            position: relative;
+            border-left: 3px solid var(--accent);
         }
 
         .stat-item label {
             min-width: 60px;
             margin: 0;
+            font-weight: bold;
         }
 
         .stat-item input {
             width: 60px;
+            text-align: center;
         }
 
         .stat-mod {
             font-weight: bold;
             color: var(--accent);
             min-width: 40px;
+            text-align: center;
         }
 
         .stat-remove {
@@ -781,14 +932,40 @@
             gap: 1rem;
         }
 
-        .combat-grid .form-group {
+        .hp-controls {
             display: flex;
             align-items: center;
             gap: 0.5rem;
         }
 
-        .combat-grid input {
+        .hp-controls input {
             width: 70px;
+        }
+
+        .skills-list {
+            display: grid;
+            gap: 0.5rem;
+        }
+
+        .skill-item {
+            display: flex;
+            gap: 0.5rem;
+            align-items: center;
+            padding: 0.75rem;
+            background: var(--bg-secondary);
+            border-radius: 4px;
+            border-left: 3px solid var(--accent);
+        }
+
+        .skill-name {
+            flex: 1;
+            font-weight: bold;
+        }
+
+        .skill-value {
+            width: 60px;
+            text-align: center;
+            font-family: 'Courier New', monospace;
         }
 
         .template-list {
@@ -799,7 +976,7 @@
 
         .template-item {
             background: var(--bg-secondary);
-            padding: 1rem;
+            padding: 1.5rem;
             border-radius: 8px;
             cursor: pointer;
             transition: all 0.3s;
@@ -809,6 +986,7 @@
         .template-item:hover {
             background: var(--accent);
             color: var(--bg-primary);
+            transform: translateY(-2px);
         }
 
         .template-item h4 {
@@ -833,7 +1011,7 @@
         }
 
         .skill-option {
-            padding: 0.5rem;
+            padding: 0.75rem;
             border-bottom: 1px solid var(--border);
         }
 
@@ -845,9 +1023,33 @@
             margin-right: 0.5rem;
         }
 
+        .equipment-section, .notes-section {
+            margin-top: 2rem;
+        }
+
         @media (max-width: 768px) {
             .character-actions {
                 flex-direction: column;
+                width: 100%;
+            }
+            
+            .character-item {
+                flex-direction: column;
+                align-items: stretch;
+                gap: 1rem;
+            }
+            
+            .char-stats-preview {
+                justify-content: center;
+                margin: 0;
+            }
+            
+            .char-actions {
+                width: 100%;
+            }
+            
+            .char-actions button {
+                flex: 1;
             }
             
             .section-header {
@@ -855,7 +1057,7 @@
                 align-items: stretch;
             }
             
-            .stat-controls {
+            .stat-controls, .skill-controls {
                 width: 100%;
                 justify-content: space-between;
             }
@@ -864,16 +1066,16 @@
                 grid-template-columns: 1fr;
             }
             
-            .char-stats-preview {
-                justify-content: center;
-            }
-            
             .stat-item {
                 flex-wrap: wrap;
             }
             
             .skill-filters {
                 flex-direction: column;
+            }
+            
+            .form-grid {
+                grid-template-columns: 1fr;
             }
         }
     </style>

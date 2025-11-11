@@ -16,6 +16,8 @@
             <a href="random-generator.html">Generators</a>
             <a href="notes.html">Notes</a>
             <a href="map.html">Map</a>
+            <a href="battle.html">Battle</a>
+            <a href="database.html">Database</a>
             <a href="multiplayer.html" class="active">Multiplayer</a>
             <a href="settings.html">Settings</a>
         </div>
@@ -24,39 +26,53 @@
     <main class="container">
         <!-- Game Master View -->
         <section id="gmView" class="card" style="display: none;">
-            <h2 contenteditable="true">Game Master Control Panel</h2>
+            <h2>Game Master Control Panel</h2>
             <div class="party-info">
-                <h3 contenteditable="true">Party: <span id="partyNameDisplay">Unnamed Party</span></h3>
-                <p contenteditable="true">Party Code: <strong id="partyCodeDisplay">XXXX</strong></p>
-                <p contenteditable="true">Connected Players: <span id="playerCount">0</span></p>
+                <h3>Party: <span id="partyNameDisplay">Unnamed Party</span></h3>
+                <p>Party Code: <strong id="partyCodeDisplay">XXXX</strong></p>
+                <p>Connected Players: <span id="playerCount">0</span></p>
+                <p>Session Status: <span id="sessionStatus" class="status-active">Active</span></p>
             </div>
             
             <div class="player-list">
-                <h3 contenteditable="true">Connected Players</h3>
+                <h3>Connected Players</h3>
                 <div id="playersList"></div>
             </div>
             
             <div class="gm-controls">
-                <button onclick="endSession()" class="btn-danger" contenteditable="true">End Session</button>
-                <button onclick="broadcastMessage()" class="btn-secondary" contenteditable="true">Broadcast Message</button>
+                <button onclick="broadcastMessage()" class="btn-primary">Broadcast Message</button>
+                <button onclick="shareMap()" class="btn-secondary">Share Map</button>
+                <button onclick="shareHandout()" class="btn-secondary">Share Handout</button>
+                <button onclick="endSession()" class="btn-danger">End Session</button>
             </div>
             
             <div class="shared-dice">
-                <h3 contenteditable="true">Shared Dice Rolls</h3>
+                <h3>Shared Dice Rolls</h3>
                 <div id="sharedRolls"></div>
+            </div>
+
+            <div class="session-tools">
+                <h3>Session Tools</h3>
+                <div class="tool-buttons">
+                    <button onclick="startCombat()" class="btn-secondary">Start Combat</button>
+                    <button onclick="shareInitiative()" class="btn-secondary">Share Initiative</button>
+                    <button onclick="revealMap()" class="btn-secondary">Reveal Map Area</button>
+                    <button onclick="playAmbience()" class="btn-secondary">Play Ambience</button>
+                </div>
             </div>
         </section>
 
         <!-- Player View -->
         <section id="playerView" class="card" style="display: none;">
-            <h2 contenteditable="true">Player Session</h2>
+            <h2>Player Session</h2>
             <div class="session-info">
-                <h3 contenteditable="true">Party: <span id="playerPartyName">Unnamed Party</span></h3>
-                <p contenteditable="true">Game Master: <span id="gmName">Unknown</span></p>
+                <h3>Party: <span id="playerPartyName">Unnamed Party</span></h3>
+                <p>Game Master: <span id="gmName">Unknown</span></p>
+                <p>Session Status: <span id="playerSessionStatus" class="status-active">Connected</span></p>
             </div>
             
             <div class="player-dice">
-                <h3 contenteditable="true">Roll Dice</h3>
+                <h3>Roll Dice</h3>
                 <div class="quick-dice-buttons">
                     <button onclick="sharedRoll('d4')" class="dice-btn">d4</button>
                     <button onclick="sharedRoll('d6')" class="dice-btn">d6</button>
@@ -65,70 +81,131 @@
                     <button onclick="sharedRoll('d12')" class="dice-btn">d12</button>
                     <button onclick="sharedRoll('d20')" class="dice-btn">d20</button>
                     <button onclick="sharedRoll('d100')" class="dice-btn">d100</button>
+                    <button onclick="sharedRoll('2d6')" class="dice-btn">2d6</button>
                 </div>
                 <div class="custom-roll">
                     <input type="text" id="customRollFormula" placeholder="2d6+3">
-                    <button onclick="sharedCustomRoll()" class="btn-primary" contenteditable="true">Roll</button>
+                    <button onclick="sharedCustomRoll()" class="btn-primary">Roll</button>
+                </div>
+                <div class="character-rolls">
+                    <h4>Quick Character Rolls</h4>
+                    <div id="characterRollButtons"></div>
+                </div>
+            </div>
+            
+            <div class="shared-content">
+                <h3>Shared Content</h3>
+                <div id="sharedContent">
+                    <p>Game Master hasn't shared any content yet.</p>
                 </div>
             </div>
             
             <div class="shared-rolls">
-                <h3 contenteditable="true">Recent Rolls</h3>
+                <h3>Recent Rolls</h3>
                 <div id="playerSharedRolls"></div>
             </div>
             
-            <button onclick="leaveSession()" class="btn-danger" contenteditable="true">Leave Session</button>
+            <button onclick="leaveSession()" class="btn-danger">Leave Session</button>
         </section>
 
         <!-- Login View -->
         <section id="loginView" class="card">
-            <h2 contenteditable="true">Multiplayer Session</h2>
+            <h2>Multiplayer Session</h2>
             <div class="login-options">
                 <div class="form-group">
-                    <label contenteditable="true">Your Name:</label>
+                    <label>Your Name:</label>
                     <input type="text" id="playerName" placeholder="Enter your character name" maxlength="20">
                 </div>
                 
                 <div class="role-selection">
-                    <h3 contenteditable="true">Join as:</h3>
+                    <h3>Join as:</h3>
                     <div class="role-buttons">
-                        <button onclick="showGMCreation()" class="btn-primary" contenteditable="true">Game Master</button>
-                        <button onclick="showPlayerJoin()" class="btn-secondary" contenteditable="true">Player</button>
+                        <button onclick="showGMCreation()" class="btn-primary">Game Master</button>
+                        <button onclick="showPlayerJoin()" class="btn-secondary">Player</button>
                     </div>
                 </div>
             </div>
             
             <!-- GM Creation -->
             <div id="gmCreation" style="display: none;">
-                <h3 contenteditable="true">Create New Session</h3>
+                <h3>Create New Session</h3>
                 <div class="form-group">
-                    <label contenteditable="true">Party Name:</label>
+                    <label>Party Name:</label>
                     <input type="text" id="partyName" placeholder="Adventurers Guild">
                 </div>
-                <button onclick="createSession()" class="btn-primary" contenteditable="true">Create Session</button>
+                <div class="form-group">
+                    <label>Session Password (optional):</label>
+                    <input type="password" id="sessionPassword" placeholder="Leave empty for no password">
+                </div>
+                <div class="form-group">
+                    <label>Max Players:</label>
+                    <input type="number" id="maxPlayers" value="6" min="1" max="20">
+                </div>
+                <button onclick="createSession()" class="btn-primary">Create Session</button>
             </div>
             
             <!-- Player Join -->
             <div id="playerJoin" style="display: none;">
-                <h3 contenteditable="true">Join Existing Session</h3>
+                <h3>Join Existing Session</h3>
                 <div class="form-group">
-                    <label contenteditable="true">Party Code:</label>
+                    <label>Party Code:</label>
                     <input type="text" id="partyCode" placeholder="Enter 4-digit code" maxlength="4" pattern="[0-9]{4}">
                 </div>
-                <button onclick="joinSession()" class="btn-primary" contenteditable="true">Join Session</button>
+                <div class="form-group">
+                    <label>Session Password (if required):</label>
+                    <input type="password" id="joinPassword" placeholder="Enter password">
+                </div>
+                <button onclick="joinSession()" class="btn-primary">Join Session</button>
             </div>
         </section>
 
         <!-- Session History -->
         <section class="card">
-            <h2 contenteditable="true">Session History</h2>
+            <h2>Session History</h2>
             <div id="sessionHistory">
-                <p contenteditable="true">No previous sessions.</p>
+                <p>No previous sessions.</p>
+            </div>
+        </section>
+
+        <!-- Quick Session Tools -->
+        <section class="card">
+            <h2>Quick Session Tools</h2>
+            <div class="quick-tools">
+                <button onclick="quickRoll('d20')" class="btn-secondary">Quick d20</button>
+                <button onclick="quickRoll('2d6')" class="btn-secondary">Quick 2d6</button>
+                <button onclick="generateEncounter()" class="btn-secondary">Generate Encounter</button>
+                <button onclick="generateNPC()" class="btn-secondary">Generate NPC</button>
+                <button onclick="showOracle()" class="btn-secondary">Oracle Yes/No</button>
             </div>
         </section>
     </main>
 
+    <!-- Message Modal -->
+    <div id="messageModal" class="modal" style="display: none;">
+        <div class="modal-content">
+            <h2>Broadcast Message</h2>
+            <div class="form-group">
+                <label>Message:</label>
+                <textarea id="broadcastMessage" placeholder="Enter message to broadcast to all players..." style="min-height: 100px;"></textarea>
+            </div>
+            <div class="form-group">
+                <label>Message Type:</label>
+                <select id="messageType">
+                    <option value="info">Information</option>
+                    <option value="warning">Warning</option>
+                    <option value="success">Success</option>
+                    <option value="danger">Danger</option>
+                </select>
+            </div>
+            <div class="modal-actions">
+                <button onclick="sendBroadcastMessage()" class="btn-primary">Send</button>
+                <button onclick="closeMessageModal()" class="btn-secondary">Cancel</button>
+            </div>
+        </div>
+    </div>
+
     <script src="file:///android_asset/js/main.js"></script>
+    <script src="file:///android_asset/js/emojis.js"></script>
     <script>
         // Multiplayer state
         let currentSession = null;
@@ -136,25 +213,64 @@
         let playerId = null;
         let sessionHistory = JSON.parse(localStorage.getItem('sessionHistory') || '[]');
         
-        // Simulated "server" storage (in real app, this would be a backend)
+        // Simulated "server" storage
         const multiplayerSessions = JSON.parse(localStorage.getItem('multiplayerSessions') || '{}');
+        const sessionPollInterval = 3000; // 3 seconds
+        let pollIntervalId = null;
 
         document.addEventListener('DOMContentLoaded', function() {
             loadSessionHistory();
-            // Check if we're rejoining a session
+            checkForRejoin();
+            setupCharacterRolls();
+        });
+
+        function checkForRejoin() {
             const savedSession = localStorage.getItem('currentSession');
             if (savedSession) {
-                currentSession = JSON.parse(savedSession);
-                if (currentSession.playerId) {
-                    joinExistingSession();
+                const sessionData = JSON.parse(savedSession);
+                const session = multiplayerSessions[sessionData.partyCode];
+                
+                if (session && session.isActive) {
+                    if (confirm('Rejoin your previous session?')) {
+                        rejoinSession(sessionData);
+                    } else {
+                        localStorage.removeItem('currentSession');
+                    }
+                } else {
+                    localStorage.removeItem('currentSession');
                 }
             }
-        });
+        }
+
+        function rejoinSession(sessionData) {
+            const session = multiplayerSessions[sessionData.partyCode];
+            
+            if (!session || !session.isActive) {
+                TTRPGToolkit.showNotification('Session no longer exists', 'error');
+                localStorage.removeItem('currentSession');
+                return;
+            }
+            
+            currentSession = session;
+            playerId = sessionData.playerId;
+            isGM = sessionData.isGM;
+            
+            document.getElementById('playerName').value = sessionData.playerName || 'Player';
+            
+            if (isGM) {
+                showGMView();
+            } else {
+                showPlayerView();
+            }
+            
+            startSessionPolling();
+            TTRPGToolkit.showNotification('Rejoined session!', 'success');
+        }
 
         function showGMCreation() {
             const playerName = document.getElementById('playerName').value.trim();
             if (!playerName) {
-                alert('Please enter your name!');
+                TTRPGToolkit.showNotification('Please enter your name!', 'error');
                 return;
             }
             
@@ -165,7 +281,7 @@
         function showPlayerJoin() {
             const playerName = document.getElementById('playerName').value.trim();
             if (!playerName) {
-                alert('Please enter your name!');
+                TTRPGToolkit.showNotification('Please enter your name!', 'error');
                 return;
             }
             
@@ -176,25 +292,36 @@
         function createSession() {
             const playerName = document.getElementById('playerName').value.trim();
             const partyName = document.getElementById('partyName').value.trim() || 'Adventure Party';
+            const password = document.getElementById('sessionPassword').value;
+            const maxPlayers = parseInt(document.getElementById('maxPlayers').value) || 6;
             
             if (!playerName) {
-                alert('Please enter your name!');
+                TTRPGToolkit.showNotification('Please enter your name!', 'error');
                 return;
             }
             
             // Generate random 4-digit code
-            const partyCode = Math.floor(1000 + Math.random() * 9000).toString();
+            const partyCode = generatePartyCode();
             
             // Create session
             currentSession = {
-                id: Date.now().toString(),
+                id: TTRPGToolkit.generateId(),
                 partyName: partyName,
                 partyCode: partyCode,
+                password: password,
+                maxPlayers: maxPlayers,
                 gm: playerName,
                 players: [],
                 rolls: [],
+                sharedContent: [],
+                messages: [],
                 created: new Date().toISOString(),
-                isActive: true
+                isActive: true,
+                settings: {
+                    allowCharacterRolls: true,
+                    autoShareRolls: true,
+                    showPlayerNames: true
+                }
             };
             
             playerId = `gm_${Date.now()}`;
@@ -206,32 +333,52 @@
             localStorage.setItem('currentSession', JSON.stringify({
                 partyCode: partyCode,
                 playerId: playerId,
+                playerName: playerName,
                 isGM: true
             }));
             
             showGMView();
             startSessionPolling();
             
-            showNotification(`Session created! Party code: ${partyCode}`, 'success');
+            TTRPGToolkit.showNotification(`Session created! Party code: ${partyCode}`, 'success');
+        }
+
+        function generatePartyCode() {
+            let code;
+            do {
+                code = Math.floor(1000 + Math.random() * 9000).toString();
+            } while (multiplayerSessions[code] && multiplayerSessions[code].isActive);
+            return code;
         }
 
         function joinSession() {
             const playerName = document.getElementById('playerName').value.trim();
             const partyCode = document.getElementById('partyCode').value.trim();
+            const password = document.getElementById('joinPassword').value;
             
             if (!playerName || !partyCode) {
-                alert('Please enter both name and party code!');
+                TTRPGToolkit.showNotification('Please enter both name and party code!', 'error');
                 return;
             }
             
             if (partyCode.length !== 4 || !/^\d+$/.test(partyCode)) {
-                alert('Please enter a valid 4-digit party code!');
+                TTRPGToolkit.showNotification('Please enter a valid 4-digit party code!', 'error');
                 return;
             }
             
             const session = multiplayerSessions[partyCode];
             if (!session || !session.isActive) {
-                alert('Session not found or has ended!');
+                TTRPGToolkit.showNotification('Session not found or has ended!', 'error');
+                return;
+            }
+            
+            if (session.password && session.password !== password) {
+                TTRPGToolkit.showNotification('Incorrect password!', 'error');
+                return;
+            }
+            
+            if (session.players.length >= session.maxPlayers) {
+                TTRPGToolkit.showNotification('Session is full!', 'error');
                 return;
             }
             
@@ -242,7 +389,9 @@
             session.players.push({
                 id: playerId,
                 name: playerName,
-                joined: new Date().toISOString()
+                character: getCurrentCharacter(),
+                joined: new Date().toISOString(),
+                lastActive: new Date().toISOString()
             });
             
             multiplayerSessions[partyCode] = session;
@@ -250,6 +399,7 @@
             localStorage.setItem('currentSession', JSON.stringify({
                 partyCode: partyCode,
                 playerId: playerId,
+                playerName: playerName,
                 isGM: false
             }));
             
@@ -257,28 +407,12 @@
             showPlayerView();
             startSessionPolling();
             
-            showNotification(`Joined session: ${session.partyName}`, 'success');
+            TTRPGToolkit.showNotification(`Joined session: ${session.partyName}`, 'success');
         }
 
-        function joinExistingSession() {
-            const sessionData = JSON.parse(localStorage.getItem('currentSession'));
-            const session = multiplayerSessions[sessionData.partyCode];
-            
-            if (session && session.isActive) {
-                currentSession = session;
-                playerId = sessionData.playerId;
-                isGM = sessionData.isGM;
-                
-                if (isGM) {
-                    showGMView();
-                } else {
-                    showPlayerView();
-                }
-                startSessionPolling();
-            } else {
-                localStorage.removeItem('currentSession');
-                showNotification('Session no longer active', 'error');
-            }
+        function getCurrentCharacter() {
+            const characters = JSON.parse(localStorage.getItem('characters') || '[]');
+            return characters[0] || null; // Return first character for simplicity
         }
 
         function showGMView() {
@@ -300,16 +434,31 @@
             document.getElementById('playerPartyName').textContent = currentSession.partyName;
             document.getElementById('gmName').textContent = currentSession.gm;
             updatePlayerSharedRolls();
+            updateSharedContent();
+            setupCharacterRolls();
         }
 
         function startSessionPolling() {
-            // Poll for updates every 3 seconds
-            setInterval(() => {
+            if (pollIntervalId) {
+                clearInterval(pollIntervalId);
+            }
+            
+            pollIntervalId = setInterval(() => {
                 const session = multiplayerSessions[currentSession.partyCode];
                 if (!session || !session.isActive) {
-                    showNotification('Session ended by GM', 'error');
+                    TTRPGToolkit.showNotification('Session ended by GM', 'error');
                     leaveSession();
                     return;
+                }
+                
+                // Update player last active time
+                if (!isGM) {
+                    const playerIndex = session.players.findIndex(p => p.id === playerId);
+                    if (playerIndex !== -1) {
+                        session.players[playerIndex].lastActive = new Date().toISOString();
+                        multiplayerSessions[currentSession.partyCode] = session;
+                        localStorage.setItem('multiplayerSessions', JSON.stringify(multiplayerSessions));
+                    }
                 }
                 
                 if (isGM) {
@@ -317,8 +466,9 @@
                     updateSharedRolls();
                 } else {
                     updatePlayerSharedRolls();
+                    updateSharedContent();
                 }
-            }, 3000);
+            }, sessionPollInterval);
         }
 
         function updatePlayerList() {
@@ -328,32 +478,52 @@
             playerCount.textContent = currentSession.players.length;
             
             if (currentSession.players.length === 0) {
-                container.innerHTML = '<p contenteditable="true">No players connected yet.</p>';
+                container.innerHTML = '<p>No players connected yet.</p>';
                 return;
             }
             
             container.innerHTML = currentSession.players.map(player => `
                 <div class="player-item">
-                    <span class="player-name" contenteditable="true">${player.name}</span>
-                    <small contenteditable="true">Joined: ${new Date(player.joined).toLocaleTimeString()}</small>
+                    <div class="player-info">
+                        <span class="player-name">${player.name}</span>
+                        ${player.character ? `<small class="player-character">${player.character.name} (${player.character.race} ${player.character.class})</small>` : ''}
+                        <small class="player-joined">Joined: ${new Date(player.joined).toLocaleTimeString()}</small>
+                    </div>
+                    <div class="player-status">
+                        <span class="status-indicator ${isPlayerActive(player) ? 'active' : 'inactive'}"></span>
+                        <small>${isPlayerActive(player) ? 'Online' : 'Away'}</small>
+                    </div>
                 </div>
             `).join('');
+        }
+
+        function isPlayerActive(player) {
+            const lastActive = new Date(player.lastActive);
+            const now = new Date();
+            return (now - lastActive) < (sessionPollInterval * 2); // 2 poll cycles
         }
 
         function updateSharedRolls() {
             const container = document.getElementById('sharedRolls');
             
             if (currentSession.rolls.length === 0) {
-                container.innerHTML = '<p contenteditable="true">No rolls yet.</p>';
+                container.innerHTML = '<p>No rolls yet.</p>';
                 return;
             }
             
             container.innerHTML = currentSession.rolls.slice(0, 10).map(roll => `
-                <div class="roll-item">
-                    <strong contenteditable="true">${roll.playerName}</strong>: 
-                    <span contenteditable="true">${roll.formula} = ${roll.result}</span>
-                    <small contenteditable="true">(${roll.details})</small>
-                    <br><small contenteditable="true">${new Date(roll.timestamp).toLocaleTimeString()}</small>
+                <div class="roll-item ${roll.isCritical ? 'critical' : ''} ${roll.isFumble ? 'fumble' : ''}">
+                    <div class="roll-header">
+                        <strong>${roll.playerName}</strong>
+                        <span class="roll-time">${new Date(roll.timestamp).toLocaleTimeString()}</span>
+                    </div>
+                    <div class="roll-details">
+                        <span class="roll-formula">${roll.formula}</span>
+                        <span class="roll-result">= ${roll.result}</span>
+                        ${roll.isCritical ? ' 🎉' : ''}
+                        ${roll.isFumble ? ' 💥' : ''}
+                    </div>
+                    ${roll.details ? `<small class="roll-breakdown">${roll.details}</small>` : ''}
                 </div>
             `).join('');
         }
@@ -362,29 +532,54 @@
             const container = document.getElementById('playerSharedRolls');
             
             if (currentSession.rolls.length === 0) {
-                container.innerHTML = '<p contenteditable="true">No rolls yet.</p>';
+                container.innerHTML = '<p>No rolls yet.</p>';
                 return;
             }
             
             container.innerHTML = currentSession.rolls.slice(0, 10).map(roll => `
                 <div class="roll-item">
-                    <strong contenteditable="true">${roll.playerName}</strong>: 
-                    <span contenteditable="true">${roll.formula} = ${roll.result}</span>
-                    <small contenteditable="true">${new Date(roll.timestamp).toLocaleTimeString()}</small>
+                    <strong>${roll.playerName}</strong>: 
+                    <span>${roll.formula} = ${roll.result}</span>
+                    <small>${new Date(roll.timestamp).toLocaleTimeString()}</small>
+                </div>
+            `).join('');
+        }
+
+        function updateSharedContent() {
+            const container = document.getElementById('sharedContent');
+            const content = currentSession.sharedContent;
+            
+            if (content.length === 0) {
+                container.innerHTML = '<p>Game Master hasn\'t shared any content yet.</p>';
+                return;
+            }
+            
+            container.innerHTML = content.slice(0, 5).map(item => `
+                <div class="content-item ${item.type}">
+                    <h4>${item.title}</h4>
+                    <p>${item.content}</p>
+                    <small>Shared: ${new Date(item.timestamp).toLocaleTimeString()}</small>
                 </div>
             `).join('');
         }
 
         function sharedRoll(diceType) {
-            const sides = parseInt(diceType.substring(1));
-            const roll = Math.floor(Math.random() * sides) + 1;
+            const playerName = document.getElementById('playerName').value.trim() || 'Player';
+            const result = TTRPGToolkit.rollDice(diceType);
+            
+            if (!result) {
+                TTRPGToolkit.showNotification('Invalid dice formula!', 'error');
+                return;
+            }
             
             const rollData = {
-                playerName: document.getElementById('playerName').value.trim(),
+                playerName: playerName,
                 formula: diceType,
-                result: roll,
-                details: `${diceType} = ${roll}`,
-                timestamp: new Date().toISOString()
+                result: result.total,
+                details: result.details,
+                timestamp: new Date().toISOString(),
+                isCritical: result.rolls.some(roll => roll === 20),
+                isFumble: result.rolls.some(roll => roll === 1)
             };
             
             addRollToSession(rollData);
@@ -392,40 +587,31 @@
 
         function sharedCustomRoll() {
             const formula = document.getElementById('customRollFormula').value.trim();
-            if (!formula) return;
+            const playerName = document.getElementById('playerName').value.trim() || 'Player';
             
-            // Simple dice formula parser (supports nds+m format)
-            const match = formula.match(/(\d*)d(\d+)([+-]\d+)?/i);
-            if (!match) {
-                alert('Invalid dice formula! Use format like "2d6+3"');
+            if (!formula) {
+                TTRPGToolkit.showNotification('Please enter a dice formula!', 'error');
                 return;
             }
             
-            const count = parseInt(match[1]) || 1;
-            const sides = parseInt(match[2]);
-            const mod = parseInt(match[3]) || 0;
-            
-            let total = 0;
-            let rolls = [];
-            
-            for (let i = 0; i < count; i++) {
-                const roll = Math.floor(Math.random() * sides) + 1;
-                rolls.push(roll);
-                total += roll;
+            const result = TTRPGToolkit.rollDice(formula);
+            if (!result) {
+                TTRPGToolkit.showNotification('Invalid dice formula!', 'error');
+                return;
             }
             
-            const finalResult = total + mod;
-            const resultText = `${formula} = [${rolls.join(' + ')}]${mod >= 0 ? '+' : ''}${mod} = ${finalResult}`;
-            
             const rollData = {
-                playerName: document.getElementById('playerName').value.trim(),
+                playerName: playerName,
                 formula: formula,
-                result: finalResult,
-                details: resultText,
-                timestamp: new Date().toISOString()
+                result: result.total,
+                details: result.details,
+                timestamp: new Date().toISOString(),
+                isCritical: result.rolls.some(roll => roll === 20),
+                isFumble: result.rolls.some(roll => roll === 1)
             };
             
             addRollToSession(rollData);
+            document.getElementById('customRollFormula').value = '';
         }
 
         function addRollToSession(rollData) {
@@ -443,23 +629,90 @@
         }
 
         function broadcastMessage() {
-            const message = prompt('Enter message to broadcast:');
-            if (message) {
-                showNotification(`Broadcast: ${message}`, 'info');
-                // In a real app, this would send to all players
+            document.getElementById('messageModal').style.display = 'flex';
+            document.getElementById('broadcastMessage').value = '';
+            document.getElementById('messageType').value = 'info';
+        }
+
+        function closeMessageModal() {
+            document.getElementById('messageModal').style.display = 'none';
+        }
+
+        function sendBroadcastMessage() {
+            const message = document.getElementById('broadcastMessage').value.trim();
+            const type = document.getElementById('messageType').value;
+            
+            if (!message) {
+                TTRPGToolkit.showNotification('Please enter a message!', 'error');
+                return;
             }
+            
+            currentSession.messages.push({
+                from: 'GM',
+                message: message,
+                type: type,
+                timestamp: new Date().toISOString()
+            });
+            
+            multiplayerSessions[currentSession.partyCode] = currentSession;
+            localStorage.setItem('multiplayerSessions', JSON.stringify(multiplayerSessions));
+            
+            closeMessageModal();
+            TTRPGToolkit.showNotification('Message broadcasted!', 'success');
+        }
+
+        function shareMap() {
+            // In a real app, this would share a map image or data
+            TTRPGToolkit.showNotification('Map sharing would be implemented here', 'info');
+        }
+
+        function shareHandout() {
+            const title = prompt('Enter handout title:');
+            const content = prompt('Enter handout content:');
+            
+            if (title && content) {
+                currentSession.sharedContent.unshift({
+                    type: 'handout',
+                    title: title,
+                    content: content,
+                    timestamp: new Date().toISOString()
+                });
+                
+                multiplayerSessions[currentSession.partyCode] = currentSession;
+                localStorage.setItem('multiplayerSessions', JSON.stringify(multiplayerSessions));
+                
+                TTRPGToolkit.showNotification('Handout shared!', 'success');
+            }
+        }
+
+        function startCombat() {
+            TTRPGToolkit.showNotification('Combat started! Players notified.', 'success');
+        }
+
+        function shareInitiative() {
+            TTRPGToolkit.showNotification('Initiative order shared with players', 'info');
+        }
+
+        function revealMap() {
+            TTRPGToolkit.showNotification('Map area revealed to players', 'info');
+        }
+
+        function playAmbience() {
+            TTRPGToolkit.showNotification('Ambience player would start here', 'info');
         }
 
         function endSession() {
             if (confirm('End session for all players?')) {
                 currentSession.isActive = false;
+                currentSession.ended = new Date().toISOString();
                 delete multiplayerSessions[currentSession.partyCode];
                 localStorage.setItem('multiplayerSessions', JSON.stringify(multiplayerSessions));
                 
                 // Add to history
                 sessionHistory.unshift({
                     ...currentSession,
-                    ended: new Date().toISOString()
+                    playerCount: currentSession.players.length,
+                    rollCount: currentSession.rolls.length
                 });
                 localStorage.setItem('sessionHistory', JSON.stringify(sessionHistory));
                 
@@ -486,21 +739,124 @@
             const container = document.getElementById('sessionHistory');
             
             if (sessionHistory.length === 0) {
-                container.innerHTML = '<p contenteditable="true">No previous sessions.</p>';
+                container.innerHTML = '<p>No previous sessions.</p>';
                 return;
             }
             
             container.innerHTML = sessionHistory.slice(0, 5).map(session => `
                 <div class="session-item">
-                    <h4 contenteditable="true">${session.partyName}</h4>
-                    <p contenteditable="true">
+                    <h4>${session.partyName}</h4>
+                    <p>
                         ${session.isActive ? 'Active' : 'Ended'} • 
-                        ${session.players.length} players • 
+                        ${session.playerCount || 0} players • 
+                        ${session.rollCount || 0} rolls •
                         ${new Date(session.created).toLocaleDateString()}
                     </p>
-                    <small contenteditable="true">Code: ${session.partyCode}</small>
+                    <small>Code: ${session.partyCode} • GM: ${session.gm}</small>
                 </div>
             `).join('');
+        }
+
+        function setupCharacterRolls() {
+            const characters = JSON.parse(localStorage.getItem('characters') || '[]');
+            const container = document.getElementById('characterRollButtons');
+            
+            if (characters.length === 0) {
+                container.innerHTML = '<p>No characters found. Create one in the Characters section.</p>';
+                return;
+            }
+            
+            container.innerHTML = characters.map(char => `
+                <button onclick="rollCharacterSkill('${char.id}')" class="btn-secondary">
+                    ${char.name} - Skill Check
+                </button>
+                <button onclick="rollCharacterAttack('${char.id}')" class="btn-secondary">
+                    ${char.name} - Attack
+                </button>
+            `).join('');
+        }
+
+        function rollCharacterSkill(characterId) {
+            const characters = JSON.parse(localStorage.getItem('characters') || '[]');
+            const character = characters.find(c => c.id === characterId);
+            const playerName = document.getElementById('playerName').value.trim() || 'Player';
+            
+            if (!character) return;
+            
+            const skills = character.skills || [];
+            if (skills.length === 0) {
+                TTRPGToolkit.showNotification('No skills found for this character', 'warning');
+                return;
+            }
+            
+            const skill = skills[Math.floor(Math.random() * skills.length)];
+            const roll = Math.floor(Math.random() * 20) + 1;
+            
+            const rollData = {
+                playerName: playerName,
+                formula: `${character.name} - ${skill.name}`,
+                result: roll,
+                details: `${skill.name} check: ${roll}`,
+                timestamp: new Date().toISOString()
+            };
+            
+            addRollToSession(rollData);
+        }
+
+        function rollCharacterAttack(characterId) {
+            const characters = JSON.parse(localStorage.getItem('characters') || '[]');
+            const character = characters.find(c => c.id === characterId);
+            const playerName = document.getElementById('playerName').value.trim() || 'Player';
+            
+            if (!character) return;
+            
+            const attackRoll = Math.floor(Math.random() * 20) + 1;
+            const damageRoll = Math.floor(Math.random() * 8) + 1;
+            
+            const rollData = {
+                playerName: playerName,
+                formula: `${character.name} - Attack`,
+                result: attackRoll,
+                details: `Attack: ${attackRoll}, Damage: ${damageRoll}`,
+                timestamp: new Date().toISOString(),
+                isCritical: attackRoll === 20,
+                isFumble: attackRoll === 1
+            };
+            
+            addRollToSession(rollData);
+        }
+
+        // Quick tools
+        function quickRoll(formula) {
+            sharedRoll(formula);
+        }
+
+        function generateEncounter() {
+            const difficulties = ['Easy', 'Medium', 'Hard', 'Deadly'];
+            const types = ['Combat', 'Social', 'Puzzle', 'Exploration'];
+            
+            const difficulty = difficulties[Math.floor(Math.random() * difficulties.length)];
+            const type = types[Math.floor(Math.random() * types.length)];
+            
+            TTRPGToolkit.showNotification(`Generated ${difficulty} ${type} encounter`, 'info');
+        }
+
+        function generateNPC() {
+            const names = ['Aelar', 'Borin', 'Celia', 'Darian'];
+            const races = ['Human', 'Elf', 'Dwarf', 'Halfling'];
+            const occupations = ['Merchant', 'Guard', 'Scholar', 'Priest'];
+            
+            const name = names[Math.floor(Math.random() * names.length)];
+            const race = races[Math.floor(Math.random() * races.length)];
+            const occupation = occupations[Math.floor(Math.random() * occupations.length)];
+            
+            TTRPGToolkit.showNotification(`Generated NPC: ${name} the ${race} ${occupation}`, 'info');
+        }
+
+        function showOracle() {
+            const answers = ['Yes', 'No', 'Yes, but...', 'No, and...', 'Maybe', 'Ask again later'];
+            const answer = answers[Math.floor(Math.random() * answers.length)];
+            TTRPGToolkit.showNotification(`Oracle: ${answer}`, 'info');
         }
     </script>
 
@@ -532,6 +888,15 @@
             margin-bottom: 1rem;
         }
 
+        .status-active {
+            color: var(--success);
+            font-weight: bold;
+        }
+
+        .status-inactive {
+            color: var(--text-secondary);
+        }
+
         .player-list {
             margin-bottom: 1rem;
         }
@@ -540,10 +905,49 @@
             display: flex;
             justify-content: space-between;
             align-items: center;
-            padding: 0.5rem;
+            padding: 0.75rem;
             background: var(--bg-secondary);
             border-radius: 4px;
             margin-bottom: 0.5rem;
+        }
+
+        .player-info {
+            flex: 1;
+        }
+
+        .player-name {
+            font-weight: bold;
+            display: block;
+        }
+
+        .player-character {
+            color: var(--text-secondary);
+            display: block;
+        }
+
+        .player-joined {
+            color: var(--text-secondary);
+            font-size: 0.8rem;
+        }
+
+        .player-status {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .status-indicator {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+        }
+
+        .status-indicator.active {
+            background: var(--success);
+        }
+
+        .status-indicator.inactive {
+            background: var(--text-secondary);
         }
 
         .gm-controls {
@@ -553,21 +957,71 @@
             flex-wrap: wrap;
         }
 
-        .shared-dice, .shared-rolls {
+        .shared-dice, .shared-rolls, .shared-content {
             background: var(--bg-secondary);
             padding: 1rem;
             border-radius: 8px;
             max-height: 300px;
             overflow-y: auto;
+            margin-bottom: 1rem;
         }
 
         .roll-item {
-            padding: 0.5rem;
+            padding: 0.75rem;
             border-bottom: 1px solid var(--border);
+            transition: all 0.3s;
+        }
+
+        .roll-item:hover {
+            background: var(--bg-primary);
         }
 
         .roll-item:last-child {
             border-bottom: none;
+        }
+
+        .roll-item.critical {
+            border-left: 3px solid var(--success);
+            background: rgba(68, 255, 68, 0.1);
+        }
+
+        .roll-item.fumble {
+            border-left: 3px solid var(--danger);
+            background: rgba(255, 68, 68, 0.1);
+        }
+
+        .roll-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 0.25rem;
+        }
+
+        .roll-time {
+            color: var(--text-secondary);
+            font-size: 0.8rem;
+        }
+
+        .roll-details {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            margin-bottom: 0.25rem;
+        }
+
+        .roll-formula {
+            font-family: 'Courier New', monospace;
+            font-weight: bold;
+        }
+
+        .roll-result {
+            font-weight: bold;
+            color: var(--accent);
+        }
+
+        .roll-breakdown {
+            color: var(--text-secondary);
+            font-family: 'Courier New', monospace;
         }
 
         .session-info {
@@ -582,19 +1036,71 @@
         }
 
         .quick-dice-buttons {
-            display: flex;
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(80px, 1fr));
             gap: 0.5rem;
-            flex-wrap: wrap;
             margin-bottom: 1rem;
+        }
+
+        .dice-btn {
+            padding: 0.75rem 0.5rem;
+            border: 2px solid var(--accent);
+            background: var(--bg-secondary);
+            color: var(--text-primary);
+            border-radius: 6px;
+            cursor: pointer;
+            font-weight: bold;
+            transition: all 0.3s;
+        }
+
+        .dice-btn:hover {
+            background: var(--accent);
+            color: var(--bg-primary);
         }
 
         .custom-roll {
             display: flex;
             gap: 0.5rem;
+            margin-bottom: 1rem;
         }
 
         .custom-roll input {
             flex: 1;
+        }
+
+        .character-rolls {
+            margin-top: 1rem;
+        }
+
+        .character-rolls h4 {
+            margin-bottom: 0.5rem;
+            color: var(--accent);
+        }
+
+        #characterRollButtons {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 0.5rem;
+        }
+
+        .content-item {
+            background: var(--bg-primary);
+            padding: 1rem;
+            border-radius: 4px;
+            margin-bottom: 0.5rem;
+            border-left: 3px solid var(--accent);
+        }
+
+        .content-item.handout {
+            border-left-color: var(--success);
+        }
+
+        .content-item.info {
+            border-left-color: var(--accent);
+        }
+
+        .content-item.warning {
+            border-left-color: var(--warning);
         }
 
         .session-item {
@@ -607,6 +1113,22 @@
         .session-item h4 {
             color: var(--accent);
             margin: 0 0 0.5rem 0;
+        }
+
+        .session-tools {
+            margin-top: 1rem;
+        }
+
+        .tool-buttons {
+            display: flex;
+            gap: 0.5rem;
+            flex-wrap: wrap;
+        }
+
+        .quick-tools {
+            display: flex;
+            gap: 0.5rem;
+            flex-wrap: wrap;
         }
 
         @media (max-width: 768px) {
@@ -623,6 +1145,28 @@
             }
             
             .custom-roll {
+                flex-direction: column;
+            }
+            
+            .player-item {
+                flex-direction: column;
+                align-items: stretch;
+                gap: 0.5rem;
+            }
+            
+            .player-status {
+                justify-content: flex-start;
+            }
+            
+            .quick-dice-buttons {
+                grid-template-columns: repeat(4, 1fr);
+            }
+            
+            #characterRollButtons {
+                grid-template-columns: 1fr;
+            }
+            
+            .tool-buttons, .quick-tools {
                 flex-direction: column;
             }
         }

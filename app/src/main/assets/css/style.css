@@ -8,6 +8,7 @@
     --accent-hover: #0099cc;
     --danger: #ff4444;
     --success: #44ff44;
+    --warning: #ffaa00;
     --border: #333;
     --shadow: rgba(0, 0, 0, 0.3);
     --font-size: 16px;
@@ -21,6 +22,7 @@
     --text-secondary: #666;
     --accent: #0066cc;
     --border: #ccc;
+    --shadow: rgba(0, 0, 0, 0.1);
 }
 
 [data-theme="cyber"] {
@@ -29,6 +31,7 @@
     --bg-card: #330066;
     --accent: #ff00ff;
     --text-primary: #00ff00;
+    --text-secondary: #00cc00;
 }
 
 [data-theme="forest"] {
@@ -37,6 +40,7 @@
     --bg-card: #2d4a2d;
     --accent: #7cfc00;
     --text-primary: #f0fff0;
+    --text-secondary: #c0e0c0;
 }
 
 * {
@@ -54,7 +58,7 @@ body {
     background: linear-gradient(135deg, var(--bg-primary), var(--bg-secondary));
     color: var(--text-primary);
     min-height: 100vh;
-    padding-bottom: 2rem;
+    line-height: 1.6;
 }
 
 .navbar {
@@ -76,6 +80,7 @@ body {
     display: flex;
     gap: 0.5rem;
     overflow-x: auto;
+    padding-bottom: 0.25rem;
 }
 
 .nav-tabs a {
@@ -85,16 +90,19 @@ body {
     border-radius: 4px;
     white-space: nowrap;
     transition: all 0.3s;
+    border: 1px solid transparent;
 }
 
 .nav-tabs a.active {
     background: var(--accent);
     color: var(--bg-primary);
+    border-color: var(--accent);
 }
 
 .nav-tabs a:hover {
     background: var(--bg-secondary);
     color: var(--text-primary);
+    border-color: var(--accent);
 }
 
 .container {
@@ -109,6 +117,7 @@ body {
     padding: 1.5rem;
     margin-bottom: 1rem;
     box-shadow: 0 4px 12px var(--shadow);
+    border: 1px solid var(--border);
 }
 
 .card h2, .card h3 {
@@ -116,20 +125,24 @@ body {
     margin-bottom: 1rem;
 }
 
-[contenteditable="true"]:hover {
+/* Editable content styles */
+.editable-content {
+    padding: 0.25rem;
+    border-radius: 3px;
+    transition: all 0.3s;
+}
+
+.editable-content:hover {
     background: rgba(0, 212, 255, 0.1);
     outline: 1px dashed var(--accent);
-    padding: 2px;
-    border-radius: 3px;
 }
 
-[contenteditable="true"]:focus {
+.editable-content:focus {
     background: rgba(0, 212, 255, 0.2);
     outline: 2px solid var(--accent);
-    padding: 2px;
-    border-radius: 3px;
 }
 
+/* Form styles */
 .form-group {
     margin-bottom: 1rem;
 }
@@ -138,10 +151,13 @@ body {
     display: block;
     margin-bottom: 0.5rem;
     font-weight: 600;
+    color: var(--text-primary);
 }
 
 input[type="text"],
 input[type="number"],
+input[type="password"],
+input[type="email"],
 select,
 textarea {
     width: 100%;
@@ -151,13 +167,21 @@ textarea {
     background: var(--bg-secondary);
     color: var(--text-primary);
     font-size: 1rem;
+    transition: border-color 0.3s;
+}
+
+input:focus, select:focus, textarea:focus {
+    border-color: var(--accent);
+    outline: none;
 }
 
 textarea {
     min-height: 100px;
     resize: vertical;
+    font-family: inherit;
 }
 
+/* Button styles */
 .button-group {
     display: flex;
     gap: 0.5rem;
@@ -172,6 +196,7 @@ button {
     cursor: pointer;
     font-size: 1rem;
     transition: all 0.3s;
+    font-weight: 600;
 }
 
 .btn-primary {
@@ -181,16 +206,37 @@ button {
 
 .btn-primary:hover {
     background: var(--accent-hover);
+    transform: translateY(-2px);
 }
 
 .btn-secondary {
     background: var(--bg-secondary);
     color: var(--text-primary);
+    border: 1px solid var(--border);
+}
+
+.btn-secondary:hover {
+    background: var(--accent);
+    color: var(--bg-primary);
 }
 
 .btn-danger {
     background: var(--danger);
     color: white;
+}
+
+.btn-danger:hover {
+    background: #cc3333;
+    transform: translateY(-2px);
+}
+
+.btn-warning {
+    background: var(--warning);
+    color: var(--bg-primary);
+}
+
+.btn-warning:hover {
+    background: #cc8800;
 }
 
 .btn-oracle {
@@ -199,6 +245,7 @@ button {
     margin: 0.25rem;
 }
 
+/* Grid and layout */
 .stat-grid,
 .dice-controls,
 .settings-group {
@@ -211,9 +258,10 @@ button {
     display: flex;
     align-items: center;
     gap: 0.5rem;
-    padding: 0.5rem;
+    padding: 0.75rem;
     background: var(--bg-secondary);
     border-radius: 4px;
+    border-left: 4px solid var(--accent);
 }
 
 .dice-input {
@@ -236,11 +284,14 @@ button {
     border-radius: 8px;
     color: var(--accent);
     font-weight: bold;
+    border: 2px solid var(--accent);
 }
 
+/* List styles */
 .character-list,
 .table-list,
-.dice-sets {
+.dice-sets,
+.notes-list {
     display: grid;
     gap: 0.5rem;
     margin-bottom: 1rem;
@@ -248,19 +299,24 @@ button {
 
 .character-item,
 .table-item,
-.dice-set {
+.dice-set,
+.note-item {
     background: var(--bg-secondary);
     padding: 1rem;
     border-radius: 4px;
     cursor: pointer;
     transition: all 0.3s;
+    border-left: 4px solid var(--accent);
 }
 
 .character-item:hover,
-.table-item:hover {
+.table-item:hover,
+.dice-set:hover,
+.note-item:hover {
     background: var(--accent);
     color: var(--bg-primary);
     transform: translateY(-2px);
+    box-shadow: 0 4px 12px var(--shadow);
 }
 
 .skill-item,
@@ -269,9 +325,10 @@ button {
     gap: 0.5rem;
     align-items: center;
     margin-bottom: 0.5rem;
-    padding: 0.5rem;
+    padding: 0.75rem;
     background: var(--bg-secondary);
     border-radius: 4px;
+    border-left: 3px solid var(--accent);
 }
 
 .skill-item span,
@@ -293,11 +350,21 @@ button {
     background: var(--bg-secondary);
     padding: 1rem;
     border-radius: 4px;
+    border: 1px solid var(--border);
 }
 
 .history-item {
-    padding: 0.5rem;
+    padding: 0.75rem;
     border-bottom: 1px solid var(--border);
+    transition: background-color 0.3s;
+}
+
+.history-item:hover {
+    background: var(--bg-primary);
+}
+
+.history-item:last-child {
+    border-bottom: none;
 }
 
 .stat-list {
@@ -309,11 +376,109 @@ button {
     flex: 1;
 }
 
-#charNotes {
+/* Modal styles */
+.modal {
+    position: fixed;
+    top: 0;
+    left: 0;
     width: 100%;
-    min-height: 150px;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.8);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 1000;
+    padding: 1rem;
+    backdrop-filter: blur(5px);
 }
 
+.modal-content {
+    background: var(--bg-card);
+    padding: 2rem;
+    border-radius: 8px;
+    max-width: 90%;
+    max-height: 90%;
+    overflow-y: auto;
+    width: 600px;
+    border: 2px solid var(--accent);
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+}
+
+.modal-actions {
+    display: flex;
+    gap: 0.5rem;
+    justify-content: flex-end;
+    margin-top: 1rem;
+    flex-wrap: wrap;
+}
+
+/* Notification styles */
+.notification {
+    position: fixed;
+    top: 20px;
+    right: 20px;
+    padding: 1rem 2rem;
+    border-radius: 4px;
+    z-index: 1000;
+    animation: slideIn 0.3s ease;
+    font-weight: 600;
+    box-shadow: 0 4px 12px var(--shadow);
+}
+
+.notification-success {
+    background: var(--success);
+    color: var(--bg-primary);
+}
+
+.notification-error {
+    background: var(--danger);
+    color: white;
+}
+
+.notification-warning {
+    background: var(--warning);
+    color: var(--bg-primary);
+}
+
+.notification-info {
+    background: var(--accent);
+    color: var(--bg-primary);
+}
+
+/* Tag styles */
+.tag {
+    background: var(--accent);
+    color: var(--bg-primary);
+    padding: 0.25rem 0.5rem;
+    border-radius: 12px;
+    font-size: 0.8rem;
+    font-weight: 600;
+    display: inline-block;
+    margin: 0.1rem;
+}
+
+.tag:hover {
+    transform: scale(1.05);
+}
+
+/* Animation keyframes */
+@keyframes slideIn {
+    from { transform: translateX(100%); opacity: 0; }
+    to { transform: translateX(0); opacity: 1; }
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; transform: translateY(-10px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes diceRoll {
+    0% { transform: rotate(0deg) scale(0.8); opacity: 0; }
+    50% { transform: rotate(180deg) scale(1.2); }
+    100% { transform: rotate(360deg) scale(1); opacity: 1; }
+}
+
+/* Mobile responsiveness */
 @media (max-width: 768px) {
     .nav-tabs {
         font-size: 0.9rem;
@@ -330,15 +495,53 @@ button {
     button {
         width: 100%;
     }
+    
+    .dice-input {
+        flex-direction: column;
+        align-items: stretch;
+    }
+    
+    .dice-input input {
+        width: 100%;
+    }
+    
+    .modal-content {
+        width: 95%;
+        padding: 1rem;
+    }
+    
+    .modal-actions {
+        flex-direction: column;
+    }
 }
 
+/* Prevent text selection on UI elements */
 body {
     -webkit-user-select: none;
     user-select: none;
     -webkit-touch-callout: none;
 }
 
+/* Allow text selection in inputs and editable areas */
 input, textarea, [contenteditable="true"] {
     -webkit-user-select: text;
     user-select: text;
+}
+
+/* Scrollbar styling */
+::-webkit-scrollbar {
+    width: 8px;
+}
+
+::-webkit-scrollbar-track {
+    background: var(--bg-secondary);
+}
+
+::-webkit-scrollbar-thumb {
+    background: var(--accent);
+    border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+    background: var(--accent-hover);
 }

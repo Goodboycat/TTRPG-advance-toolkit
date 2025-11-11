@@ -16,44 +16,52 @@
             <a href="random-generator.html">Generators</a>
             <a href="notes.html">Notes</a>
             <a href="map.html">Map</a>
+            <a href="battle.html">Battle</a>
+            <a href="database.html">Database</a>
+            <a href="multiplayer.html">Multiplayer</a>
             <a href="settings.html">Settings</a>
         </div>
     </nav>
 
     <main class="container">
+        <!-- Quick Roll Section -->
         <section class="card">
-            <h2 contenteditable="true">Quick Roll</h2>
+            <h2>Quick Roll</h2>
             <div class="dice-controls">
                 <div class="dice-input">
                     <input type="number" id="diceCount" value="1" min="1" max="100">
-                    <span contenteditable="true" id="diceTypeLabel">d</span>
+                    <span>d</span>
                     <input type="number" id="diceSides" value="20" min="2" max="1000">
-                    <span contenteditable="true">+</span>
-                    <input type="number" id="diceMod" value="0" min="-100" max="100">
+                    <span>+</span>
+                    <input type="number" id="diceMod" value="0" min="-1000" max="1000">
                 </div>
+                
                 <div class="roll-style-selector">
-                    <label contenteditable="true">Roll Style:</label>
+                    <label>Roll Style:</label>
                     <select id="rollStyle">
                         <option value="normal">Normal</option>
                         <option value="advantage">Advantage (D&D 5e)</option>
                         <option value="disadvantage">Disadvantage (D&D 5e)</option>
                         <option value="critical">Critical Success/Fail</option>
                         <option value="fate">Fate Dice (+/-)</option>
+                        <option value="wild">Wild Die (Savage Worlds)</option>
                     </select>
                 </div>
-                <button onclick="rollDice()" class="btn-primary" contenteditable="true">Roll Dice</button>
+                
+                <button onclick="rollDice()" class="btn-primary">Roll Dice</button>
                 
                 <div id="diceVisual" class="dice-visual-container"></div>
                 
                 <div id="rollResult" class="roll-result">
-                    <span contenteditable="true">Result: </span><span id="resultValue">-</span>
+                    <span>Result: </span><span id="resultValue">-</span>
                 </div>
                 <div id="rollDetails" class="roll-details"></div>
             </div>
         </section>
 
+        <!-- Quick Dice Buttons -->
         <section class="card">
-            <h2 contenteditable="true">Quick Dice</h2>
+            <h2>Quick Dice</h2>
             <div class="quick-dice-buttons">
                 <button onclick="quickRoll('d4')" class="dice-btn" data-sides="4">d4</button>
                 <button onclick="quickRoll('d6')" class="dice-btn" data-sides="6">d6</button>
@@ -62,45 +70,74 @@
                 <button onclick="quickRoll('d12')" class="dice-btn" data-sides="12">d12</button>
                 <button onclick="quickRoll('d20')" class="dice-btn" data-sides="20">d20</button>
                 <button onclick="quickRoll('d100')" class="dice-btn" data-sides="100">d100</button>
-                <button onclick="rollFate()" class="dice-btn fate" contenteditable="true">Fate</button>
+                <button onclick="rollFate()" class="dice-btn fate">Fate</button>
+                <button onclick="rollWild()" class="dice-btn wild">Wild</button>
             </div>
         </section>
 
+        <!-- Saved Dice Sets -->
         <section class="card">
-            <h2 contenteditable="true">Saved Dice Sets</h2>
+            <div class="card-header">
+                <h2>Saved Dice Sets</h2>
+                <button onclick="addDiceSet()" class="btn-primary">Add New Set</button>
+            </div>
             <div id="savedDiceSets" class="dice-sets">
-                <div class="dice-set" contenteditable="true">
-                    <span class="set-name">Attack Roll</span>
-                    <span class="set-formula">1d20+5</span>
-                    <button onclick="rollSet(this)">Roll</button>
-                    <button onclick="removeSet(this)">X</button>
+                <!-- Dice sets will be loaded here -->
+            </div>
+        </section>
+
+        <!-- Roll History -->
+        <section class="card">
+            <div class="card-header">
+                <h2>Roll History</h2>
+                <button onclick="clearRollHistory()" class="btn-danger">Clear History</button>
+            </div>
+            <div id="rollHistory" class="roll-history">
+                <!-- Roll history will be loaded here -->
+            </div>
+        </section>
+
+        <!-- Dice Set Editor Modal -->
+        <div id="diceSetModal" class="modal" style="display: none;">
+            <div class="modal-content">
+                <h2>Add Dice Set</h2>
+                <div class="form-group">
+                    <label>Set Name:</label>
+                    <input type="text" id="setName" placeholder="Attack Roll">
+                </div>
+                <div class="form-group">
+                    <label>Dice Formula:</label>
+                    <input type="text" id="setFormula" placeholder="1d20+5">
+                    <small>Format: [number]d[sides][+/-modifier] (e.g., 2d6+3)</small>
+                </div>
+                <div class="modal-actions">
+                    <button onclick="saveDiceSet()" class="btn-primary">Save Set</button>
+                    <button onclick="closeDiceSetModal()" class="btn-secondary">Cancel</button>
                 </div>
             </div>
-            <button onclick="addDiceSet()" class="btn-secondary" contenteditable="true">Add New Set</button>
-        </section>
-
-        <section class="card">
-            <h2 contenteditable="true">Roll History</h2>
-            <div id="rollHistory" class="roll-history"></div>
-            <button onclick="clearRollHistory()" class="btn-danger" contenteditable="true">Clear History</button>
-        </section>
+        </div>
     </main>
 
     <script src="file:///android_asset/js/main.js"></script>
+    <script src="file:///android_asset/js/emojis.js"></script>
     <script>
         let rollHistory = JSON.parse(localStorage.getItem('rollHistory') || '[]');
+        let diceSets = JSON.parse(localStorage.getItem('diceSets') || '[]');
+        let editingSetId = null;
 
         document.addEventListener('DOMContentLoaded', function() {
             loadDiceSets();
             displayRollHistory();
-            
-            // Load default dice from settings
+            updateDiceFromSettings();
+        });
+
+        function updateDiceFromSettings() {
             const defaultDice = localStorage.getItem('defaultDice') || 'd20';
             const diceMatch = defaultDice.match(/d(\d+)/i);
             if (diceMatch) {
                 document.getElementById('diceSides').value = diceMatch[1];
             }
-        });
+        }
 
         function rollDice() {
             const count = parseInt(document.getElementById('diceCount').value) || 1;
@@ -115,6 +152,8 @@
             let finalResult = 0;
             let formula = '';
             let resultText = '';
+            let isCritical = false;
+            let isFumble = false;
             
             switch(style) {
                 case 'advantage':
@@ -154,7 +193,42 @@
                     resultText = `${formula} = [${fateResults.join(', ')}] = ${finalResult}`;
                     break;
                     
-                default:
+                case 'wild':
+                    const wildDie = Math.floor(Math.random() * 6) + 1;
+                    const traitDie = Math.floor(Math.random() * sides) + 1;
+                    rolls = [wildDie, traitDie];
+                    total = Math.max(wildDie, traitDie);
+                    finalResult = total + mod;
+                    formula = `Wild Die: max(1d6, 1d${sides})${mod >= 0 ? '+' : ''}${mod}`;
+                    resultText = `${formula} = max([${wildDie}, ${traitDie}])${mod >= 0 ? '+' : ''}${mod} = ${finalResult}`;
+                    if (wildDie === 6) {
+                        resultText += ' (WILD!)';
+                    }
+                    break;
+                    
+                case 'critical':
+                    let criticalRolls = [];
+                    let criticalTotal = 0;
+                    for (let i = 0; i < count; i++) {
+                        const roll = Math.floor(Math.random() * sides) + 1;
+                        criticalRolls.push(roll);
+                        criticalTotal += roll;
+                        
+                        // Check for critical success/failure
+                        if (sides === 20) {
+                            if (roll === 20) isCritical = true;
+                            if (roll === 1) isFumble = true;
+                        }
+                    }
+                    finalResult = criticalTotal + mod;
+                    formula = `${count}d${sides}${mod >= 0 ? '+' : ''}${mod}`;
+                    resultText = `${formula} = [${criticalRolls.join(' + ')}]${mod >= 0 ? '+' : ''}${mod} = ${finalResult}`;
+                    if (isCritical) resultText += ' 🎉 CRITICAL SUCCESS!';
+                    if (isFumble) resultText += ' 💥 CRITICAL FAILURE!';
+                    rolls = criticalRolls;
+                    break;
+                    
+                default: // normal
                     for (let i = 0; i < count; i++) {
                         const roll = Math.floor(Math.random() * sides) + 1;
                         rolls.push(roll);
@@ -165,27 +239,39 @@
                     resultText = `${formula} = [${rolls.join(' + ')}]${mod >= 0 ? '+' : ''}${mod} = ${finalResult}`;
             }
             
-            displayDiceVisual(rolls, sides, style);
+            displayDiceVisual(rolls, sides, style, isCritical, isFumble);
             document.getElementById('resultValue').textContent = finalResult;
-            document.getElementById('rollDetails').innerHTML = `<div contenteditable="true">${resultText}</div>`;
+            document.getElementById('rollDetails').innerHTML = `<div>${resultText}</div>`;
             
+            // Save to history
             const timestamp = new Date().toLocaleTimeString();
-            rollHistory.unshift({
+            const historyEntry = {
+                id: TTRPGToolkit.generateId(),
                 formula, 
                 result: finalResult, 
                 details: resultText, 
                 time: timestamp,
                 rolls: rolls,
-                style: style
-            });
-            rollHistory = rollHistory.slice(0, 50);
+                style: style,
+                isCritical,
+                isFumble
+            };
+            
+            rollHistory.unshift(historyEntry);
+            rollHistory = rollHistory.slice(0, 50); // Keep last 50 rolls
             localStorage.setItem('rollHistory', JSON.stringify(rollHistory));
             displayRollHistory();
             
+            // Update recent rolls for dashboard
             const recentRolls = JSON.parse(localStorage.getItem('recentRolls') || '[]');
             recentRolls.unshift(`${formula}: ${finalResult}`);
             recentRolls.splice(5);
             localStorage.setItem('recentRolls', JSON.stringify(recentRolls));
+            
+            // Haptic feedback (if available)
+            if (navigator.vibrate) {
+                navigator.vibrate(50);
+            }
         }
 
         function quickRoll(diceType) {
@@ -199,10 +285,20 @@
 
         function rollFate() {
             document.getElementById('rollStyle').value = 'fate';
+            document.getElementById('diceCount').value = 4;
+            document.getElementById('diceSides').value = 3;
+            document.getElementById('diceMod').value = 0;
             rollDice();
         }
 
-        function displayDiceVisual(rolls, sides, style) {
+        function rollWild() {
+            document.getElementById('rollStyle').value = 'wild';
+            document.getElementById('diceCount').value = 1;
+            document.getElementById('diceMod').value = 0;
+            rollDice();
+        }
+
+        function displayDiceVisual(rolls, sides, style, isCritical = false, isFumble = false) {
             const container = document.getElementById('diceVisual');
             container.innerHTML = '';
             
@@ -222,6 +318,7 @@
                         margin: 5px;
                         font-weight: bold;
                         background: var(--bg-secondary);
+                        font-size: 1.2rem;
                     `;
                     container.appendChild(die);
                 });
@@ -247,12 +344,14 @@
                     
                     // Special styling for critical rolls
                     if (sides === 20) {
-                        if (roll === 20) {
+                        if (roll === 20 || isCritical) {
                             die.style.background = 'var(--success)';
                             die.style.color = 'var(--bg-primary)';
-                        } else if (roll === 1) {
+                            die.style.borderColor = 'var(--success)';
+                        } else if (roll === 1 || isFumble) {
                             die.style.background = 'var(--danger)';
                             die.style.color = 'white';
+                            die.style.borderColor = 'var(--danger)';
                         }
                     }
                     
@@ -265,93 +364,135 @@
             document.getElementById('diceVisual').innerHTML = '';
         }
 
-        // ... rest of the existing dice functions (addDiceSet, loadDiceSets, rollSet, removeSet, displayRollHistory, clearRollHistory) ...
-        // These remain the same as in the previous version
-
         function addDiceSet() {
-            const name = prompt('Enter set name:') || 'New Set';
-            const formula = prompt('Enter formula (e.g., 2d6+3):') || '1d20';
-            
-            const sets = JSON.parse(localStorage.getItem('diceSets') || '[]');
-            sets.push({name, formula});
-            localStorage.setItem('diceSets', JSON.stringify(sets));
-            loadDiceSets();
+            document.getElementById('diceSetModal').style.display = 'flex';
+            document.getElementById('setName').value = '';
+            document.getElementById('setFormula').value = '';
+            editingSetId = null;
         }
 
-        function loadDiceSets() {
-            const sets = JSON.parse(localStorage.getItem('diceSets') || '[]');
-            const container = document.getElementById('savedDiceSets');
+        function saveDiceSet() {
+            const name = document.getElementById('setName').value.trim();
+            const formula = document.getElementById('setFormula').value.trim();
             
-            if (sets.length === 0) {
-                container.innerHTML = '<p contenteditable="true">No saved sets yet. Add one!</p>';
+            if (!name || !formula) {
+                TTRPGToolkit.showNotification('Please enter both name and formula!', 'error');
                 return;
             }
             
-            container.innerHTML = sets.map((set, index) => `
-                <div class="dice-set" data-index="${index}">
-                    <span class="set-name" contenteditable="true">${set.name}</span>
-                    <span class="set-formula" contenteditable="true">${set.formula}</span>
-                    <button onclick="rollSet(this)">Roll</button>
-                    <button onclick="removeSet(this)">X</button>
+            // Validate formula
+            if (!formula.match(/^(\d*)d(\d+)([+-]\d+)?$/i)) {
+                TTRPGToolkit.showNotification('Invalid dice formula! Use format like "2d6+3"', 'error');
+                return;
+            }
+            
+            const diceSet = {
+                id: editingSetId || TTRPGToolkit.generateId(),
+                name,
+                formula
+            };
+            
+            if (editingSetId) {
+                const index = diceSets.findIndex(set => set.id === editingSetId);
+                diceSets[index] = diceSet;
+            } else {
+                diceSets.unshift(diceSet);
+            }
+            
+            localStorage.setItem('diceSets', JSON.stringify(diceSets));
+            loadDiceSets();
+            closeDiceSetModal();
+            TTRPGToolkit.showNotification('Dice set saved!', 'success');
+        }
+
+        function closeDiceSetModal() {
+            document.getElementById('diceSetModal').style.display = 'none';
+        }
+
+        function loadDiceSets() {
+            const container = document.getElementById('savedDiceSets');
+            
+            if (diceSets.length === 0) {
+                container.innerHTML = '<p>No saved sets yet. Add one!</p>';
+                return;
+            }
+            
+            container.innerHTML = diceSets.map(set => `
+                <div class="dice-set">
+                    <div class="set-info">
+                        <span class="set-name">${set.name}</span>
+                        <span class="set-formula">${set.formula}</span>
+                    </div>
+                    <div class="set-actions">
+                        <button onclick="rollSavedSet('${set.id}')" class="btn-primary">Roll</button>
+                        <button onclick="editDiceSet('${set.id}')" class="btn-secondary">Edit</button>
+                        <button onclick="deleteDiceSet('${set.id}')" class="btn-danger">Delete</button>
+                    </div>
                 </div>
             `).join('');
         }
 
-        function rollSet(button) {
-            const setDiv = button.parentElement;
-            const formula = setDiv.querySelector('.set-formula').textContent;
+        function rollSavedSet(setId) {
+            const set = diceSets.find(s => s.id === setId);
+            if (!set) return;
             
-            const match = formula.match(/(\d*)d(\d+)([+-]\d+)?/i);
-            if (!match) return;
+            const match = set.formula.match(/(\d*)d(\d+)([+-]\d+)?/i);
+            if (!match) {
+                TTRPGToolkit.showNotification('Invalid dice set formula!', 'error');
+                return;
+            }
             
             const count = parseInt(match[1]) || 1;
             const sides = parseInt(match[2]);
             const mod = parseInt(match[3]) || 0;
             
-            let total = 0;
-            let rolls = [];
+            // Set the form values
+            document.getElementById('diceCount').value = count;
+            document.getElementById('diceSides').value = sides;
+            document.getElementById('diceMod').value = mod;
+            document.getElementById('rollStyle').value = 'normal';
             
-            for (let i = 0; i < count; i++) {
-                const roll = Math.floor(Math.random() * sides) + 1;
-                rolls.push(roll);
-                total += roll;
-            }
-            
-            const finalResult = total + mod;
-            const resultText = `${formula} = [${rolls.join(' + ')}]${mod >= 0 ? '+' : ''}${mod} = ${finalResult}`;
-            
-            document.getElementById('resultValue').textContent = finalResult;
-            displayDiceVisual(rolls, sides, 'normal');
-            document.getElementById('rollDetails').innerHTML = `<div contenteditable="true">${resultText}</div>`;
-            
-            const timestamp = new Date().toLocaleTimeString();
-            rollHistory.unshift({formula, result: finalResult, details: resultText, time: timestamp, rolls: rolls});
-            rollHistory = rollHistory.slice(0, 50);
-            localStorage.setItem('rollHistory', JSON.stringify(rollHistory));
-            displayRollHistory();
+            // Roll the dice
+            rollDice();
         }
 
-        function removeSet(button) {
-            const setDiv = button.parentElement;
-            const index = parseInt(setDiv.dataset.index);
+        function editDiceSet(setId) {
+            const set = diceSets.find(s => s.id === setId);
+            if (!set) return;
             
-            const sets = JSON.parse(localStorage.getItem('diceSets') || '[]');
-            sets.splice(index, 1);
-            localStorage.setItem('diceSets', JSON.stringify(sets));
+            editingSetId = setId;
+            document.getElementById('setName').value = set.name;
+            document.getElementById('setFormula').value = set.formula;
+            document.getElementById('diceSetModal').style.display = 'flex';
+        }
+
+        function deleteDiceSet(setId) {
+            if (!confirm('Delete this dice set?')) return;
+            
+            diceSets = diceSets.filter(set => set.id !== setId);
+            localStorage.setItem('diceSets', JSON.stringify(diceSets));
             loadDiceSets();
+            TTRPGToolkit.showNotification('Dice set deleted!', 'success');
         }
 
         function displayRollHistory() {
             const container = document.getElementById('rollHistory');
             if (rollHistory.length === 0) {
-                container.innerHTML = '<p contenteditable="true">No rolls yet...</p>';
+                container.innerHTML = '<p>No rolls yet...</p>';
                 return;
             }
+            
             container.innerHTML = rollHistory.slice(0, 10).map(entry => `
-                <div class="history-item" contenteditable="true">
-                    <strong>${entry.formula}</strong> = ${entry.result} 
-                    ${entry.rolls ? `<small>(${entry.rolls.join(', ')})</small>` : ''}
-                    <small>(${entry.time})</small>
+                <div class="history-item ${entry.isCritical ? 'critical-success' : ''} ${entry.isFumble ? 'critical-fail' : ''}">
+                    <div class="history-main">
+                        <strong>${entry.formula}</strong> = ${entry.result}
+                        ${entry.isCritical ? ' 🎉' : ''}
+                        ${entry.isFumble ? ' 💥' : ''}
+                    </div>
+                    <div class="history-details">
+                        <small>${entry.details}</small>
+                        <small class="history-time">${entry.time}</small>
+                    </div>
                 </div>
             `).join('');
         }
@@ -361,47 +502,99 @@
                 rollHistory = [];
                 localStorage.removeItem('rollHistory');
                 displayRollHistory();
+                TTRPGToolkit.showNotification('Roll history cleared!', 'success');
             }
         }
 
-        document.getElementById('savedDiceSets').addEventListener('blur', function(e) {
-            if (e.target.classList.contains('set-name') || e.target.classList.contains('set-formula')) {
-                const sets = Array.from(document.querySelectorAll('.dice-set')).map(setDiv => ({
-                    name: setDiv.querySelector('.set-name').textContent,
-                    formula: setDiv.querySelector('.set-formula').textContent
-                }));
-                localStorage.setItem('diceSets', JSON.stringify(sets));
+        // Keyboard shortcuts
+        document.addEventListener('keydown', function(e) {
+            // Spacebar to roll
+            if (e.code === 'Space' && e.target.tagName !== 'INPUT' && e.target.tagName !== 'TEXTAREA') {
+                e.preventDefault();
+                rollDice();
             }
-        }, true);
+            
+            // Number keys for quick dice
+            if (e.code >= 'Digit1' && e.code <= 'Digit6' && e.ctrlKey) {
+                e.preventDefault();
+                const diceMap = {
+                    'Digit1': 'd4',
+                    'Digit2': 'd6', 
+                    'Digit3': 'd8',
+                    'Digit4': 'd10',
+                    'Digit5': 'd12',
+                    'Digit6': 'd20'
+                };
+                quickRoll(diceMap[e.code]);
+            }
+        });
     </script>
 
     <style>
-        .quick-dice-buttons {
+        .dice-controls {
+            display: grid;
+            gap: 1rem;
+        }
+
+        .dice-input {
             display: flex;
+            align-items: center;
             gap: 0.5rem;
             flex-wrap: wrap;
-            margin-bottom: 1rem;
+            justify-content: center;
+        }
+
+        .dice-input input {
+            width: 80px;
+            text-align: center;
+        }
+
+        .roll-style-selector {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            justify-content: center;
+            flex-wrap: wrap;
+        }
+
+        .roll-style-selector select {
+            width: auto;
+        }
+
+        .quick-dice-buttons {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(80px, 1fr));
+            gap: 0.5rem;
         }
 
         .dice-btn {
-            padding: 0.75rem 1rem;
+            padding: 1rem 0.5rem;
             border: 2px solid var(--accent);
             background: var(--bg-secondary);
             color: var(--text-primary);
-            border-radius: 6px;
+            border-radius: 8px;
             cursor: pointer;
             font-weight: bold;
             transition: all 0.3s;
+            font-size: 1.1rem;
         }
 
         .dice-btn:hover {
             background: var(--accent);
             color: var(--bg-primary);
+            transform: translateY(-2px);
         }
 
         .dice-btn.fate {
             background: linear-gradient(45deg, #8B4513, #A0522D);
             color: white;
+            border-color: #8B4513;
+        }
+
+        .dice-btn.wild {
+            background: linear-gradient(45deg, #FF6B35, #FF8E53);
+            color: white;
+            border-color: #FF6B35;
         }
 
         .dice-visual-container {
@@ -411,6 +604,11 @@
             border-radius: 8px;
             margin: 1rem 0;
             text-align: center;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            flex-wrap: wrap;
+            border: 2px solid var(--border);
         }
 
         .roll-details {
@@ -418,16 +616,95 @@
             padding: 1rem;
             border-radius: 4px;
             margin-top: 1rem;
-            font-family: monospace;
+            font-family: 'Courier New', monospace;
+            border: 1px solid var(--border);
         }
 
-        .roll-style-selector {
-            margin: 1rem 0;
+        .dice-sets {
+            display: grid;
+            gap: 0.5rem;
         }
 
-        .roll-style-selector select {
-            width: auto;
-            margin-left: 0.5rem;
+        .dice-set {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 1rem;
+            background: var(--bg-secondary);
+            border-radius: 4px;
+            border-left: 4px solid var(--accent);
+            transition: all 0.3s;
+        }
+
+        .dice-set:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px var(--shadow);
+        }
+
+        .set-info {
+            display: flex;
+            flex-direction: column;
+            gap: 0.25rem;
+        }
+
+        .set-name {
+            font-weight: bold;
+            color: var(--accent);
+        }
+
+        .set-formula {
+            font-family: 'Courier New', monospace;
+            color: var(--text-secondary);
+        }
+
+        .set-actions {
+            display: flex;
+            gap: 0.5rem;
+        }
+
+        .history-item {
+            padding: 1rem;
+            border-bottom: 1px solid var(--border);
+            transition: all 0.3s;
+        }
+
+        .history-item:hover {
+            background: var(--bg-secondary);
+        }
+
+        .history-item:last-child {
+            border-bottom: none;
+        }
+
+        .history-item.critical-success {
+            border-left: 4px solid var(--success);
+            background: rgba(68, 255, 68, 0.1);
+        }
+
+        .history-item.critical-fail {
+            border-left: 4px solid var(--danger);
+            background: rgba(255, 68, 68, 0.1);
+        }
+
+        .history-main {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 0.5rem;
+        }
+
+        .history-details {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .history-time {
+            color: var(--text-secondary);
+        }
+
+        .fate-die {
+            animation: diceRoll 0.5s ease-in-out;
         }
 
         @keyframes diceRoll {
@@ -437,13 +714,48 @@
         }
 
         @media (max-width: 768px) {
-            .quick-dice-buttons {
-                justify-content: center;
+            .dice-input {
+                flex-direction: column;
+                align-items: stretch;
             }
             
-            .dice-btn {
+            .dice-input input {
+                width: 100%;
+            }
+            
+            .roll-style-selector {
+                flex-direction: column;
+                align-items: stretch;
+            }
+            
+            .quick-dice-buttons {
+                grid-template-columns: repeat(4, 1fr);
+            }
+            
+            .dice-set {
+                flex-direction: column;
+                align-items: stretch;
+                gap: 1rem;
+            }
+            
+            .set-actions {
+                width: 100%;
+            }
+            
+            .set-actions button {
                 flex: 1;
-                min-width: 60px;
+            }
+            
+            .history-main {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 0.5rem;
+            }
+            
+            .history-details {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 0.5rem;
             }
         }
     </style>

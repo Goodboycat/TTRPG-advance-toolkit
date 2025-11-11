@@ -8,92 +8,454 @@
 </head>
 <body>
     <nav class="navbar">
-        <h1 contenteditable="true" id="gameTitle">My TTRPG System</h1>
+        <h1 class="editable-content" data-save-key="gameTitle">My TTRPG Campaign</h1>
         <div class="nav-tabs">
             <a href="index.html" class="active">Dashboard</a>
             <a href="dice-roller.html">Dice</a>
             <a href="character-sheet.html">Characters</a>
             <a href="random-generator.html">Generators</a>
+            <a href="notes.html">Notes</a>
+            <a href="map.html">Map</a>
+            <a href="battle.html">Battle</a>
+            <a href="database.html">Database</a>
+            <a href="multiplayer.html">Multiplayer</a>
             <a href="settings.html">Settings</a>
         </div>
     </nav>
 
     <main class="container">
+        <!-- Quick Stats Section -->
         <section class="card">
-            <h2 contenteditable="true">Quick Stats</h2>
+            <h2 class="editable-content" data-save-key="campaignName">Campaign Overview</h2>
             <div class="stat-grid">
                 <div class="stat-item">
-                    <label contenteditable="true">System Name:</label>
-                    <span contenteditable="true" id="systemName" class="editable-field">Flexible RPG</span>
+                    <label>System:</label>
+                    <span class="editable-content" data-save-key="systemName">Flexible TTRPG</span>
                 </div>
                 <div class="stat-item">
-                    <label contenteditable="true">Dice Type:</label>
-                    <span contenteditable="true" id="diceType" class="editable-field">d20</span>
+                    <label>Session:</label>
+                    <span class="editable-content" data-save-key="sessionNumber">1</span>
                 </div>
                 <div class="stat-item">
-                    <label contenteditable="true">Max Level:</label>
-                    <span contenteditable="true" id="maxLevel" class="editable-field">10</span>
+                    <label>Players:</label>
+                    <span class="editable-content" data-save-key="playerCount">4</span>
+                </div>
+                <div class="stat-item">
+                    <label>Date:</label>
+                    <span id="currentDate">Loading...</span>
                 </div>
             </div>
         </section>
 
+        <!-- Quick Actions -->
         <section class="card">
-            <h2 contenteditable="true">Active Characters</h2>
-            <div id="activeCharacters" class="character-list">
-                <p contenteditable="true">No characters yet. Create one in the Character tab!</p>
+            <h2>Quick Actions</h2>
+            <div class="button-group">
+                <button onclick="quickRoll('d20')" class="btn-primary">Roll d20</button>
+                <button onclick="quickRoll('d6')" class="btn-secondary">Roll d6</button>
+                <button onclick="location.href='character-sheet.html'" class="btn-secondary">New Character</button>
+                <button onclick="location.href='notes.html'" class="btn-secondary">Take Notes</button>
+                <button onclick="location.href='battle.html'" class="btn-warning">Start Battle</button>
             </div>
         </section>
 
+        <!-- Recent Activity Grid -->
+        <div class="dashboard-grid">
+            <!-- Characters Panel -->
+            <section class="card">
+                <div class="card-header">
+                    <h3>Recent Characters</h3>
+                    <button onclick="location.href='character-sheet.html'" class="btn-secondary">View All</button>
+                </div>
+                <div id="recentCharacters" class="content-list">
+                    <p>No characters yet. Create your first character!</p>
+                </div>
+            </section>
+
+            <!-- Notes Panel -->
+            <section class="card">
+                <div class="card-header">
+                    <h3>Recent Notes</h3>
+                    <button onclick="location.href='notes.html'" class="btn-secondary">View All</button>
+                </div>
+                <div id="recentNotes" class="content-list">
+                    <p>No notes yet. Start taking notes!</p>
+                </div>
+            </section>
+
+            <!-- Dice Rolls Panel -->
+            <section class="card">
+                <div class="card-header">
+                    <h3>Recent Rolls</h3>
+                    <button onclick="location.href='dice-roller.html'" class="btn-secondary">Roll Dice</button>
+                </div>
+                <div id="recentRolls" class="content-list">
+                    <p>No recent rolls. Roll some dice!</p>
+                </div>
+            </section>
+
+            <!-- Quick Generators Panel -->
+            <section class="card">
+                <div class="card-header">
+                    <h3>Quick Generators</h3>
+                    <button onclick="location.href='random-generator.html'" class="btn-secondary">More</button>
+                </div>
+                <div class="button-group">
+                    <button onclick="generateNPC()" class="btn-secondary">NPC</button>
+                    <button onclick="generateLocation()" class="btn-secondary">Location</button>
+                    <button onclick="generateLoot()" class="btn-secondary">Loot</button>
+                    <button onclick="generateEncounter()" class="btn-secondary">Encounter</button>
+                </div>
+                <div id="generatorResult" class="generator-result">
+                    <p>Generator results will appear here</p>
+                </div>
+            </section>
+        </div>
+
+        <!-- Campaign Progress -->
         <section class="card">
-            <h2 contenteditable="true">Recent Rolls</h2>
-            <div id="recentRolls" class="roll-history">
-                <p contenteditable="true">Roll history will appear here...</p>
+            <h2 class="editable-content" data-save-key="progressTitle">Campaign Progress</h2>
+            <div class="progress-section">
+                <div class="form-group">
+                    <label>Current Story Arc:</label>
+                    <input type="text" class="editable-content" data-save-key="currentArc" value="The Beginning" placeholder="Enter current story arc">
+                </div>
+                <div class="form-group">
+                    <label>Next Session Plan:</label>
+                    <textarea class="editable-content" data-save-key="nextSession" placeholder="What's planned for next session?"></textarea>
+                </div>
+                <div class="form-group">
+                    <label>Major Plot Points:</label>
+                    <textarea class="editable-content" data-save-key="plotPoints" placeholder="Key story developments"></textarea>
+                </div>
             </div>
         </section>
     </main>
 
     <script src="file:///android_asset/js/main.js"></script>
+    <script src="file:///android_asset/js/emojis.js"></script>
     <script>
+        // Dashboard-specific functionality
         document.addEventListener('DOMContentLoaded', function() {
-            // Global settings are loaded by main.js automatically
-            loadActiveCharacters();
+            loadDashboardData();
+            updateCurrentDate();
+            loadRecentCharacters();
+            loadRecentNotes();
             loadRecentRolls();
-            
-            // Auto-save dashboard edits
-            document.querySelectorAll('[contenteditable="true"]').forEach(el => {
-                el.addEventListener('blur', saveDashboardData);
-            });
         });
 
-        function saveDashboardData() {
-            const data = {
-                gameTitle: document.getElementById('gameTitle').textContent,
-                systemName: document.getElementById('systemName').textContent,
-                diceType: document.getElementById('diceType').textContent,
-                maxLevel: document.getElementById('maxLevel').textContent
-            };
-            localStorage.setItem('dashboardData', JSON.stringify(data));
+        function loadDashboardData() {
+            // Load editable content from localStorage
+            document.querySelectorAll('[data-save-key]').forEach(element => {
+                const key = element.dataset.saveKey;
+                const savedValue = localStorage.getItem(key);
+                if (savedValue !== null) {
+                    if (element.tagName === 'INPUT' || element.tagName === 'TEXTAREA') {
+                        element.value = savedValue;
+                    } else {
+                        element.textContent = savedValue;
+                    }
+                }
+            });
         }
 
-        function loadActiveCharacters() {
+        function updateCurrentDate() {
+            const now = new Date();
+            const options = { 
+                weekday: 'long', 
+                year: 'numeric', 
+                month: 'long', 
+                day: 'numeric' 
+            };
+            document.getElementById('currentDate').textContent = now.toLocaleDateString('en-US', options);
+        }
+
+        function quickRoll(diceType) {
+            const sides = parseInt(diceType.substring(1));
+            const roll = Math.floor(Math.random() * sides) + 1;
+            
+            // Save to recent rolls
+            const recentRolls = JSON.parse(localStorage.getItem('recentRolls') || '[]');
+            recentRolls.unshift({
+                formula: diceType,
+                result: roll,
+                time: new Date().toLocaleTimeString()
+            });
+            recentRolls.splice(5); // Keep only last 5
+            localStorage.setItem('recentRolls', JSON.stringify(recentRolls));
+            
+            // Update display
+            loadRecentRolls();
+            
+            TTRPGToolkit.showNotification(`Rolled ${diceType}: ${roll}`, 'success');
+        }
+
+        function loadRecentCharacters() {
             const characters = JSON.parse(localStorage.getItem('characters') || '[]');
-            const container = document.getElementById('activeCharacters');
-            if (characters.length > 0) {
-                container.innerHTML = characters.map(char => 
-                    `<div class="character-mini" contenteditable="true">${char.name || 'Unnamed'}</div>`
-                ).join('');
+            const container = document.getElementById('recentCharacters');
+            
+            if (characters.length === 0) {
+                container.innerHTML = '<p>No characters yet. Create your first character!</p>';
+                return;
             }
+            
+            const recentChars = characters.slice(0, 3);
+            container.innerHTML = recentChars.map(char => `
+                <div class="list-item" onclick="location.href='character-sheet.html'">
+                    <strong>${char.name || 'Unnamed Character'}</strong>
+                    <span>${char.race || ''} ${char.class || ''} Lvl ${char.level || 1}</span>
+                </div>
+            `).join('');
+        }
+
+        function loadRecentNotes() {
+            const notes = JSON.parse(localStorage.getItem('notes') || '[]');
+            const container = document.getElementById('recentNotes');
+            
+            if (notes.length === 0) {
+                container.innerHTML = '<p>No notes yet. Start taking notes!</p>';
+                return;
+            }
+            
+            const recentNotes = notes.slice(0, 3);
+            container.innerHTML = recentNotes.map(note => `
+                <div class="list-item" onclick="location.href='notes.html'">
+                    <strong>${note.title || 'Untitled Note'}</strong>
+                    <span>${note.content?.substring(0, 50) || 'No content'}...</span>
+                </div>
+            `).join('');
         }
 
         function loadRecentRolls() {
             const rolls = JSON.parse(localStorage.getItem('recentRolls') || '[]');
             const container = document.getElementById('recentRolls');
-            if (rolls.length > 0) {
-                container.innerHTML = rolls.slice(0, 5).map(roll => 
-                    `<div class="roll-item" contenteditable="true">${roll}</div>`
-                ).join('');
+            
+            if (rolls.length === 0) {
+                container.innerHTML = '<p>No recent rolls. Roll some dice!</p>';
+                return;
+            }
+            
+            container.innerHTML = rolls.map(roll => `
+                <div class="list-item">
+                    <strong>${roll.formula}</strong>
+                    <span>Result: ${roll.result}</span>
+                    <small>${roll.time}</small>
+                </div>
+            `).join('');
+        }
+
+        // Generator functions
+        function generateNPC() {
+            const names = ['Aelar', 'Borin', 'Celia', 'Darian', 'Elena', 'Fargrim', 'Gwen', 'Hakon'];
+            const races = ['Human', 'Elf', 'Dwarf', 'Halfling', 'Gnome', 'Half-Elf'];
+            const occupations = ['Merchant', 'Guard', 'Scholar', 'Priest', 'Rogue', 'Noble'];
+            
+            const name = names[Math.floor(Math.random() * names.length)];
+            const race = races[Math.floor(Math.random() * races.length)];
+            const occupation = occupations[Math.floor(Math.random() * occupations.length)];
+            
+            document.getElementById('generatorResult').innerHTML = `
+                <h4>Generated NPC</h4>
+                <p><strong>Name:</strong> ${name}</p>
+                <p><strong>Race:</strong> ${race}</p>
+                <p><strong>Occupation:</strong> ${occupation}</p>
+                <p><strong>Personality:</strong> ${getRandomTrait()}</p>
+            `;
+        }
+
+        function generateLocation() {
+            const types = ['Tavern', 'Temple', 'Castle', 'Cave', 'Forest', 'Village', 'Dungeon', 'Market'];
+            const adjectives = ['Ancient', 'Mysterious', 'Bustling', 'Quiet', 'Dangerous', 'Peaceful'];
+            
+            const type = types[Math.floor(Math.random() * types.length)];
+            const adjective = adjectives[Math.floor(Math.random() * adjectives.length)];
+            
+            document.getElementById('generatorResult').innerHTML = `
+                <h4>Generated Location</h4>
+                <p><strong>Name:</strong> The ${adjective} ${type}</p>
+                <p><strong>Feature:</strong> ${getRandomFeature()}</p>
+                <p><strong>Atmosphere:</strong> ${getRandomAtmosphere()}</p>
+            `;
+        }
+
+        function generateLoot() {
+            const items = [
+                'Magic Sword', 'Healing Potion', 'Ancient Scroll', 'Gemstone', 
+                'Mysterious Key', 'Enchanted Armor', 'Ring of Power', 'Bag of Gold'
+            ];
+            const qualities = ['Common', 'Uncommon', 'Rare', 'Epic', 'Legendary'];
+            
+            const item = items[Math.floor(Math.random() * items.length)];
+            const quality = qualities[Math.floor(Math.random() * qualities.length)];
+            
+            document.getElementById('generatorResult').innerHTML = `
+                <h4>Generated Loot</h4>
+                <p><strong>Item:</strong> ${quality} ${item}</p>
+                <p><strong>Value:</strong> ${Math.floor(Math.random() * 1000) + 10} gold</p>
+                <p><strong>Description:</strong> ${getRandomLootDescription()}</p>
+            `;
+        }
+
+        function generateEncounter() {
+            const difficulties = ['Easy', 'Medium', 'Hard', 'Deadly'];
+            const types = ['Combat', 'Social', 'Puzzle', 'Exploration'];
+            
+            const difficulty = difficulties[Math.floor(Math.random() * difficulties.length)];
+            const type = types[Math.floor(Math.random() * types.length)];
+            
+            document.getElementById('generatorResult').innerHTML = `
+                <h4>Generated Encounter</h4>
+                <p><strong>Type:</strong> ${type}</p>
+                <p><strong>Difficulty:</strong> ${difficulty}</p>
+                <p><strong>Setup:</strong> ${getRandomEncounterSetup()}</p>
+            `;
+        }
+
+        // Helper functions for generators
+        function getRandomTrait() {
+            const traits = [
+                'Friendly and outgoing', 'Suspicious of strangers', 'Wise but cryptic',
+                'Greedy and manipulative', 'Brave but reckless', 'Kind and helpful'
+            ];
+            return traits[Math.floor(Math.random() * traits.length)];
+        }
+
+        function getRandomFeature() {
+            const features = [
+                'Hidden underground chamber', 'Magical fountain', 'Ancient statue',
+                'Secret passage', 'Magical barrier', 'Strange glowing crystals'
+            ];
+            return features[Math.floor(Math.random() * features.length)];
+        }
+
+        function getRandomAtmosphere() {
+            const atmospheres = [
+                'Tense and ominous', 'Peaceful and serene', 'Busy and lively',
+                'Eerie and quiet', 'Dangerous and foreboding', 'Welcoming and warm'
+            ];
+            return atmospheres[Math.floor(Math.random() * atmospheres.length)];
+        }
+
+        function getRandomLootDescription() {
+            const descriptions = [
+                'Gleams with an inner light', 'Feels warm to the touch',
+                'Humming with magical energy', 'Ancient and weathered',
+                'Ornate and beautifully crafted', 'Simple but effective'
+            ];
+            return descriptions[Math.floor(Math.random() * descriptions.length)];
+        }
+
+        function getRandomEncounterSetup() {
+            const setups = [
+                'The party discovers a trapped room', 'A mysterious stranger approaches',
+                'Ancient mechanism requires solving', 'Monsters ambush from hiding',
+                'NPC needs help with a problem', 'Environmental hazard blocks the path'
+            ];
+            return setups[Math.floor(Math.random() * setups.length)];
+        }
+
+        // Auto-save functionality
+        document.addEventListener('blur', function(e) {
+            if (e.target.classList.contains('editable-content') && e.target.dataset.saveKey) {
+                const key = e.target.dataset.saveKey;
+                const value = e.target.value || e.target.textContent;
+                localStorage.setItem(key, value);
+            }
+        }, true);
+    </script>
+
+    <style>
+        .dashboard-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 1rem;
+            margin-bottom: 1rem;
+        }
+
+        .card-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1rem;
+        }
+
+        .card-header h3 {
+            margin: 0;
+            color: var(--accent);
+        }
+
+        .content-list {
+            display: grid;
+            gap: 0.5rem;
+        }
+
+        .list-item {
+            background: var(--bg-secondary);
+            padding: 0.75rem;
+            border-radius: 4px;
+            border-left: 3px solid var(--accent);
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .list-item:hover {
+            background: var(--accent);
+            color: var(--bg-primary);
+            transform: translateX(5px);
+        }
+
+        .list-item strong {
+            display: block;
+            margin-bottom: 0.25rem;
+        }
+
+        .list-item span {
+            font-size: 0.9rem;
+            color: inherit;
+        }
+
+        .list-item small {
+            font-size: 0.8rem;
+            opacity: 0.8;
+        }
+
+        .progress-section {
+            display: grid;
+            gap: 1rem;
+        }
+
+        .generator-result {
+            background: var(--bg-secondary);
+            padding: 1rem;
+            border-radius: 4px;
+            margin-top: 1rem;
+            border: 1px solid var(--border);
+        }
+
+        .generator-result h4 {
+            margin: 0 0 0.5rem 0;
+            color: var(--accent);
+        }
+
+        .generator-result p {
+            margin: 0.25rem 0;
+        }
+
+        @media (max-width: 768px) {
+            .dashboard-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .card-header {
+                flex-direction: column;
+                align-items: stretch;
+                gap: 0.5rem;
+            }
+            
+            .button-group {
+                flex-direction: column;
             }
         }
-    </script>
+    </style>
 </body>
 </html>

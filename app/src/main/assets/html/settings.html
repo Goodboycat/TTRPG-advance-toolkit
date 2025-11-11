@@ -14,147 +14,549 @@
             <a href="dice-roller.html">Dice</a>
             <a href="character-sheet.html">Characters</a>
             <a href="random-generator.html">Generators</a>
+            <a href="notes.html">Notes</a>
+            <a href="map.html">Map</a>
+            <a href="battle.html">Battle</a>
+            <a href="database.html">Database</a>
+            <a href="multiplayer.html">Multiplayer</a>
             <a href="settings.html" class="active">Settings</a>
         </div>
     </nav>
 
     <main class="container">
+        <!-- System Configuration -->
         <section class="card">
-            <h2 contenteditable="true">System Configuration</h2>
+            <h2>System Configuration</h2>
             <div class="settings-group">
                 <div class="setting-item">
-                    <label contenteditable="true">Game System Name:</label>
-                    <input type="text" id="systemName" placeholder="My TTRPG System" onblur="saveSetting('systemName', this.value)">
+                    <label>Game System Name:</label>
+                    <input type="text" id="systemName" placeholder="My TTRPG System" 
+                           onchange="saveSetting('systemName', this.value)">
+                    <small>This name appears throughout the app</small>
                 </div>
                 <div class="setting-item">
-                    <label contenteditable="true">Default Dice:</label>
-                    <input type="text" id="defaultDice" placeholder="d20" onblur="saveSetting('defaultDice', this.value)">
+                    <label>Default Dice:</label>
+                    <input type="text" id="defaultDice" placeholder="d20" 
+                           onchange="saveSetting('defaultDice', this.value)"
+                           list="diceOptions">
+                    <datalist id="diceOptions">
+                        <option value="d4">
+                        <option value="d6">
+                        <option value="d8">
+                        <option value="d10">
+                        <option value="d12">
+                        <option value="d20">
+                        <option value="d100">
+                    </datalist>
+                    <small>Default dice for quick rolls</small>
                 </div>
                 <div class="setting-item">
-                    <label contenteditable="true">Max Character Level:</label>
-                    <input type="number" id="maxLevel" value="20" min="1" max="100" onblur="saveSetting('maxLevel', this.value)">
+                    <label>Max Character Level:</label>
+                    <input type="number" id="maxLevel" value="20" min="1" max="100" 
+                           onchange="saveSetting('maxLevel', this.value)">
+                    <small>Maximum level for character progression</small>
+                </div>
+                <div class="setting-item">
+                    <label>Experience System:</label>
+                    <select id="expSystem" onchange="saveSetting('expSystem', this.value)">
+                        <option value="milestone">Milestone Leveling</option>
+                        <option value="xp">XP-Based Leveling</option>
+                        <option value="session">Session-Based</option>
+                        <option value="custom">Custom</option>
+                    </select>
+                    <small>How characters gain levels</small>
                 </div>
             </div>
         </section>
 
+        <!-- Character Stats Configuration -->
         <section class="card">
-            <h2 contenteditable="true">Character Stats</h2>
-            <p contenteditable="true">Define the stats used in your game (affects all characters):</p>
-            <div id="statList" class="stat-list"></div>
-            <button onclick="addStat()" class="btn-secondary" contenteditable="true">Add Stat</button>
-        </section>
-
-        <section class="card">
-            <h2 contenteditable="true">Data Management</h2>
+            <div class="card-header">
+                <h2>Character Stats</h2>
+                <button onclick="resetStats()" class="btn-secondary">Reset to Default</button>
+            </div>
+            <p>Define the stats used in your game (affects all characters):</p>
+            <div id="statList" class="stat-list">
+                <!-- Stats will be loaded here -->
+            </div>
             <div class="button-group">
-                <button onclick="exportData()" class="btn-primary" contenteditable="true">Export All Data</button>
-                <button onclick="importData()" class="btn-secondary" contenteditable="true">Import Data</button>
-                <button onclick="clearAllData()" class="btn-danger" contenteditable="true">Clear All Data</button>
+                <button onclick="addStat()" class="btn-primary">Add Stat</button>
+                <button onclick="bulkEditStats()" class="btn-secondary">Bulk Edit</button>
             </div>
-            <textarea id="importExportArea" style="display: none;" placeholder="Paste data here..."></textarea>
         </section>
 
+        <!-- Game Rules -->
         <section class="card">
-            <h2 contenteditable="true">Appearance</h2>
-            <div class="settings-group">
+            <h2>Game Rules</h2>
+            <div class="rules-grid">
+                <div class="rule-group">
+                    <h3>Combat Rules</h3>
+                    <div class="setting-item">
+                        <label>Critical Hit Multiplier:</label>
+                        <input type="number" id="critMultiplier" value="2" min="1" max="5" 
+                               onchange="saveSetting('critMultiplier', this.value)">
+                    </div>
+                    <div class="setting-item">
+                        <label>Death Saving Throws:</label>
+                        <select id="deathSaves" onchange="saveSetting('deathSaves', this.value)">
+                            <option value="3of5">3 Success/2 Fail (D&D 5e)</option>
+                            <option value="majority">Majority Wins</option>
+                            <option value="none">No Death Saves</option>
+                        </select>
+                    </div>
+                    <div class="setting-item">
+                        <label>Initiative System:</label>
+                        <select id="initiativeSystem" onchange="saveSetting('initiativeSystem', this.value)">
+                            <option value="individual">Individual Rolls</option>
+                            <option value="group">Group Rolls</option>
+                            <option value="side">Side Initiative</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="rule-group">
+                    <h3>Skill System</h3>
+                    <div class="setting-item">
+                        <label>Skill Check Difficulty:</label>
+                        <select id="skillDifficulty" onchange="saveSetting('skillDifficulty', this.value)">
+                            <option value="standard">Standard (DC 10-20)</option>
+                            <option value="graded">Graded Success</option>
+                            <option value="opposed">Opposed Rolls</option>
+                        </select>
+                    </div>
+                    <div class="setting-item">
+                        <label>Proficiency Bonus Scaling:</label>
+                        <select id="proficiencyScaling" onchange="saveSetting('proficiencyScaling', this.value)">
+                            <option value="bounded">Bounded Accuracy</option>
+                            <option value="linear">Linear Scaling</option>
+                            <option value="exponential">Exponential</option>
+                        </select>
+                    </div>
+                    <div class="setting-item">
+                        <label>Allow Skill Specialization:</label>
+                        <input type="checkbox" id="skillSpecialization" onchange="saveSetting('skillSpecialization', this.checked)">
+                    </div>
+                </div>
+
+                <div class="rule-group">
+                    <h3>Magic System</h3>
+                    <div class="setting-item">
+                        <label>Spell Slots:</label>
+                        <select id="spellSystem" onchange="saveSetting('spellSystem', this.value)">
+                            <option value="vancian">Vancian (D&D)</option>
+                            <option value="points">Spell Points</option>
+                            <option value="atwill">At-Will</option>
+                            <option value="none">No Magic</option>
+                        </select>
+                    </div>
+                    <div class="setting-item">
+                        <label>Max Spell Level:</label>
+                        <input type="number" id="maxSpellLevel" value="9" min="0" max="20" 
+                               onchange="saveSetting('maxSpellLevel', this.value)">
+                    </div>
+                    <div class="setting-item">
+                        <label>Spell Components:</label>
+                        <select id="spellComponents" onchange="saveSetting('spellComponents', this.value)">
+                            <option value="verbose">Verbal, Somatic, Material</option>
+                            <option value="simple">Simple Components</option>
+                            <option value="none">No Components</option>
+                        </select>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Data Management -->
+        <section class="card">
+            <h2>Data Management</h2>
+            <div class="data-management">
+                <div class="data-section">
+                    <h3>Export Data</h3>
+                    <p>Export your game data for backup or transfer:</p>
+                    <div class="button-group">
+                        <button onclick="exportAllData()" class="btn-primary">Export All Data</button>
+                        <button onclick="exportCharacters()" class="btn-secondary">Export Characters</button>
+                        <button onclick="exportNotes()" class="btn-secondary">Export Notes</button>
+                        <button onclick="exportDatabase()" class="btn-secondary">Export Database</button>
+                    </div>
+                </div>
+
+                <div class="data-section">
+                    <h3>Import Data</h3>
+                    <p>Import data from previous exports:</p>
+                    <div class="import-controls">
+                        <input type="file" id="importFile" accept=".json" style="display: none;">
+                        <button onclick="document.getElementById('importFile').click()" class="btn-primary">
+                            Choose File
+                        </button>
+                        <span id="fileName">No file chosen</span>
+                        <button onclick="importData()" class="btn-secondary" id="importButton" disabled>
+                            Import Data
+                        </button>
+                    </div>
+                    <small>Supported format: JSON export files</small>
+                </div>
+
+                <div class="data-section danger-zone">
+                    <h3>⚠️ Danger Zone</h3>
+                    <p>Permanently delete data (cannot be undone):</p>
+                    <div class="button-group">
+                        <button onclick="clearCharacters()" class="btn-danger">Clear All Characters</button>
+                        <button onclick="clearNotes()" class="btn-danger">Clear All Notes</button>
+                        <button onclick="clearDatabase()" class="btn-danger">Clear Database</button>
+                        <button onclick="clearAllData()" class="btn-danger">Clear EVERYTHING</button>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Appearance -->
+        <section class="card">
+            <h2>Appearance</h2>
+            <div class="appearance-settings">
                 <div class="setting-item">
-                    <label contenteditable="true">Theme:</label>
-                    <select id="themeSelect" onchange="saveSetting('theme', this.value); applyTheme(this.value)">
+                    <label>Theme:</label>
+                    <select id="themeSelect" onchange="changeTheme(this.value)">
                         <option value="dark">Dark (Default)</option>
                         <option value="light">Light</option>
                         <option value="cyber">Cyberpunk</option>
                         <option value="forest">Forest</option>
+                        <option value="custom">Custom...</option>
                     </select>
                 </div>
+
                 <div class="setting-item">
-                    <label contenteditable="true">Font Size:</label>
-                    <input type="range" id="fontSize" min="12" max="24" value="16" oninput="saveSetting('fontSize', this.value); applyFontSize(this.value)">
-                    <span id="fontSizeValue">16px</span>
+                    <label>Font Size:</label>
+                    <div class="range-control">
+                        <input type="range" id="fontSize" min="12" max="24" value="16" 
+                               oninput="updateFontSize(this.value)">
+                        <span id="fontSizeValue">16px</span>
+                    </div>
+                </div>
+
+                <div class="setting-item">
+                    <label>UI Density:</label>
+                    <select id="uiDensity" onchange="saveSetting('uiDensity', this.value)">
+                        <option value="compact">Compact</option>
+                        <option value="comfortable" selected>Comfortable</option>
+                        <option value="spacious">Spacious</option>
+                    </select>
+                </div>
+
+                <div class="setting-item">
+                    <label>Animation Speed:</label>
+                    <select id="animationSpeed" onchange="saveSetting('animationSpeed', this.value)">
+                        <option value="fast">Fast</option>
+                        <option value="normal" selected>Normal</option>
+                        <option value="slow">Slow</option>
+                        <option value="none">No Animations</option>
+                    </select>
+                </div>
+
+                <div class="setting-item">
+                    <label>Color Scheme:</label>
+                    <div class="color-picker">
+                        <input type="color" id="accentColor" value="#00d4ff" 
+                               onchange="changeAccentColor(this.value)">
+                        <label for="accentColor">Accent Color</label>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Advanced Settings -->
+        <section class="card">
+            <div class="card-header">
+                <h2>Advanced Settings</h2>
+                <button onclick="toggleAdvancedSettings()" class="btn-secondary" id="toggleAdvancedBtn">
+                    Show Advanced
+                </button>
+            </div>
+            <div id="advancedSettings" class="advanced-settings" style="display: none;">
+                <div class="advanced-grid">
+                    <div class="advanced-group">
+                        <h3>Storage</h3>
+                        <div class="setting-item">
+                            <label>Auto-save Interval:</label>
+                            <select id="autoSaveInterval" onchange="saveSetting('autoSaveInterval', this.value)">
+                                <option value="30000">30 seconds</option>
+                                <option value="60000">1 minute</option>
+                                <option value="300000">5 minutes</option>
+                                <option value="0">Manual only</option>
+                            </select>
+                        </div>
+                        <div class="setting-item">
+                            <label>Max Roll History:</label>
+                            <input type="number" id="maxRollHistory" value="100" min="10" max="1000" 
+                                   onchange="saveSetting('maxRollHistory', this.value)">
+                        </div>
+                    </div>
+
+                    <div class="advanced-group">
+                        <h3>Performance</h3>
+                        <div class="setting-item">
+                            <label>Map Rendering:</label>
+                            <select id="mapRendering" onchange="saveSetting('mapRendering', this.value)">
+                                <option value="auto">Auto</option>
+                                <option value="high">High Quality</option>
+                                <option value="low">Performance</option>
+                            </select>
+                        </div>
+                        <div class="setting-item">
+                            <label>Enable Hardware Acceleration:</label>
+                            <input type="checkbox" id="hardwareAccel" checked 
+                                   onchange="saveSetting('hardwareAccel', this.checked)">
+                        </div>
+                    </div>
+
+                    <div class="advanced-group">
+                        <h3>Backup</h3>
+                        <div class="setting-item">
+                            <label>Auto-backup:</label>
+                            <input type="checkbox" id="autoBackup" checked 
+                                   onchange="saveSetting('autoBackup', this.checked)">
+                        </div>
+                        <div class="setting-item">
+                            <label>Backup Location:</label>
+                            <select id="backupLocation" onchange="saveSetting('backupLocation', this.value)">
+                                <option value="local">Local Storage</option>
+                                <option value="cloud">Cloud (if available)</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="debug-section">
+                    <h3>Debug Information</h3>
+                    <div class="debug-info">
+                        <div class="debug-item">
+                            <span>App Version:</span>
+                            <span id="appVersion">1.0.0</span>
+                        </div>
+                        <div class="debug-item">
+                            <span>Storage Used:</span>
+                            <span id="storageUsed">Calculating...</span>
+                        </div>
+                        <div class="debug-item">
+                            <span>Characters:</span>
+                            <span id="charactersCount">0</span>
+                        </div>
+                        <div class="debug-item">
+                            <span>Notes:</span>
+                            <span id="notesCount">0</span>
+                        </div>
+                        <div class="debug-item">
+                            <span>Database Entries:</span>
+                            <span id="databaseCount">0</span>
+                        </div>
+                    </div>
+                    <button onclick="showDebugInfo()" class="btn-secondary">Refresh Debug Info</button>
+                    <button onclick="clearCache()" class="btn-warning">Clear Cache</button>
                 </div>
             </div>
         </section>
     </main>
 
+    <!-- Bulk Edit Stats Modal -->
+    <div id="bulkStatsModal" class="modal" style="display: none;">
+        <div class="modal-content">
+            <h2>Bulk Edit Stats</h2>
+            <div class="form-group">
+                <label>Enter stats (one per line):</label>
+                <textarea id="bulkStatsText" placeholder="STR&#10;DEX&#10;CON&#10;INT&#10;WIS&#10;CHA" 
+                          style="min-height: 200px;"></textarea>
+            </div>
+            <div class="modal-actions">
+                <button onclick="saveBulkStats()" class="btn-primary">Save Stats</button>
+                <button onclick="closeBulkStatsModal()" class="btn-secondary">Cancel</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Import Confirmation Modal -->
+    <div id="importModal" class="modal" style="display: none;">
+        <div class="modal-content">
+            <h2>Import Data</h2>
+            <div id="importPreview" class="import-preview">
+                <!-- Import preview will be shown here -->
+            </div>
+            <div class="modal-actions">
+                <button onclick="confirmImport()" class="btn-primary">Confirm Import</button>
+                <button onclick="cancelImport()" class="btn-secondary">Cancel</button>
+            </div>
+        </div>
+    </div>
+
     <script src="file:///android_asset/js/main.js"></script>
+    <script src="file:///android_asset/js/emojis.js"></script>
     <script>
         let characterStats = JSON.parse(localStorage.getItem('characterStats') || '["STR","DEX","CON","INT","WIS","CHA"]');
+        let importDataCache = null;
 
         document.addEventListener('DOMContentLoaded', function() {
             loadSettings();
             loadStatList();
+            updateDebugInfo();
+            setupFileImport();
         });
+
+        function loadSettings() {
+            // Load all settings from localStorage
+            const settings = {
+                systemName: 'Flexible TTRPG',
+                defaultDice: 'd20',
+                maxLevel: '20',
+                expSystem: 'milestone',
+                critMultiplier: '2',
+                deathSaves: '3of5',
+                initiativeSystem: 'individual',
+                skillDifficulty: 'standard',
+                proficiencyScaling: 'bounded',
+                skillSpecialization: false,
+                spellSystem: 'vancian',
+                maxSpellLevel: '9',
+                spellComponents: 'verbose',
+                theme: 'dark',
+                fontSize: '16',
+                uiDensity: 'comfortable',
+                animationSpeed: 'normal',
+                accentColor: '#00d4ff',
+                autoSaveInterval: '60000',
+                maxRollHistory: '100',
+                mapRendering: 'auto',
+                hardwareAccel: true,
+                autoBackup: true,
+                backupLocation: 'local'
+            };
+
+            Object.keys(settings).forEach(key => {
+                const value = localStorage.getItem(key) || settings[key];
+                const element = document.getElementById(key);
+                
+                if (element) {
+                    if (element.type === 'checkbox') {
+                        element.checked = value === 'true' || value === true;
+                    } else {
+                        element.value = value;
+                    }
+                }
+            });
+
+            // Apply theme and font size
+            applyTheme(localStorage.getItem('theme') || 'dark');
+            applyFontSize(localStorage.getItem('fontSize') || '16');
+            applyAccentColor(localStorage.getItem('accentColor') || '#00d4ff');
+        }
 
         function saveSetting(key, value) {
             localStorage.setItem(key, value);
-            // Show notification that settings are saved and will reflect on other pages
-            showNotification(`${key} saved! Changes will appear on all pages.`, 'success');
-        }
-
-        function loadSettings() {
-            const systemName = localStorage.getItem('systemName') || 'Flexible TTRPG';
-            const defaultDice = localStorage.getItem('defaultDice') || 'd20';
-            const maxLevel = localStorage.getItem('maxLevel') || '20';
-            const fontSize = localStorage.getItem('fontSize') || '16';
-            const theme = localStorage.getItem('theme') || 'dark';
             
-            document.getElementById('systemName').value = systemName;
-            document.getElementById('defaultDice').value = defaultDice;
-            document.getElementById('maxLevel').value = maxLevel;
-            document.getElementById('fontSize').value = fontSize;
-            document.getElementById('fontSizeValue').textContent = fontSize + 'px';
-            document.getElementById('themeSelect').value = theme;
+            // Apply changes immediately for certain settings
+            switch(key) {
+                case 'theme':
+                    applyTheme(value);
+                    break;
+                case 'fontSize':
+                    applyFontSize(value);
+                    break;
+                case 'accentColor':
+                    applyAccentColor(value);
+                    break;
+            }
             
-            applyTheme(theme);
-            applyFontSize(fontSize);
+            TTRPGToolkit.showNotification(`${key} saved!`, 'success');
         }
 
         function applyTheme(theme) {
             document.documentElement.setAttribute('data-theme', theme);
+            document.getElementById('themeSelect').value = theme;
         }
 
         function applyFontSize(size) {
             document.documentElement.style.fontSize = size + 'px';
             document.getElementById('fontSizeValue').textContent = size + 'px';
+            document.getElementById('fontSize').value = size;
+        }
+
+        function applyAccentColor(color) {
+            document.documentElement.style.setProperty('--accent', color);
+            document.getElementById('accentColor').value = color;
+            
+            // Calculate hover color (darken by 20%)
+            const hoverColor = darkenColor(color, 20);
+            document.documentElement.style.setProperty('--accent-hover', hoverColor);
+        }
+
+        function darkenColor(color, percent) {
+            const num = parseInt(color.replace("#", ""), 16);
+            const amt = Math.round(2.55 * percent);
+            const R = (num >> 16) - amt;
+            const G = (num >> 8 & 0x00FF) - amt;
+            const B = (num & 0x0000FF) - amt;
+            return "#" + (0x1000000 + (R < 255 ? R < 1 ? 0 : R : 255) * 0x10000 +
+                (G < 255 ? G < 1 ? 0 : G : 255) * 0x100 +
+                (B < 255 ? B < 1 ? 0 : B : 255)).toString(16).slice(1);
+        }
+
+        function changeTheme(theme) {
+            saveSetting('theme', theme);
+        }
+
+        function updateFontSize(size) {
+            document.getElementById('fontSizeValue').textContent = size + 'px';
+            saveSetting('fontSize', size);
+        }
+
+        function changeAccentColor(color) {
+            saveSetting('accentColor', color);
         }
 
         function loadStatList() {
             const container = document.getElementById('statList');
             container.innerHTML = characterStats.map((stat, index) => `
                 <div class="stat-item" data-index="${index}">
-                    <input type="text" value="${stat}" onblur="updateStat(${index}, this.value)">
-                    <button onclick="removeStat(${index})">X</button>
+                    <input type="text" value="${stat}" 
+                           onchange="updateStat(${index}, this.value)"
+                           placeholder="Stat name">
+                    <button onclick="removeStat(${index})" class="btn-danger">Remove</button>
                 </div>
             `).join('');
         }
 
         function addStat() {
-            const newStat = prompt('Enter stat name:') || 'NEW';
+            const newStat = prompt('Enter new stat name:') || 'NEW_STAT';
             if (newStat && !characterStats.includes(newStat)) {
                 characterStats.push(newStat);
                 localStorage.setItem('characterStats', JSON.stringify(characterStats));
                 loadStatList();
-                showNotification(`Added stat: ${newStat}`, 'success');
+                TTRPGToolkit.showNotification(`Added stat: ${newStat}`, 'success');
             } else {
-                showNotification('Stat already exists or invalid name!', 'error');
+                TTRPGToolkit.showNotification('Stat already exists or invalid name!', 'error');
             }
         }
 
         function updateStat(index, value) {
             const oldStat = characterStats[index];
+            if (!value.trim()) {
+                TTRPGToolkit.showNotification('Stat name cannot be empty!', 'error');
+                loadStatList(); // Reload to reset the value
+                return;
+            }
+
             characterStats[index] = value;
             localStorage.setItem('characterStats', JSON.stringify(characterStats));
             
             // Update all existing characters with new stat name
             const characters = JSON.parse(localStorage.getItem('characters') || '[]');
             characters.forEach(char => {
-                if (char.stats[oldStat] !== undefined) {
+                if (char.stats && char.stats[oldStat] !== undefined) {
                     char.stats[value] = char.stats[oldStat];
                     delete char.stats[oldStat];
                 }
             });
             localStorage.setItem('characters', JSON.stringify(characters));
             
-            showNotification(`Stat updated from ${oldStat} to ${value}`, 'success');
+            TTRPGToolkit.showNotification(`Stat updated from ${oldStat} to ${value}`, 'success');
         }
 
         function removeStat(index) {
@@ -166,75 +568,537 @@
                 // Remove stat from all characters
                 const characters = JSON.parse(localStorage.getItem('characters') || '[]');
                 characters.forEach(char => {
-                    delete char.stats[statToRemove];
+                    if (char.stats) {
+                        delete char.stats[statToRemove];
+                    }
                 });
                 localStorage.setItem('characters', JSON.stringify(characters));
                 
                 loadStatList();
-                showNotification(`Removed stat: ${statToRemove}`, 'success');
+                TTRPGToolkit.showNotification(`Removed stat: ${statToRemove}`, 'success');
             }
         }
 
-        function exportData() {
+        function resetStats() {
+            if (confirm('Reset to default stats? This will affect all characters!')) {
+                characterStats = ['STR', 'DEX', 'CON', 'INT', 'WIS', 'CHA'];
+                localStorage.setItem('characterStats', JSON.stringify(characterStats));
+                loadStatList();
+                TTRPGToolkit.showNotification('Stats reset to default!', 'success');
+            }
+        }
+
+        function bulkEditStats() {
+            document.getElementById('bulkStatsText').value = characterStats.join('\n');
+            document.getElementById('bulkStatsModal').style.display = 'flex';
+        }
+
+        function saveBulkStats() {
+            const text = document.getElementById('bulkStatsText').value;
+            const newStats = text.split('\n')
+                .map(stat => stat.trim())
+                .filter(stat => stat.length > 0);
+            
+            if (newStats.length === 0) {
+                TTRPGToolkit.showNotification('Please enter at least one stat!', 'error');
+                return;
+            }
+
+            // Update characters to remove old stats and add new ones
+            const characters = JSON.parse(localStorage.getItem('characters') || '[]');
+            characters.forEach(char => {
+                const newCharStats = {};
+                newStats.forEach(stat => {
+                    newCharStats[stat] = char.stats?.[stat] || 10;
+                });
+                char.stats = newCharStats;
+            });
+            localStorage.setItem('characters', JSON.stringify(characters));
+
+            characterStats = newStats;
+            localStorage.setItem('characterStats', JSON.stringify(characterStats));
+            loadStatList();
+            closeBulkStatsModal();
+            TTRPGToolkit.showNotification('Stats updated!', 'success');
+        }
+
+        function closeBulkStatsModal() {
+            document.getElementById('bulkStatsModal').style.display = 'none';
+        }
+
+        // Data Management Functions
+        function exportAllData() {
             const data = {
-                dashboardData: JSON.parse(localStorage.getItem('dashboardData') || '{}'),
+                version: '1.0.0',
+                exportedAt: new Date().toISOString(),
+                settings: getAllSettings(),
                 characters: JSON.parse(localStorage.getItem('characters') || '[]'),
+                notes: JSON.parse(localStorage.getItem('notes') || '[]'),
                 diceSets: JSON.parse(localStorage.getItem('diceSets') || '[]'),
                 rollHistory: JSON.parse(localStorage.getItem('rollHistory') || '[]'),
                 randomTables: JSON.parse(localStorage.getItem('randomTables') || '[]'),
-                characterStats: JSON.parse(localStorage.getItem('characterStats') || '[]'),
-                systemName: localStorage.getItem('systemName') || '',
-                defaultDice: localStorage.getItem('defaultDice') || '',
-                maxLevel: localStorage.getItem('maxLevel') || '',
-                theme: localStorage.getItem('theme') || 'dark',
-                fontSize: localStorage.getItem('fontSize') || '16'
+                gameDatabase: JSON.parse(localStorage.getItem('gameDatabase') || '{}'),
+                battles: JSON.parse(localStorage.getItem('battles') || '[]'),
+                characterStats: characterStats
             };
             
-            const exportArea = document.getElementById('importExportArea');
-            exportArea.style.display = 'block';
-            exportArea.value = JSON.stringify(data, null, 2);
-            exportArea.select();
+            TTRPGToolkit.exportData(data, 'ttrpg-toolkit-backup.json');
+            TTRPGToolkit.showNotification('All data exported!', 'success');
+        }
+
+        function exportCharacters() {
+            const characters = JSON.parse(localStorage.getItem('characters') || '[]');
+            TTRPGToolkit.exportData(characters, 'ttrpg-characters.json');
+            TTRPGToolkit.showNotification('Characters exported!', 'success');
+        }
+
+        function exportNotes() {
+            const notes = JSON.parse(localStorage.getItem('notes') || '[]');
+            TTRPGToolkit.exportData(notes, 'ttrpg-notes.json');
+            TTRPGToolkit.showNotification('Notes exported!', 'success');
+        }
+
+        function exportDatabase() {
+            const database = JSON.parse(localStorage.getItem('gameDatabase') || '{}');
+            TTRPGToolkit.exportData(database, 'ttrpg-database.json');
+            TTRPGToolkit.showNotification('Database exported!', 'success');
+        }
+
+        function getAllSettings() {
+            const settings = {};
+            const elements = document.querySelectorAll('[id]');
+            elements.forEach(element => {
+                if (element.id && element.id !== 'statList' && element.id !== 'fileName') {
+                    if (element.type === 'checkbox') {
+                        settings[element.id] = element.checked;
+                    } else {
+                        settings[element.id] = element.value;
+                    }
+                }
+            });
+            return settings;
+        }
+
+        function setupFileImport() {
+            const fileInput = document.getElementById('importFile');
+            fileInput.addEventListener('change', function(e) {
+                const file = e.target.files[0];
+                if (file) {
+                    document.getElementById('fileName').textContent = file.name;
+                    document.getElementById('importButton').disabled = false;
+                    
+                    // Preview the file
+                    const reader = new FileReader();
+                    reader.onload = function(e) {
+                        try {
+                            importDataCache = JSON.parse(e.target.result);
+                            showImportPreview(importDataCache);
+                        } catch (error) {
+                            TTRPGToolkit.showNotification('Invalid file format!', 'error');
+                            document.getElementById('importButton').disabled = true;
+                        }
+                    };
+                    reader.readAsText(file);
+                }
+            });
+        }
+
+        function showImportPreview(data) {
+            const preview = document.getElementById('importPreview');
+            let previewHTML = '<div class="import-summary">';
+            
+            if (data.characters) {
+                previewHTML += `<p><strong>Characters:</strong> ${data.characters.length}</p>`;
+            }
+            if (data.notes) {
+                previewHTML += `<p><strong>Notes:</strong> ${data.notes.length}</p>`;
+            }
+            if (data.gameDatabase) {
+                const dbEntries = Object.values(data.gameDatabase).reduce((sum, arr) => sum + arr.length, 0);
+                previewHTML += `<p><strong>Database Entries:</strong> ${dbEntries}</p>`;
+            }
+            if (data.settings) {
+                previewHTML += `<p><strong>Settings:</strong> Included</p>`;
+            }
+            
+            previewHTML += `<p><small>Export Date: ${data.exportedAt ? new Date(data.exportedAt).toLocaleString() : 'Unknown'}</small></p>`;
+            previewHTML += '</div>';
+            
+            preview.innerHTML = previewHTML;
+            document.getElementById('importModal').style.display = 'flex';
         }
 
         function importData() {
-            const exportArea = document.getElementById('importExportArea');
-            if (exportArea.style.display === 'none') {
-                exportArea.style.display = 'block';
-                exportArea.value = '';
-                exportArea.placeholder = 'Paste your exported data here...';
+            if (!importDataCache) {
+                TTRPGToolkit.showNotification('No file selected!', 'error');
                 return;
             }
-            
+            showImportPreview(importDataCache);
+        }
+
+        function confirmImport() {
+            if (!importDataCache) return;
+
             try {
-                const data = JSON.parse(exportArea.value);
+                // Import data selectively
+                if (importDataCache.characters) {
+                    localStorage.setItem('characters', JSON.stringify(importDataCache.characters));
+                }
+                if (importDataCache.notes) {
+                    localStorage.setItem('notes', JSON.stringify(importDataCache.notes));
+                }
+                if (importDataCache.gameDatabase) {
+                    localStorage.setItem('gameDatabase', JSON.stringify(importDataCache.gameDatabase));
+                }
+                if (importDataCache.settings) {
+                    Object.keys(importDataCache.settings).forEach(key => {
+                        localStorage.setItem(key, importDataCache.settings[key]);
+                    });
+                }
+                if (importDataCache.characterStats) {
+                    localStorage.setItem('characterStats', JSON.stringify(importDataCache.characterStats));
+                    characterStats = importDataCache.characterStats;
+                    loadStatList();
+                }
+
+                cancelImport();
+                loadSettings();
+                TTRPGToolkit.showNotification('Data imported successfully!', 'success');
                 
-                if (data.dashboardData) localStorage.setItem('dashboardData', JSON.stringify(data.dashboardData));
-                if (data.characters) localStorage.setItem('characters', JSON.stringify(data.characters));
-                if (data.diceSets) localStorage.setItem('diceSets', JSON.stringify(data.diceSets));
-                if (data.rollHistory) localStorage.setItem('rollHistory', JSON.stringify(data.rollHistory));
-                if (data.randomTables) localStorage.setItem('randomTables', JSON.stringify(data.randomTables));
-                if (data.characterStats) localStorage.setItem('characterStats', JSON.stringify(data.characterStats));
-                if (data.systemName) localStorage.setItem('systemName', data.systemName);
-                if (data.defaultDice) localStorage.setItem('defaultDice', data.defaultDice);
-                if (data.maxLevel) localStorage.setItem('maxLevel', data.maxLevel);
-                if (data.theme) localStorage.setItem('theme', data.theme);
-                if (data.fontSize) localStorage.setItem('fontSize', data.fontSize);
-                
-                alert('Data imported successfully! Please refresh all pages to see changes.');
-                exportArea.style.display = 'none';
-            } catch (e) {
-                alert('Error importing data: ' + e.message);
+                // Refresh the page to apply all settings
+                setTimeout(() => {
+                    if (confirm('Refresh the app to apply all changes?')) {
+                        location.reload();
+                    }
+                }, 1000);
+
+            } catch (error) {
+                TTRPGToolkit.showNotification('Error importing data!', 'error');
+                console.error('Import error:', error);
+            }
+        }
+
+        function cancelImport() {
+            document.getElementById('importModal').style.display = 'none';
+            document.getElementById('importFile').value = '';
+            document.getElementById('fileName').textContent = 'No file chosen';
+            document.getElementById('importButton').disabled = true;
+            importDataCache = null;
+        }
+
+        // Clear Data Functions
+        function clearCharacters() {
+            if (confirm('Delete ALL characters? This cannot be undone!')) {
+                localStorage.removeItem('characters');
+                TTRPGToolkit.showNotification('All characters deleted!', 'success');
+                updateDebugInfo();
+            }
+        }
+
+        function clearNotes() {
+            if (confirm('Delete ALL notes? This cannot be undone!')) {
+                localStorage.removeItem('notes');
+                TTRPGToolkit.showNotification('All notes deleted!', 'success');
+                updateDebugInfo();
+            }
+        }
+
+        function clearDatabase() {
+            if (confirm('Delete ALL database entries? This cannot be undone!')) {
+                localStorage.removeItem('gameDatabase');
+                TTRPGToolkit.showNotification('Database cleared!', 'success');
+                updateDebugInfo();
             }
         }
 
         function clearAllData() {
-            if (confirm('Are you sure you want to delete ALL data? This cannot be undone!')) {
-                if (confirm('Last chance! This will delete everything including all characters and tables!')) {
+            if (confirm('ARE YOU SURE? This will delete EVERYTHING including all characters, notes, settings, and cannot be undone!')) {
+                if (confirm('LAST WARNING! This will completely reset the app!')) {
                     localStorage.clear();
-                    alert('All data cleared. Please refresh the page.');
+                    TTRPGToolkit.showNotification('All data cleared!', 'success');
+                    setTimeout(() => location.reload(), 1000);
                 }
             }
         }
+
+        // Advanced Settings
+        function toggleAdvancedSettings() {
+            const advanced = document.getElementById('advancedSettings');
+            const button = document.getElementById('toggleAdvancedBtn');
+            
+            if (advanced.style.display === 'none') {
+                advanced.style.display = 'block';
+                button.textContent = 'Hide Advanced';
+            } else {
+                advanced.style.display = 'none';
+                button.textContent = 'Show Advanced';
+            }
+        }
+
+        function updateDebugInfo() {
+            document.getElementById('charactersCount').textContent = 
+                JSON.parse(localStorage.getItem('characters') || '[]').length;
+            document.getElementById('notesCount').textContent = 
+                JSON.parse(localStorage.getItem('notes') || '[]').length;
+            
+            const database = JSON.parse(localStorage.getItem('gameDatabase') || '{}');
+            const dbCount = Object.values(database).reduce((sum, arr) => sum + arr.length, 0);
+            document.getElementById('databaseCount').textContent = dbCount;
+            
+            // Calculate storage usage (approximate)
+            let totalSize = 0;
+            for (let key in localStorage) {
+                if (localStorage.hasOwnProperty(key)) {
+                    totalSize += localStorage[key].length * 2; // UTF-16 characters are 2 bytes
+                }
+            }
+            document.getElementById('storageUsed').textContent = (totalSize / 1024).toFixed(2) + ' KB';
+        }
+
+        function showDebugInfo() {
+            updateDebugInfo();
+            TTRPGToolkit.showNotification('Debug info updated!', 'info');
+        }
+
+        function clearCache() {
+            if (confirm('Clear app cache? This will not delete your data.')) {
+                // Clear any cached data that's not in localStorage
+                TTRPGToolkit.showNotification('Cache cleared!', 'success');
+                updateDebugInfo();
+            }
+        }
+
+        // Initialize app version
+        document.getElementById('appVersion').textContent = '1.0.0';
     </script>
+
+    <style>
+        .settings-group {
+            display: grid;
+            gap: 1rem;
+        }
+
+        .setting-item {
+            display: flex;
+            flex-direction: column;
+            gap: 0.5rem;
+            padding: 1rem;
+            background: var(--bg-secondary);
+            border-radius: 8px;
+            border-left: 4px solid var(--accent);
+        }
+
+        .setting-item label {
+            font-weight: 600;
+            color: var(--accent);
+            margin: 0;
+        }
+
+        .setting-item small {
+            color: var(--text-secondary);
+            font-size: 0.8rem;
+        }
+
+        .stat-list {
+            display: grid;
+            gap: 0.5rem;
+            margin: 1rem 0;
+        }
+
+        .stat-item {
+            display: flex;
+            gap: 0.5rem;
+            align-items: center;
+            padding: 0.75rem;
+            background: var(--bg-secondary);
+            border-radius: 4px;
+        }
+
+        .stat-item input {
+            flex: 1;
+        }
+
+        .rules-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 1.5rem;
+            margin-top: 1rem;
+        }
+
+        .rule-group {
+            background: var(--bg-secondary);
+            padding: 1.5rem;
+            border-radius: 8px;
+            border: 1px solid var(--border);
+        }
+
+        .rule-group h3 {
+            color: var(--accent);
+            margin-bottom: 1rem;
+            border-bottom: 2px solid var(--accent);
+            padding-bottom: 0.5rem;
+        }
+
+        .data-management {
+            display: grid;
+            gap: 2rem;
+        }
+
+        .data-section {
+            padding: 1.5rem;
+            background: var(--bg-secondary);
+            border-radius: 8px;
+            border-left: 4px solid var(--accent);
+        }
+
+        .data-section.danger-zone {
+            border-left-color: var(--danger);
+            background: rgba(255, 68, 68, 0.1);
+        }
+
+        .data-section.danger-zone h3 {
+            color: var(--danger);
+        }
+
+        .import-controls {
+            display: flex;
+            gap: 0.5rem;
+            align-items: center;
+            flex-wrap: wrap;
+            margin: 1rem 0;
+        }
+
+        .import-controls span {
+            color: var(--text-secondary);
+        }
+
+        .appearance-settings {
+            display: grid;
+            gap: 1rem;
+        }
+
+        .range-control {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .range-control input {
+            flex: 1;
+        }
+
+        .color-picker {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .color-picker input[type="color"] {
+            width: 60px;
+            height: 40px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+
+        .advanced-settings {
+            margin-top: 1rem;
+        }
+
+        .advanced-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 1.5rem;
+            margin-bottom: 2rem;
+        }
+
+        .advanced-group {
+            background: var(--bg-secondary);
+            padding: 1.5rem;
+            border-radius: 8px;
+        }
+
+        .advanced-group h3 {
+            color: var(--accent);
+            margin-bottom: 1rem;
+        }
+
+        .debug-section {
+            background: var(--bg-secondary);
+            padding: 1.5rem;
+            border-radius: 8px;
+            border: 1px solid var(--border);
+        }
+
+        .debug-info {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 0.5rem;
+            margin: 1rem 0;
+        }
+
+        .debug-item {
+            display: flex;
+            justify-content: space-between;
+            padding: 0.5rem;
+            background: var(--bg-primary);
+            border-radius: 4px;
+        }
+
+        .debug-item span:first-child {
+            font-weight: 600;
+            color: var(--text-secondary);
+        }
+
+        .debug-item span:last-child {
+            font-family: 'Courier New', monospace;
+            color: var(--accent);
+        }
+
+        .import-preview {
+            max-height: 300px;
+            overflow-y: auto;
+            background: var(--bg-secondary);
+            padding: 1rem;
+            border-radius: 4px;
+            margin: 1rem 0;
+        }
+
+        .import-summary p {
+            margin: 0.5rem 0;
+        }
+
+        @media (max-width: 768px) {
+            .rules-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .advanced-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .debug-info {
+                grid-template-columns: 1fr;
+            }
+            
+            .import-controls {
+                flex-direction: column;
+                align-items: stretch;
+            }
+            
+            .stat-item {
+                flex-direction: column;
+                align-items: stretch;
+            }
+            
+            .setting-item {
+                padding: 0.75rem;
+            }
+            
+            .data-section {
+                padding: 1rem;
+            }
+        }
+    </style>
 </body>
 </html>
